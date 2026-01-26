@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "react-select": "^5.10.2",
+    "recoil": "^0.7.7"
+  }
+}
