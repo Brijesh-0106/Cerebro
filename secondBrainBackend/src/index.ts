@@ -1,8 +1,8 @@
 // ----------------------------------------- Imports
 import cors from 'cors';
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Document, ObjectId, Schema } from 'mongoose';
 // -------------------------------------------
 
 // --------------------------------------------JWT config
@@ -26,17 +26,20 @@ declare global {
 app.use(cors())
 app.use(express.json())
 // AUTH Middleware
-const middleAuth = (req, res, next) => {
-    // console.log(req.header('token'))
-    let token = req.header('token');
-    if (!token) return res.status(403).json({ error: "You don't access for this" })
-    let decoded = jwt.verify(token, SECRET_KEY);
-    if (decoded) {
+const middleAuth = (req: Request, res: Response, next: NextFunction): void => {
+    try {
+        let token = req.header('token');
+        if (!token) {
+            res.status(403).json({ error: "You don't access for this" })
+            return;
+        }
+
+        let decoded = jwt.verify(token, SECRET_KEY) as JwtPayload;
         console.log(decoded, "Decoded");
-        req.userId = decoded
+        req.userId = decoded.userId;
         next();
-    } else {
-        return res.status(401).json({ error: "Invalid Session" })
+    } catch (error) {
+        res.status(401).json({ message: "Invalid or expired token" });
     }
 }
 // 
@@ -50,30 +53,47 @@ async function DbConnect() {
 DbConnect()
 // ----------------------------------------- 
 
+// ----------------------------------------- Interface/Models
+interface JwtPayload {
+    userId: string;
+}
+interface IUser extends Document {
+    name: String,
+    email: String,
+    password: String
+}
+interface IContent extends Document {
+    title: String,
+    type: String,
+    tags: Array<String>,
+    url: String,
+    desc: String,
+    userId: ObjectId
+}
+// -----------------------------------------
+
 // ----------------------------------------- Models & Schema
-const UserSchema = new Schema({
+const UserSchema = new Schema<IUser>({
     name: { type: String, required: true },
     email: { type: String, unique: true, required: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true }
 })
-const UserModel = mongoose.model('user', UserSchema);
-const ContentSchema = new Schema({
+const UserModel = mongoose.model<IUser>('user', UserSchema);
+const ContentSchema = new Schema<IContent>({
     title: { type: String, required: true },
-    type: { type: String, required: true },
+    type: { type: String, required: true, enum: ["youtube", "twitter"], },
     tags: Array,
     url: { type: String, required: true },
     desc: { type: String, required: true },
     userId: { type: Schema.Types.ObjectId, ref: UserModel, required: true },
 })
-const ContentModel = mongoose.model('content', ContentSchema);
+const ContentModel = mongoose.model<IContent>('content', ContentSchema);
 // ----------------------------------------- 
 
 
 // ----------------------------------------------Signin & Login Routes
-app.post('/signin', async (req, res) => {
-    let email = req.body.email;
-    let name = req.body.name;
-    let password = req.body.password;
+app.post('/signin', async (req: Request, res: Response) => {
+    let { email, name, password } = req.body;
     console.log(email, name, password);
     await UserModel.create({ name, email, password });
     res.json({
@@ -82,8 +102,7 @@ app.post('/signin', async (req, res) => {
 })
 
 app.post('/login', async (req, res) => {
-    let email = req.body.email;
-    let password = req.body.password;
+    let { email, password } = req.body;
     console.log(email, password);
     let user = await UserModel.findOne({ email, password });
     console.log(user);
@@ -103,14 +122,9 @@ app.post('/login', async (req, res) => {
 
 // ----------------------------------------------Content Routes
 app.post('/add-content', middleAuth, async (req, res) => {
-    let title = req.body.title;
-    let desc = req.body.desc;
-    let type = req.body.type;
-    let tags = req.body.tags;
-    let url = req.body.url;
+    let { title, desc, type, tags, url } = req.body;
     console.log(title, type, tags, url, desc);
-    let userId = req.userId
-    let user = await ContentModel.create({ title, type, tags, url, desc, userId });
+    let user = await ContentModel.create({ title: title, type: type, tags: tags, url: url, desc: desc, userId: new Schema.Types.ObjectId(req.userId) });
     if (user) {
         res.status(201).json({
             message: 'Content added Successfully',
