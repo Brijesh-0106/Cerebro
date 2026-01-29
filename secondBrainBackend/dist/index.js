@@ -90,21 +90,21 @@ app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 // AUTH Middleware
 var middleAuth = function (req, res, next) {
-    // console.log(req.header('token'))
-    var token = req.header('token');
-    if (!token)
-        return res.status(403).json({ error: "You don't access for this" });
-    var decoded = jsonwebtoken_1.default.verify(token, SECRET_KEY);
-    if (decoded) {
-        console.log(decoded, "Decoded");
-        req.userId = decoded;
+    try {
+        var token = req.header('Token');
+        console.log(req.header('Token'));
+        if (!token) {
+            res.status(403).json({ error: "You don't access for this" });
+            return;
+        }
+        var payload = jsonwebtoken_1.default.verify(token, SECRET_KEY);
+        req.userId = payload;
         next();
     }
-    else {
-        return res.status(401).json({ error: "Invalid Session" });
+    catch (error) {
+        res.status(401).json({ message: "Invalid or expired token" });
     }
 };
-// 
 // ----------------------------------------- 
 // ----------------------------------------- DB Condig + Connnect
 function DbConnect() {
@@ -121,65 +121,64 @@ function DbConnect() {
     });
 }
 DbConnect();
-// ----------------------------------------- 
+// -----------------------------------------
 // ----------------------------------------- Models & Schema
 var UserSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     email: { type: String, unique: true, required: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true }
 });
 var UserModel = mongoose_1.default.model('user', UserSchema);
 var ContentSchema = new mongoose_1.Schema({
     title: { type: String, required: true },
-    type: { type: String, required: true },
+    type: { type: String, required: true, enum: ["youtube", "tweet"], },
     tags: Array,
-    url: { type: String, required: true },
-    desc: { type: String, required: true },
+    contentUrl: { type: String, required: true },
+    description: { type: String, required: true },
+    createdAt: { type: Date, required: true },
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: UserModel, required: true },
 });
 var ContentModel = mongoose_1.default.model('content', ContentSchema);
 // ----------------------------------------- 
 // ----------------------------------------------Signin & Login Routes
-app.post('/signin', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var email, name, password;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+app.post('/v0/api/signin', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, email, name, password;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
-                email = req.body.email;
-                name = req.body.name;
-                password = req.body.password;
+                console.log("reached here", req.body);
+                _a = req.body, email = _a.email, name = _a.name, password = _a.password;
                 console.log(email, name, password);
                 return [4 /*yield*/, UserModel.create({ name: name, email: email, password: password })];
             case 1:
-                _a.sent();
-                res.json({
+                _b.sent();
+                res.status(200).json({
                     message: 'Sign in Successfully'
                 });
                 return [2 /*return*/];
         }
     });
 }); });
-app.post('/login', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var email, password, user, token;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+app.post('/v0/api/login', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, email, password, user, token;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
-                email = req.body.email;
-                password = req.body.password;
+                _a = req.body, email = _a.email, password = _a.password;
                 console.log(email, password);
                 return [4 /*yield*/, UserModel.findOne({ email: email, password: password })];
             case 1:
-                user = _a.sent();
+                user = _b.sent();
                 console.log(user);
                 if (user) {
                     token = jsonwebtoken_1.default.sign(user._id.toString(), SECRET_KEY);
-                    res.json({
+                    res.status(200).json({
                         message: 'Login in Successfully',
                         token: token
                     });
                 }
                 else {
-                    res.json({
+                    res.status(500).json({
                         message: 'Incorrect credentials'
                     });
                 }
@@ -189,29 +188,50 @@ app.post('/login', function (req, res) { return __awaiter(void 0, void 0, void 0
 }); });
 // ----------------------------------------------
 // ----------------------------------------------Content Routes
-app.post('/add-content', middleAuth, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var title, desc, type, tags, url, userId, user;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+app.post('/v0/api/add-content', middleAuth, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, title, desc, type, tags, url, user;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
-                title = req.body.title;
-                desc = req.body.desc;
-                type = req.body.type;
-                tags = req.body.tags;
-                url = req.body.url;
+                console.log("-----------add-content API");
+                _a = req.body, title = _a.title, desc = _a.desc, type = _a.type, tags = _a.tags, url = _a.url;
                 console.log(title, type, tags, url, desc);
-                userId = req.userId;
-                return [4 /*yield*/, ContentModel.create({ title: title, type: type, tags: tags, url: url, desc: desc, userId: userId })];
+                console.log(req.userId);
+                return [4 /*yield*/, ContentModel.create({ title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose_1.default.Types.ObjectId(req.userId), createdAt: new Date().toDateString() })];
             case 1:
-                user = _a.sent();
+                user = _b.sent();
                 if (user) {
                     res.status(201).json({
-                        message: 'Content added Successfully',
+                        message: 'Content added Succes mongoose.Schema.Types.ObjectIdsfully',
                     });
                 }
                 else {
                     res.status(500).json({
                         message: 'Incorrect credentials'
+                    });
+                }
+                return [2 /*return*/];
+        }
+    });
+}); });
+app.get('/v0/api/get-all-content', middleAuth, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var ObjtId, AllUserContent;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                console.log("-----------add-content API");
+                ObjtId = new mongoose_1.default.Types.ObjectId(req.userId);
+                return [4 /*yield*/, ContentModel.find({ userId: ObjtId })];
+            case 1:
+                AllUserContent = _a.sent();
+                if (AllUserContent) {
+                    res.status(200).json({
+                        AllUserContent: AllUserContent
+                    });
+                }
+                else {
+                    res.status(500).json({
+                        message: null
                     });
                 }
                 return [2 /*return*/];

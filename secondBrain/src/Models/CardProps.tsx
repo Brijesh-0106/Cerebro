@@ -1,10 +1,11 @@
 export interface CardProps {
-  id: string;
+  _id?: string;
   type: "youtube" | "tweet";
   createdAt: string;
   title: string;
   contentUrl: string;
   description: string;
+  userId?: string;
 }
 
 export type Option = {

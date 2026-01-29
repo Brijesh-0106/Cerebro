@@ -3,18 +3,59 @@ import { CiLock } from "react-icons/ci";
 import { FaGoogle } from "react-icons/fa";
 import { GiBrain } from "react-icons/gi";
 import { MdOutlineAttachEmail, MdOutlinePerson } from "react-icons/md";
+import { Link, useNavigate } from "react-router-dom";
+import { Alert } from "./Alert";
 
 export function SignIn() {
   const [userName, setUserName] = useState("");
+  const nav = useNavigate();
   const [email, setEmail] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   formState: { errors },
+  // } = useForm();
+
+  const signin = async () => {
+    const res = await fetch("http://localhost:3000/v0/api/signin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: userName,
+        email: email,
+        password: password,
+      }),
+    });
+    if (res.status == 200) {
+      await res.json();
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+        nav("/login");
+      }, 1000);
+    } else {
+      alert("Temporary Closed");
+    }
+  };
 
   return (
     <div className="bg-custom-gradient w-full h-screen bg-[rgb(18,18,18,1)] flex justify-center items-center">
       <span className="max-w-sm flex flex-col gap-4">
         <div className="text-white text-2xl justify-center items-center gap-3 title flex mb-8">
           <GiBrain size={48} color="#4f39f6" />
+          {showAlert && (
+            <Alert
+              title="User Created Successfully"
+              type="success"
+              onClose={() => console.log("Closed")}
+            />
+          )}
           Cerebro
         </div>
         <div className="flex justify-center">
@@ -45,6 +86,7 @@ export function SignIn() {
             <input
               placeholder="Email..."
               type="text"
+              required
               className="focus:outline-none text-white rounded w-sm login-inputs  py-2 px-2"
               value={email}
               onChange={(e) => {
@@ -58,6 +100,7 @@ export function SignIn() {
             </div>
             <input
               type="text"
+              required
               placeholder="Password..."
               className="focus:outline-none rounded text-white w-sm login-inputs  py-2 px-2"
               value={password}
@@ -74,6 +117,7 @@ export function SignIn() {
               type="text"
               placeholder="Confirm Password..."
               value={confirmPassword}
+              required
               className="focus:outline-none rounded text-white w-sm login-inputs  py-2 px-2"
               onChange={(e) => {
                 setConfirmPassword(e.target.value);
@@ -82,11 +126,16 @@ export function SignIn() {
           </div>
         </div>
         <div className="flex justify-center">
-          <button className="cursor-pointer rounded text-md w-sm justify-center bg-indigo-600 text-center text-white py-2 px-4 flex items-center gap-2">
+          <button
+            onClick={() => signin()}
+            className="cursor-pointer rounded text-md w-sm justify-center bg-indigo-600 text-center text-white py-2 px-4 flex items-center gap-2"
+          >
             Continue
           </button>
         </div>
-        <div className="text-white">Already have an account? Sign in</div>
+        <div className="text-white">
+          Already have an account? <Link to={"/login"}>Login</Link>
+        </div>
       </span>
     </div>
   );

@@ -3,10 +3,27 @@ import { CiLock } from "react-icons/ci";
 import { FaGoogle } from "react-icons/fa";
 import { GiBrain } from "react-icons/gi";
 import { MdOutlineAttachEmail } from "react-icons/md";
+import { Link, useNavigate } from "react-router-dom";
 
 export function Login() {
   const [email, setEmail] = useState("");
+  const nav = useNavigate();
   const [password, setPassword] = useState("");
+
+  async function login() {
+    const data = await fetch("http://localhost:3000/v0/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: email, password: password }),
+    });
+    if (data.status == 200) {
+      const res = await data.json();
+      localStorage.setItem("token", res.token);
+      nav("/dashboard");
+    }
+  }
 
   return (
     <div className="bg-custom-gradient w-full h-screen bg-[rgb(18,18,18,1)] flex justify-center items-center">
@@ -54,11 +71,16 @@ export function Login() {
           </div>
         </div>
         <div className="flex justify-center">
-          <button className="rounded cursor-pointer text-md w-sm justify-center bg-indigo-600 text-center text-white py-2 px-4 flex items-center gap-2">
+          <button
+            onClick={() => login()}
+            className="rounded cursor-pointer text-md w-sm justify-center bg-indigo-600 text-center text-white py-2 px-4 flex items-center gap-2"
+          >
             Continue
           </button>
         </div>
-        <div className="text-white">Don't have an account yet? Sign up</div>
+        <div className="text-white">
+          Don't have an account yet? <Link to={"/signin"}>Sign up</Link>{" "}
+        </div>
       </span>
     </div>
   );

@@ -6,7 +6,6 @@ export const Alert = ({
   type = "success", // success, error, warning, info
 }) => {
   const [isVisible, setIsVisible] = useState(true);
-
   const handleClose = () => {
     setIsVisible(false);
     if (onClose) onClose();

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { IoMdClose } from "react-icons/io";
+import { useSetRecoilState } from "recoil";
 import type { Option } from "../Models/CardProps";
+import { CardAtom } from "../Recoil/CardAtom";
 import { Alert } from "./Alert";
 import { Cards } from "./Cards";
 import { Leftbar } from "./Leftbar";
@@ -16,8 +18,33 @@ export const Dashboard = () => {
   const [url, setUrl] = useState("");
   const [type, setType] = useState("");
 
-  const createCard = () => {
-    console.log(openModal);
+  const setCards = useSetRecoilState(CardAtom);
+
+  const createCard = async () => {
+    await fetch("http://localhost:3000/v0/api/add-content", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        token: localStorage.getItem("token") as string,
+      },
+
+      body: JSON.stringify({
+        tags: tags.map((elem) => elem.value),
+        desc: desc,
+        title: title,
+        type: type,
+        url: url,
+      }),
+    });
+    // const data = await fetch("http://localhost:3000/v0/api/get-all-content"
+    const data = await fetch("http://localhost:3000/v0/api/get-all-content", {
+      method: "GET",
+      headers: {
+        token: localStorage.getItem("token") as string,
+      },
+    });
+    const res = await data.json();
+    setCards([...res["AllUserContent"]]);
     setOpenModal(false);
     setShowAlert(true);
     setTimeout(() => {
@@ -100,10 +127,16 @@ export const Dashboard = () => {
                         className="w-full text-indigo-600 py-2 px-2"
                         id="0"
                       >
+                        &lt;---Select---&gt;
+                      </option>
+                      <option
+                        className="w-full text-indigo-600 py-2 px-2"
+                        id="1"
+                      >
                         youtube
                       </option>
                       <option
-                        id="1"
+                        id="2"
                         className="w-full text-indigo-600 py-2 px-2"
                       >
                         tweet
