@@ -1,35 +1,33 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { CiLock } from "react-icons/ci";
 import { FaGoogle } from "react-icons/fa";
 import { GiBrain } from "react-icons/gi";
 import { MdOutlineAttachEmail, MdOutlinePerson } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
+import type { SignInProps } from "../Models/SignInProps";
 import { Alert } from "./Alert";
 
 export function SignIn() {
-  const [userName, setUserName] = useState("");
   const nav = useNavigate();
-  const [email, setEmail] = useState("");
   const [showAlert, setShowAlert] = useState(false);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
-  // const {
-  //   register,
-  //   handleSubmit,
-  //   formState: { errors },
-  // } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignInProps>();
 
-  const signin = async () => {
+  const signin = async (data: SignInProps) => {
     const res = await fetch("http://localhost:3000/v0/api/signin", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        name: userName,
-        email: email,
-        password: password,
+        name: data.userNameInput,
+        email: data.emailInput,
+        password: data.passwordInput,
       }),
     });
     if (res.status == 200) {
@@ -66,73 +64,121 @@ export function SignIn() {
         <div className="text-white text-center">
           or, sign up with your email
         </div>
-        <div className="gap-3 flex flex-col">
-          <div className="w-sm login-Input-Wrapper flex items-stretch rounded">
-            <div className="pl-2 flex items-center">
-              <MdOutlinePerson size={20} color="#a9a9a9" />
+        <form onSubmit={handleSubmit(signin)}>
+          <div className="gap-3 flex flex-col">
+            <div className="w-sm login-Input-Wrapper flex items-stretch rounded">
+              <div className="pl-2 flex items-center">
+                <MdOutlinePerson size={20} color="#a9a9a9" />
+              </div>
+              <input
+                {...register("userNameInput", {
+                  required: {
+                    value: true,
+                    message: "User name is Required",
+                  },
+                  minLength: {
+                    value: 3,
+                    message: "User name must be at least 3 characters",
+                  },
+                })}
+                placeholder="UserName..."
+                className="focus:outline-none text-white login-inputs w-sm rounded py-2 px-2"
+                type="text"
+              />
             </div>
-            <input
-              className="focus:outline-none text-white login-inputs w-sm rounded py-2 px-2"
-              type="text"
-              placeholder="Name..."
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-            />
-          </div>
-          <div className="w-sm login-Input-Wrapper flex items-stretch rounded">
-            <div className="pl-2 flex items-center">
-              <MdOutlineAttachEmail size={20} color="#a9a9a9" />
+            {errors.userNameInput?.message && (
+              <p className="text-red-600">
+                {errors.userNameInput.message.toString()}
+              </p>
+            )}
+            <div className="w-sm login-Input-Wrapper flex items-stretch rounded">
+              <div className="pl-2 flex items-center">
+                <MdOutlineAttachEmail size={20} color="#a9a9a9" />
+              </div>
+              <input
+                placeholder="Email..."
+                type="text"
+                {...register("emailInput", {
+                  required: {
+                    value: true,
+                    message: "Email is Required",
+                  },
+                  pattern: {
+                    value: /^\S+@\S+$/i,
+                    message: "Email is not valid",
+                  },
+                })}
+                className="focus:outline-none text-white rounded w-sm login-inputs  py-2 px-2"
+              />
             </div>
-            <input
-              placeholder="Email..."
-              type="text"
-              required
-              className="focus:outline-none text-white rounded w-sm login-inputs  py-2 px-2"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-            />
-          </div>
-          <div className="w-sm login-Input-Wrapper flex items-stretch rounded">
-            <div className="pl-2 flex items-center">
-              <CiLock size={20} color="#a9a9a9" />
+            {errors.emailInput?.message && (
+              <p className="text-red-600">
+                {errors.emailInput.message.toString()}
+              </p>
+            )}
+            <div className="w-sm login-Input-Wrapper flex items-stretch rounded">
+              <div className="pl-2 flex items-center">
+                <CiLock size={20} color="#a9a9a9" />
+              </div>
+              <input
+                type="password"
+                {...register("passwordInput", {
+                  required: {
+                    value: true,
+                    message: "Password is Required",
+                  },
+                  minLength: {
+                    value: 8,
+                    message: "Password must be at least 8 characters",
+                  },
+                })}
+                placeholder="Password..."
+                className="focus:outline-none rounded text-white w-sm login-inputs  py-2 px-2"
+              />
             </div>
-            <input
-              type="text"
-              required
-              placeholder="Password..."
-              className="focus:outline-none rounded text-white w-sm login-inputs  py-2 px-2"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
-            />
-          </div>
-          <div className="w-sm login-Input-Wrapper flex items-stretch rounded">
-            <div className="pl-2 flex items-center">
-              <CiLock size={20} color="#a9a9a9" />
+            {errors.passwordInput?.message && (
+              <p className="text-red-600">
+                {errors.passwordInput.message.toString()}
+              </p>
+            )}
+
+            <div className="w-sm login-Input-Wrapper flex items-stretch rounded">
+              <div className="pl-2 flex items-center">
+                <CiLock size={20} color="#a9a9a9" />
+              </div>
+              <input
+                type="text"
+                placeholder="Confirm Password..."
+                className="focus:outline-none rounded text-white w-sm login-inputs  py-2 px-2"
+                {...register("confirmPasswordInput", {
+                  required: {
+                    value: true,
+                    message: "Confirm Password is Required",
+                  },
+                  minLength: {
+                    value: 8,
+                    message: "Confirm Password must be at least 8 characters",
+                  },
+                })}
+              />
             </div>
-            <input
-              type="text"
-              placeholder="Confirm Password..."
-              value={confirmPassword}
-              required
-              className="focus:outline-none rounded text-white w-sm login-inputs  py-2 px-2"
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-              }}
-            />
+            {errors.confirmPasswordInput?.message && (
+              <p className="text-red-600">
+                {errors.confirmPasswordInput.message.toString()}
+              </p>
+            )}
           </div>
-        </div>
-        <div className="flex justify-center">
-          <button
-            onClick={() => signin()}
-            className="cursor-pointer rounded text-md w-sm justify-center bg-indigo-600 text-center text-white py-2 px-4 flex items-center gap-2"
-          >
-            Continue
-          </button>
-        </div>
+          <div className="flex justify-center mt-3">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              // onClick={() => signin()}
+              className="cursor-pointer rounded text-md w-sm justify-center bg-indigo-600 text-center text-white py-2 px-4 flex items-center gap-2"
+            >
+              Continue
+            </button>
+          </div>
+        </form>
         <div className="text-white">
           Already have an account? <Link to={"/login"}>Login</Link>
         </div>
