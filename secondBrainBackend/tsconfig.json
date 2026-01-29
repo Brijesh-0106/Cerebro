@@ -2,6 +2,6 @@
     "compilerOptions": {
         "rootDir": "src",
         "outDir": "dist",
-        "esModuleInterop": true
+        "esModuleInterop": true //allow default import
     }
 }
