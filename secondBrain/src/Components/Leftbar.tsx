@@ -5,8 +5,14 @@ import { FaHistory } from "react-icons/fa";
 import { GiBrain } from "react-icons/gi";
 import { IoChatboxEllipsesOutline } from "react-icons/io5";
 import { VscRobot } from "react-icons/vsc";
+import { useNavigate } from "react-router-dom";
 
 export const Leftbar = () => {
+  const nav = useNavigate();
+  const logout = () => {
+    localStorage.removeItem("token");
+    nav("/login");
+  };
   return (
     <span className="fixed z-3 top-0 left-0 w-72 p-2 h-screen bg-black text-white border-2 border-black flex flex-col justify-between">
       <div className="upper-section">
@@ -46,10 +52,13 @@ export const Leftbar = () => {
             <CiSettings size={24} />
             Settings
           </div>
-          <div className="flex items-center gap-2 mb-4">
+          <button
+            onClick={() => logout()}
+            className="flex cursor-pointer items-center gap-2 mb-4"
+          >
             <CiLogout size={24} />
             Logout
-          </div>
+          </button>
         </div>
       </div>
     </span>

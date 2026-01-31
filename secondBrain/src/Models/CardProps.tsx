@@ -5,6 +5,7 @@ export interface CardProps {
   title: string;
   contentUrl: string;
   description: string;
+  tags?: Array<Option>;
   userId?: string;
 }
 

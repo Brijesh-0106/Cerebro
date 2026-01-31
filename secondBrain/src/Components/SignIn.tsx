@@ -65,8 +65,14 @@ export function SignIn() {
           or, sign up with your email
         </div>
         <form onSubmit={handleSubmit(signin)}>
-          <div className="gap-3 flex flex-col">
-            <div className="w-sm login-Input-Wrapper flex items-stretch rounded">
+          <div className="flex flex-col">
+            <div
+              className={
+                errors.userNameInput
+                  ? "w-sm login-Input-Wrapper flex items-stretch rounded"
+                  : "mb-2 w-sm login-Input-Wrapper flex items-stretch rounded"
+              }
+            >
               <div className="pl-2 flex items-center">
                 <MdOutlinePerson size={20} color="#a9a9a9" />
               </div>
@@ -87,11 +93,17 @@ export function SignIn() {
               />
             </div>
             {errors.userNameInput?.message && (
-              <p className="text-red-600">
+              <span className="text-red-600 mb-1">
                 {errors.userNameInput.message.toString()}
-              </p>
+              </span>
             )}
-            <div className="w-sm login-Input-Wrapper flex items-stretch rounded">
+            <div
+              className={
+                errors.emailInput
+                  ? "w-sm login-Input-Wrapper flex items-stretch rounded"
+                  : "mb-2 w-sm login-Input-Wrapper flex items-stretch rounded"
+              }
+            >
               <div className="pl-2 flex items-center">
                 <MdOutlineAttachEmail size={20} color="#a9a9a9" />
               </div>
@@ -112,11 +124,17 @@ export function SignIn() {
               />
             </div>
             {errors.emailInput?.message && (
-              <p className="text-red-600">
+              <p className="text-red-600 mb-1">
                 {errors.emailInput.message.toString()}
               </p>
             )}
-            <div className="w-sm login-Input-Wrapper flex items-stretch rounded">
+            <div
+              className={
+                errors.passwordInput
+                  ? "w-sm login-Input-Wrapper flex items-stretch rounded"
+                  : "mb-2 w-sm login-Input-Wrapper flex items-stretch rounded"
+              }
+            >
               <div className="pl-2 flex items-center">
                 <CiLock size={20} color="#a9a9a9" />
               </div>
@@ -137,12 +155,18 @@ export function SignIn() {
               />
             </div>
             {errors.passwordInput?.message && (
-              <p className="text-red-600">
+              <p className="text-red-600 mb-1">
                 {errors.passwordInput.message.toString()}
               </p>
             )}
 
-            <div className="w-sm login-Input-Wrapper flex items-stretch rounded">
+            <div
+              className={
+                errors.confirmPasswordInput
+                  ? "w-sm login-Input-Wrapper flex items-stretch rounded"
+                  : "mb-2 w-sm login-Input-Wrapper flex items-stretch rounded"
+              }
+            >
               <div className="pl-2 flex items-center">
                 <CiLock size={20} color="#a9a9a9" />
               </div>
@@ -163,12 +187,12 @@ export function SignIn() {
               />
             </div>
             {errors.confirmPasswordInput?.message && (
-              <p className="text-red-600">
+              <p className="text-red-600 mb-1">
                 {errors.confirmPasswordInput.message.toString()}
               </p>
             )}
           </div>
-          <div className="flex justify-center mt-3">
+          <div className="flex justify-center mt-2">
             <button
               type="submit"
               disabled={isSubmitting}

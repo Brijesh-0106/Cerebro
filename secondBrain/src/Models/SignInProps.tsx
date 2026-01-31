@@ -5,8 +5,6 @@ export interface SignInProps {
   emailInput: string;
 }
 export interface LoginProps {
-  userNameInput: string;
   passwordInput: string;
-  confirmPasswordInput: string;
   emailInput: string;
 }

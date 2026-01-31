@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { IoMdClose } from "react-icons/io";
 import { useSetRecoilState } from "recoil";
-import type { Option } from "../Models/CardProps";
+import type { CardProps } from "../Models/CardProps";
 import { CardAtom } from "../Recoil/CardAtom";
 import { Alert } from "./Alert";
 import { Cards } from "./Cards";
@@ -11,16 +12,24 @@ import { Topbar } from "./Topbar";
 
 export const Dashboard = () => {
   const [openModal, setOpenModal] = useState(false);
-  const [title, setTitle] = useState("");
   const [showAlert, setShowAlert] = useState(false);
-  const [desc, setDesc] = useState("");
-  const [tags, setTags] = useState<Option[]>([]);
-  const [url, setUrl] = useState("");
-  const [type, setType] = useState("");
-
+  const {
+    setValue,
+    watch,
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<CardProps>({
+    defaultValues: {
+      tags: [],
+    },
+  });
+  const tags = watch("tags");
   const setCards = useSetRecoilState(CardAtom);
 
-  const createCard = async () => {
+  const createCard = async (formData: CardProps) => {
+    console.log(formData.tags, "tags in form");
+
     await fetch("http://localhost:3000/v0/api/add-content", {
       method: "POST",
       headers: {
@@ -29,11 +38,11 @@ export const Dashboard = () => {
       },
 
       body: JSON.stringify({
-        tags: tags.map((elem) => elem.value),
-        desc: desc,
-        title: title,
-        type: type,
-        url: url,
+        tags: formData.tags,
+        desc: formData.description,
+        title: formData.title,
+        type: formData.type,
+        url: formData.contentUrl,
       }),
     });
     // const data = await fetch("http://localhost:3000/v0/api/get-all-content"
@@ -85,77 +94,152 @@ export const Dashboard = () => {
                   onClick={() => setOpenModal(false)}
                 />
               </div>
-              <div className="body py-2 px-4">
-                <div className="gap-3 flex flex-col">
-                  <div className="border  border-gray-400 flex items-stretch rounded">
-                    <input
-                      className="w-full focus:outline-none text-indigo-600 login-inputs rounded py-2 px-2"
-                      type="text"
-                      placeholder="Title..."
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                    />
-                  </div>
-                  <div className="border border-gray-400 flex items-stretch rounded">
-                    <textarea
-                      placeholder="Description..."
-                      value={desc}
-                      onChange={(e) => setDesc(e.target.value)}
-                      className="text-indigo-600 add-textArea focus:outline-none rounded w-full py-2 px-2"
-                      rows={2}
-                    ></textarea>
-                  </div>
-                  <div className="border  border-gray-400 flex items-stretch rounded">
-                    <input
-                      type="text"
-                      placeholder="content link..."
-                      className="w-full focus:outline-none rounded text-indigo-600 login-inputs  py-2 px-2"
-                      value={url}
-                      onChange={(e) => {
-                        setUrl(e.target.value);
-                      }}
-                    />
-                  </div>
-                  <div className="border border-gray-400 outline-none flex items-stretch rounded">
-                    <select
-                      name="type"
-                      className="w-full py-2 focus:outline-none px-2 text-indigo-600"
-                      value={type}
-                      onChange={(event) => setType(event.target.value)}
+              <form onSubmit={handleSubmit(createCard)}>
+                <div className="body py-2 px-4">
+                  <div className="flex flex-col">
+                    <div
+                      className={
+                        errors.title
+                          ? "border border-gray-400 flex items-stretch rounded"
+                          : "border mb-2 border-gray-400 flex items-stretch rounded"
+                      }
                     >
-                      <option
-                        className="w-full text-indigo-600 py-2 px-2"
-                        id="0"
+                      <input
+                        {...register("title", {
+                          required: {
+                            value: true,
+                            message: "Title is Required",
+                          },
+                          minLength: {
+                            value: 3,
+                            message: "Title must be at least 3 characters",
+                          },
+                        })}
+                        className="w-full focus:outline-none text-indigo-600 login-inputs rounded py-2 px-2"
+                        type="text"
+                        placeholder="Title..."
+                      />
+                    </div>
+                    {errors.title?.message && (
+                      <p className="text-red-600 mb-1">
+                        {errors.title.message.toString()}
+                      </p>
+                    )}
+                    <div
+                      className={
+                        errors.description
+                          ? "border border-gray-400 flex items-stretch rounded"
+                          : "border mb-2 border-gray-400 flex items-stretch rounded"
+                      }
+                    >
+                      <textarea
+                        {...register("description", {
+                          required: {
+                            value: true,
+                            message: "Description is Required",
+                          },
+                          minLength: {
+                            value: 5,
+                            message:
+                              "Description must be at least 5 characters",
+                          },
+                        })}
+                        placeholder="Description..."
+                        className="text-indigo-600 add-textArea focus:outline-none rounded w-full py-2 px-2"
+                        rows={2}
+                      ></textarea>
+                    </div>
+                    {errors.description?.message && (
+                      <p className="text-red-600 mb-1">
+                        {errors.description.message.toString()}
+                      </p>
+                    )}
+                    <div
+                      className={
+                        errors.contentUrl
+                          ? "border border-gray-400 flex items-stretch rounded"
+                          : "border mb-2 border-gray-400 flex items-stretch rounded"
+                      }
+                    >
+                      <input
+                        {...register("contentUrl", {
+                          required: {
+                            value: true,
+                            message: "Content Link is Required",
+                          },
+                          minLength: {
+                            value: 8,
+                            message:
+                              "Content link must be at least 8 characters",
+                          },
+                        })}
+                        type="text"
+                        placeholder="Content link..."
+                        className="w-full focus:outline-none rounded text-indigo-600 login-inputs  py-2 px-2"
+                      />
+                    </div>
+                    {errors.contentUrl?.message && (
+                      <p className="text-red-600 mb-1">
+                        {errors.contentUrl.message.toString()}
+                      </p>
+                    )}
+                    <div
+                      className={
+                        errors.type
+                          ? "border border-gray-400 flex items-stretch rounded"
+                          : "border mb-2 border-gray-400 flex items-stretch rounded"
+                      }
+                    >
+                      <select
+                        {...register("type", {
+                          required: "Type is Required",
+                        })}
+                        name="type"
+                        className="w-full py-2 focus:outline-none px-2 text-indigo-600"
                       >
-                        &lt;---Select---&gt;
-                      </option>
-                      <option
-                        className="w-full text-indigo-600 py-2 px-2"
-                        id="1"
-                      >
-                        youtube
-                      </option>
-                      <option
-                        id="2"
-                        className="w-full text-indigo-600 py-2 px-2"
-                      >
-                        tweet
-                      </option>
-                    </select>
-                  </div>
-                  <div className="border  border-gray-400 flex items-stretch rounded">
-                    <MultiTagSelect setTagsList={setTags} />
+                        <option
+                          value={""}
+                          className="w-full text-indigo-600 py-2 px-2"
+                        >
+                          Select type...
+                        </option>
+                        <option
+                          className="w-full text-indigo-600 py-2 px-2"
+                          value={"youtube"}
+                        >
+                          Youtube
+                        </option>
+                        <option
+                          className="w-full text-indigo-600 py-2 px-2"
+                          value={"tweet"}
+                        >
+                          Tweeter
+                        </option>
+                      </select>
+                    </div>
+                    {errors.type?.message && (
+                      <p className="text-red-600 mb-1">
+                        {errors.type.message.toString()}
+                      </p>
+                    )}
+                    <div className="border  border-gray-400 flex items-stretch rounded">
+                      <MultiTagSelect
+                        value={tags}
+                        onChange={(val) => setValue("tags", val)}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="footer flex flex-row-reverse border-t border-gray-400 p-2">
-                <button
-                  onClick={() => createCard()}
-                  className="cursor-pointer py-1 bg-indigo-600 w-28 text-white font-semibold rounded"
-                >
-                  Add
-                </button>
-              </div>
+                <div className="footer flex flex-row-reverse border-t border-gray-400 p-2">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="cursor-pointer py-1 bg-indigo-600 w-28 text-white font-semibold rounded"
+                  >
+                    Add
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

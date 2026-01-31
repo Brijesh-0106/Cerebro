@@ -2,7 +2,12 @@ import { useState } from "react";
 import CreatableSelect from "react-select/creatable";
 import type { Option } from "../Models/CardProps";
 
-export default function MultiTagSelect(props: any) {
+type Props = {
+  value: Option[];
+  onChange: (val: Option[]) => void;
+};
+
+export default function MultiTagSelect({ value, onChange }: Props) {
   const styles = {
     multiValue: (base: any, { data }: any) => ({
       ...base,
@@ -26,47 +31,41 @@ export default function MultiTagSelect(props: any) {
 
   function getRandomColor() {
     const colors = [
-      "#EF4444", // red
-      "#F97316", // orange
-      "#FACC15", // yellow
-      "#22C55E", // green
-      "#3B82F6", // blue
-      "#8B5CF6", // violet
-      "#EC4899", // pink
+      "#EF4444",
+      "#F97316",
+      "#FACC15",
+      "#22C55E",
+      "#3B82F6",
+      "#8B5CF6",
+      "#EC4899",
     ];
-
     return colors[Math.floor(Math.random() * colors.length)];
   }
 
-  const initialOptions: Option[] = [
+  const [options, setOptions] = useState<Option[]>([
     { label: "Bug", value: "bug", color: getRandomColor() },
     { label: "Feature request", value: "feature", color: getRandomColor() },
     { label: "Polish", value: "polish", color: getRandomColor() },
     { label: "Build", value: "build", color: getRandomColor() },
-  ];
-  const [options, setOptions] = useState<Option[]>(initialOptions);
-  const [value, setValue] = useState<Option[]>([]);
+  ]);
 
   return (
     <CreatableSelect
       isMulti
+      className="w-full"
       options={options}
       styles={styles}
-      className="w-full"
       value={value}
-      onChange={(newValue) => {
-        setValue(newValue as Option[]);
-        props.setTagsList(newValue as Option[]);
-      }}
+      onChange={(newValue) => onChange(newValue as Option[])}
       onCreateOption={(inputValue) => {
-        const newOption = {
+        const newOption: Option = {
           label: inputValue,
           value: inputValue.toLowerCase().replace(/\s+/g, "-"),
           color: getRandomColor(),
         };
 
         setOptions((prev) => [...prev, newOption]);
-        setValue((prev) => [...prev, newOption]);
+        onChange([...(value || []), newOption]);
       }}
       placeholder="Select or create tags..."
     />

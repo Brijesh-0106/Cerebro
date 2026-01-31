@@ -3,11 +3,31 @@ import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import mongoose, { Document, Schema, Types } from 'mongoose';
+import * as z from "zod";
 // -------------------------------------------
 
 // --------------------------------------------JWT config
 let SECRET_KEY = 'IncreaseEfforts'
 // -------------------------------------------
+
+// -------------------------------------------ZOD validations
+const SignIn = z.object({
+    name: z.string().min(3),
+    email: z.email(),
+    password: z.string().min(8),
+});
+const LogIn = z.object({
+    password: z.string().min(8),
+    email: z.email(),
+});
+const Content = z.object({
+    title: z.string().max(3),
+    type: z.enum(['youtube', 'tweet']),
+    tags: z.array(z.object(z.string())),
+    url: z.string(),
+    desc: z.string().max(5),
+})
+// ---------------------------------------------------------
 
 // ----------------------------------------- Express Basics
 const port = 3000;
@@ -54,9 +74,6 @@ DbConnect()
 // ----------------------------------------- 
 
 // ----------------------------------------- Interface/Models
-interface JwtPayload {
-    userId: string;
-}
 interface IUser extends Document {
     name: String,
     email: String,
@@ -96,28 +113,41 @@ const ContentModel = mongoose.model<IContent>('content', ContentSchema);
 // ----------------------------------------------Signin & Login Routes
 app.post('/v0/api/signin', async (req: Request, res: Response) => {
     console.log("reached here", req.body)
-    let { email, name, password } = req.body;
-    console.log(email, name, password);
-    await UserModel.create({ name, email, password });
-    res.status(200).json({
-        message: 'Sign in Successfully'
-    })
+    let { name, email, password } = req.body;
+    console.log(name, email, password);
+    debugger
+    const result = SignIn.safeParse({ name, email, password });
+    if (result.success) {
+        await UserModel.create({ name, email, password });
+        res.status(200).json({
+            message: 'Sign in Successfully'
+        })
+    } else {
+        res.status(500).json({ error: result.error })
+    }
 })
 
 app.post('/v0/api/login', async (req, res) => {
     let { email, password } = req.body;
     console.log(email, password);
-    let user = await UserModel.findOne({ email, password });
-    console.log(user);
-    if (user) {
-        let token = jwt.sign(user._id.toString(), SECRET_KEY)
-        res.status(200).json({
-            message: 'Login in Successfully',
-            token: token
-        })
+    const result = LogIn.safeParse({ password, email })
+    if (result.success) {
+        let user = await UserModel.findOne({ email, password });
+        console.log(user);
+        if (user) {
+            let token = jwt.sign(user._id.toString(), SECRET_KEY)
+            res.status(200).json({
+                message: 'Login in Successfully',
+                token: token
+            })
+        } else {
+            res.status(500).json({
+                message: 'Incorrect credentials'
+            })
+        }
     } else {
         res.status(500).json({
-            message: 'Incorrect credentials'
+            message: result.error
         })
     }
 })
@@ -129,18 +159,25 @@ app.post('/v0/api/add-content', middleAuth, async (req, res) => {
     let { title, desc, type, tags, url } = req.body;
     console.log(title, type, tags, url, desc);
     console.log(req.userId);
-
-    let user = await ContentModel.create({ title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose.Types.ObjectId(req.userId as string), createdAt: new Date().toDateString() });
-    if (user) {
-        res.status(201).json({
-            message: 'Content added Succes mongoose.Schema.Types.ObjectIdsfully',
-        })
+    const result = Content.safeParse({ title, type, tags, url, desc })
+    if (result.success) {
+        let user = await ContentModel.create({ title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose.Types.ObjectId(req.userId as string), createdAt: new Date().toDateString() });
+        if (user) {
+            res.status(201).json({
+                message: 'Content added Succes mongoose.Schema.Types.ObjectIdsfully',
+            })
+        } else {
+            res.status(500).json({
+                message: 'Incorrect credentials'
+            })
+        }
     } else {
         res.status(500).json({
             message: 'Incorrect credentials'
         })
     }
 })
+
 app.get('/v0/api/get-all-content', middleAuth, async (req, res) => {
     console.log("-----------add-content API")
     const ObjtId = new mongoose.Types.ObjectId(req.userId as string)

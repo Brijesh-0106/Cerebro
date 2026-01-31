@@ -2,6 +2,7 @@
     "compilerOptions": {
         "rootDir": "src",
         "outDir": "dist",
+        "strict": true,
         "esModuleInterop": true //allow default import
     }
 }
