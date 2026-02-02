@@ -3,42 +3,42 @@ import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import Masonry from "react-masonry-css";
 import { useRecoilState } from "recoil";
 import imgSrc from "../assets/Gemini_Generated_Image_r70ze4r70ze4r70z.png";
-import type { CardProps } from "../Models/CardProps";
-import { CardAtom } from "../Recoil/CardAtom";
+import type { ThoughtProps } from "../Models/CardProps";
+import { ThoughtAtom } from "../Recoil/Thought";
 import { Card } from "./Card";
 
-// In your component
 const breakpointColumns = {
   default: 3,
   1100: 2,
   700: 1,
 };
 
-export const Cards = () => {
-  const [cards, setCards] = useRecoilState(CardAtom);
-  console.log(cards, "cards data");
+export default function Thoughts() {
+  const [thoughts, setThoughts] = useRecoilState(ThoughtAtom);
+
+  console.log(thoughts, "thoughts data");
   async function asyncDataFetch() {
-    const data = await fetch("http://localhost:3000/v0/api/get-all-content", {
+    const data = await fetch("http://localhost:3000/v0/api/get-all-thoughts", {
       method: "GET",
       headers: {
         token: localStorage.getItem("token") as string,
       },
     });
     const res = await data.json();
-    setCards([...res["AllUserContent"]]);
+    setThoughts([...res["AllUserContent"]]);
   }
   useEffect(() => {
     asyncDataFetch();
   }, []);
   return (
     <>
-      {cards.length > 0 && (
+      {thoughts.length > 0 && (
         <Masonry
           breakpointCols={breakpointColumns}
           className="flex ml-72 mt-13 px-5 pt-4 gap-4"
           columnClassName="masonry-column"
         >
-          {cards.map((elem: CardProps) => {
+          {thoughts.map((elem: ThoughtProps) => {
             return (
               <Card
                 title={elem.title}
@@ -54,8 +54,7 @@ export const Cards = () => {
           })}
         </Masonry>
       )}
-      {/* when no cards added */}
-      {cards.length === 0 && (
+      {thoughts.length == 0 && (
         <div className="flex ml-72 mt-13 px-5 pt-4 h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center">
           <div className="empty-cards-Image h-60 w-60">
             <img
@@ -68,7 +67,7 @@ export const Cards = () => {
               Welcome to your second brain
             </div>
             <div className="text-center mt-3 text-[#a9a9a9]">
-              Start by adding your first Item
+              Start by adding your first Thought
             </div>
           </div>
           <div className="empty-cards-boxes">
@@ -81,4 +80,4 @@ export const Cards = () => {
       )}
     </>
   );
-};
+}

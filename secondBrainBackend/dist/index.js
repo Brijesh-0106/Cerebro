@@ -77,10 +77,29 @@ var cors_1 = __importDefault(require("cors"));
 var express_1 = __importDefault(require("express"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var mongoose_1 = __importStar(require("mongoose"));
+var z = __importStar(require("zod"));
 // -------------------------------------------
 // --------------------------------------------JWT config
 var SECRET_KEY = 'IncreaseEfforts';
 // -------------------------------------------
+// -------------------------------------------ZOD validations
+var SignIn = z.object({
+    name: z.string().min(3),
+    email: z.email(),
+    password: z.string().min(8),
+});
+var LogIn = z.object({
+    password: z.string().min(8),
+    email: z.email(),
+});
+var Content = z.object({
+    title: z.string().max(3),
+    type: z.enum(['youtube', 'tweet']),
+    tags: z.array(z.object(z.string())),
+    url: z.string(),
+    desc: z.string().max(5),
+});
+// ---------------------------------------------------------
 // ----------------------------------------- Express Basics
 var port = 3000;
 var app = (0, express_1.default)();
@@ -142,30 +161,41 @@ var ContentModel = mongoose_1.default.model('content', ContentSchema);
 // ----------------------------------------- 
 // ----------------------------------------------Signin & Login Routes
 app.post('/v0/api/signin', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, email, name, password;
+    var _a, name, email, password, result;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 console.log("reached here", req.body);
-                _a = req.body, email = _a.email, name = _a.name, password = _a.password;
-                console.log(email, name, password);
+                _a = req.body, name = _a.name, email = _a.email, password = _a.password;
+                console.log(name, email, password);
+                debugger;
+                result = SignIn.safeParse({ name: name, email: email, password: password });
+                if (!result.success) return [3 /*break*/, 2];
                 return [4 /*yield*/, UserModel.create({ name: name, email: email, password: password })];
             case 1:
                 _b.sent();
                 res.status(200).json({
                     message: 'Sign in Successfully'
                 });
-                return [2 /*return*/];
+                return [3 /*break*/, 3];
+            case 2:
+                res.status(400).json({
+                    error: result.error
+                });
+                _b.label = 3;
+            case 3: return [2 /*return*/];
         }
     });
 }); });
 app.post('/v0/api/login', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, email, password, user, token;
+    var _a, email, password, result, user, token;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 _a = req.body, email = _a.email, password = _a.password;
                 console.log(email, password);
+                result = LogIn.safeParse({ password: password, email: email });
+                if (!result.success) return [3 /*break*/, 2];
                 return [4 /*yield*/, UserModel.findOne({ email: email, password: password })];
             case 1:
                 user = _b.sent();
@@ -179,17 +209,23 @@ app.post('/v0/api/login', function (req, res) { return __awaiter(void 0, void 0,
                 }
                 else {
                     res.status(500).json({
-                        message: 'Incorrect credentials'
+                        error: 'Incorrect credentials'
                     });
                 }
-                return [2 /*return*/];
+                return [3 /*break*/, 3];
+            case 2:
+                res.status(400).json({
+                    message: result.error
+                });
+                _b.label = 3;
+            case 3: return [2 /*return*/];
         }
     });
 }); });
 // ----------------------------------------------
 // ----------------------------------------------Content Routes
 app.post('/v0/api/add-content', middleAuth, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, title, desc, type, tags, url, user;
+    var _a, title, desc, type, tags, url, result, user;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -197,6 +233,8 @@ app.post('/v0/api/add-content', middleAuth, function (req, res) { return __await
                 _a = req.body, title = _a.title, desc = _a.desc, type = _a.type, tags = _a.tags, url = _a.url;
                 console.log(title, type, tags, url, desc);
                 console.log(req.userId);
+                result = Content.safeParse({ title: title, type: type, tags: tags, url: url, desc: desc });
+                if (!result.success) return [3 /*break*/, 2];
                 return [4 /*yield*/, ContentModel.create({ title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose_1.default.Types.ObjectId(req.userId), createdAt: new Date().toDateString() })];
             case 1:
                 user = _b.sent();
@@ -210,7 +248,13 @@ app.post('/v0/api/add-content', middleAuth, function (req, res) { return __await
                         message: 'Incorrect credentials'
                     });
                 }
-                return [2 /*return*/];
+                return [3 /*break*/, 3];
+            case 2:
+                res.status(400).json({
+                    error: result.error
+                });
+                _b.label = 3;
+            case 3: return [2 /*return*/];
         }
     });
 }); });

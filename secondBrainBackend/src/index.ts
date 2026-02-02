@@ -4,6 +4,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import mongoose, { Document, Schema, Types } from 'mongoose';
 import * as z from "zod";
+const { upload } = require("../config/storage");
 // -------------------------------------------
 
 // --------------------------------------------JWT config
@@ -27,6 +28,12 @@ const Content = z.object({
     url: z.string(),
     desc: z.string().max(5),
 })
+const Thought = z.object({
+    title: z.string().max(3),
+    tags: z.array(z.object(z.string())),
+    imageUrl: z.string(),
+    desc: z.string().max(5),
+})
 // ---------------------------------------------------------
 
 // ----------------------------------------- Express Basics
@@ -37,6 +44,7 @@ declare global {
     namespace Express {
         interface Request {
             userId?: String;
+            file?: String;
         }
     }
 }
@@ -88,6 +96,14 @@ interface IContent extends Document {
     createdAt: Date,
     userId: Types.ObjectId;
 }
+interface IThought extends Document {
+    title: String,
+    tags: Array<String>,
+    imageUrl: String,
+    description: String,
+    createdAt: Date,
+    userId: Types.ObjectId;
+}
 // -----------------------------------------
 
 // ----------------------------------------- Models & Schema
@@ -107,6 +123,15 @@ const ContentSchema = new Schema<IContent>({
     userId: { type: Schema.Types.ObjectId, ref: UserModel, required: true },
 })
 const ContentModel = mongoose.model<IContent>('content', ContentSchema);
+const ThoughtSchema = new Schema<IThought>({
+    title: { type: String, required: true },
+    tags: Array,
+    imageUrl: { type: String, required: true },
+    description: { type: String, required: true },
+    createdAt: { type: Date, required: true },
+    userId: { type: Schema.Types.ObjectId, ref: UserModel, required: true },
+})
+const ThoughtModel = mongoose.model<IThought>('thought', ThoughtSchema);
 // ----------------------------------------- 
 
 
@@ -123,7 +148,9 @@ app.post('/v0/api/signin', async (req: Request, res: Response) => {
             message: 'Sign in Successfully'
         })
     } else {
-        res.status(500).json({ error: result.error })
+        res.status(400).json({
+            error: result.error
+        })
     }
 })
 
@@ -142,11 +169,11 @@ app.post('/v0/api/login', async (req, res) => {
             })
         } else {
             res.status(500).json({
-                message: 'Incorrect credentials'
+                error: 'Incorrect credentials'
             })
         }
     } else {
-        res.status(500).json({
+        res.status(400).json({
             message: result.error
         })
     }
@@ -164,7 +191,7 @@ app.post('/v0/api/add-content', middleAuth, async (req, res) => {
         let user = await ContentModel.create({ title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose.Types.ObjectId(req.userId as string), createdAt: new Date().toDateString() });
         if (user) {
             res.status(201).json({
-                message: 'Content added Succes mongoose.Schema.Types.ObjectIdsfully',
+                message: 'Content added Successfully',
             })
         } else {
             res.status(500).json({
@@ -172,14 +199,14 @@ app.post('/v0/api/add-content', middleAuth, async (req, res) => {
             })
         }
     } else {
-        res.status(500).json({
-            message: 'Incorrect credentials'
+        res.status(400).json({
+            error: result.error
         })
     }
 })
 
 app.get('/v0/api/get-all-content', middleAuth, async (req, res) => {
-    console.log("-----------add-content API")
+    console.log("-----------get-all-content API")
     const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
     let AllUserContent = await ContentModel.find({ userId: ObjtId });
     if (AllUserContent) {
@@ -194,6 +221,41 @@ app.get('/v0/api/get-all-content', middleAuth, async (req, res) => {
 })
 // -----------------------------------------------------
 
+// -------------------------------------------- Though routes
+app.post('/v0/api/add-thought', middleAuth, upload.single("image"), async (req, res) => {
+    try {
+        const image = req.file;
+        console.log("File:", image);
+        const imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+        const { title, desc, type, tags } = req.body;
+        const result = Thought.safeParse({ title, desc, type, tags, imageUrl });
+        if (result.success) {
+            await ThoughtModel.create({ title, description: desc, tags, imageUrl })
+            res.status(201).json({ message: 'Content added Successfully' })
+        } else {
+            res.status(400).json({
+                error: result.error
+            })
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json("Internal Server Error");
+    }
+})
+app.get('/v0/api/get-all-thoughts', middleAuth, async (req, res) => {
+    console.log("-----------get-all-thoughts API")
+    const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
+    let AllUserThoughs = await ThoughtModel.find({ userId: ObjtId });
+    if (AllUserThoughs) {
+        res.status(200).json({
+            AllUserThoughs
+        })
+    } else {
+        res.status(500).json({
+            message: null
+        })
+    }
+})
 // ----------------------------------------------------Server start
 app.listen(port, () => {
     console.log('Server is running on port ' + port)

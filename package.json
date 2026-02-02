@@ -1,6 +1,12 @@
 {
   "dependencies": {
+    "concurrently": "^9.2.1",
     "react-select": "^5.10.2",
     "recoil": "^0.7.7"
+  },
+  "scripts": {
+    "client": "npm start --prefix ./secondBrain/",
+    "server": "npm start --prefix ./secondBrainBackend/",
+    "start": "concurrently \"npm run server\" \"npm run client\""
   }
 }

@@ -8,6 +8,16 @@ export interface CardProps {
   tags?: Array<Option>;
   userId?: string;
 }
+export interface ThoughtProps {
+  _id?: string;
+  type: "youtube" | "tweet";
+  createdAt: string;
+  title: string;
+  imageUrl: string;
+  description: string;
+  tags?: Array<Option>;
+  userId?: string;
+}
 
 export type Option = {
   label: string;

@@ -29,7 +29,7 @@ export function Login() {
     if (data.status == 200) {
       const res = await data.json();
       localStorage.setItem("token", res.token);
-      nav("/dashboard");
+      nav("/dashboard/all-content");
     }
   };
 
