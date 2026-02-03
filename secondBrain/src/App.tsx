@@ -17,8 +17,6 @@ function App() {
           <Route path="thoughts" element={<Thoughts />} />
         </Route>
       </Routes>
-      {/* <Routes>
-      </Routes> */}
     </>
   );
 }

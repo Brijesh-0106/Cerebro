@@ -5,7 +5,7 @@ import { useRecoilState } from "recoil";
 import imgSrc from "../assets/Gemini_Generated_Image_r70ze4r70ze4r70z.png";
 import type { ThoughtProps } from "../Models/CardProps";
 import { ThoughtAtom } from "../Recoil/Thought";
-import { Card } from "./Card";
+import Thought from "./Thought";
 
 const breakpointColumns = {
   default: 3,
@@ -40,12 +40,12 @@ export default function Thoughts() {
         >
           {thoughts.map((elem: ThoughtProps) => {
             return (
-              <Card
+              <Thought
                 title={elem.title}
                 _id={elem._id}
                 userId={elem.userId}
                 createdAt={elem.createdAt.split("T")[0]}
-                contentUrl={elem.contentUrl}
+                imageUrl={elem.imageUrl}
                 type={elem.type}
                 description={elem.description}
                 key={elem._id}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { IoMdClose } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
 import type { CardProps, ThoughtProps } from "../Models/CardProps";
 import { CardAtom } from "../Recoil/CardAtom";
@@ -15,6 +16,7 @@ export const Dashboard = () => {
   const [openAddContentModal, setOpenAddContentModal] = useState(false);
   const [openAddThoughtsModal, setOpenAddThoughtsModal] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
+  const nav = useNavigate();
   const [showAlert, setShowAlert] = useState(false);
   const {
     setValue,
@@ -77,20 +79,21 @@ export const Dashboard = () => {
   };
   // ----------------------------------------------------------------- CREATE THOUGHT
   const createThought = async (formData: ThoughtProps) => {
+    console.log(formData.imageUrl?.[0], "file"); // File object
+    const Data = new FormData();
+    Data.append("tags", JSON.stringify(formData.tags));
+    Data.append("desc", formData.description);
+    Data.append("title", formData.title);
+    Data.append("type", "thought");
+    if (formData.imageUrl && formData.imageUrl.length > 0) {
+      Data.append("imageUrl", formData.imageUrl[0]);
+    }
     await fetch("http://localhost:3000/v0/api/add-thought", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         token: localStorage.getItem("token") as string,
       },
-
-      body: JSON.stringify({
-        tags: formData.tags,
-        desc: formData.description,
-        title: formData.title,
-        type: formData.type,
-        url: formData.imageUrl,
-      }),
+      body: Data,
     });
     const data = await fetch("http://localhost:3000/v0/api/get-all-thoughts", {
       method: "GET",
@@ -100,12 +103,13 @@ export const Dashboard = () => {
     });
     const res = await data.json();
     setThoughts([...res["AllUserThoughs"]]);
-    setOpenAddContentModal(false);
+    setOpenAddThoughtsModal(false);
     setAlertMsg("Thought stored!");
     setShowAlert(true);
     setTimeout(() => {
       setShowAlert(false);
     }, 2500);
+    nav("/dashboard/thoughts");
   };
 
   // -------------------------------------------------------------------- JSX
@@ -380,54 +384,12 @@ export const Dashboard = () => {
                     >
                       <input
                         type="file"
+                        accept="image/*"
                         {...register2("imageUrl")}
                         className="file:bg-indigo-600 w-full file:text-white file:px-4 file:py-2 file:rounded file:border-0 text-indigo-600"
                       />
                     </div>
-                    {errors2.imageUrl?.message && (
-                      <p className="text-red-600 mb-1">
-                        {errors2.imageUrl.message.toString()}
-                      </p>
-                    )}
-                    <div
-                      className={
-                        errors2.type
-                          ? "border border-gray-400 flex items-stretch rounded"
-                          : "border mb-2 border-gray-400 flex items-stretch rounded"
-                      }
-                    >
-                      <select
-                        {...register2("type", {
-                          required: "Type is Required",
-                        })}
-                        name="type"
-                        className="w-full py-2 focus:outline-none px-2 text-indigo-600"
-                      >
-                        <option
-                          value={""}
-                          className="w-full text-indigo-600 py-2 px-2"
-                        >
-                          Select type...
-                        </option>
-                        <option
-                          className="w-full text-indigo-600 py-2 px-2"
-                          value={"youtube"}
-                        >
-                          Youtube
-                        </option>
-                        <option
-                          className="w-full text-indigo-600 py-2 px-2"
-                          value={"tweet"}
-                        >
-                          Tweeter
-                        </option>
-                      </select>
-                    </div>
-                    {errors2.type?.message && (
-                      <p className="text-red-600 mb-1">
-                        {errors2.type.message.toString()}
-                      </p>
-                    )}
+
                     <div className="border  border-gray-400 flex items-stretch rounded">
                       <MultiTagSelect
                         value={thoughtTags}

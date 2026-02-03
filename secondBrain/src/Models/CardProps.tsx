@@ -10,10 +10,10 @@ export interface CardProps {
 }
 export interface ThoughtProps {
   _id?: string;
-  type: "youtube" | "tweet";
+  type: "thought";
   createdAt: string;
   title: string;
-  imageUrl: string;
+  imageUrl?: FileList;
   description: string;
   tags?: Array<Option>;
   userId?: string;

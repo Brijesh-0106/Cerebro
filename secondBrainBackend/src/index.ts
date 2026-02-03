@@ -4,7 +4,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import mongoose, { Document, Schema, Types } from 'mongoose';
 import * as z from "zod";
-const { upload } = require("../config/storage");
+const { upload } = require("./storage");
 // -------------------------------------------
 
 // --------------------------------------------JWT config
@@ -22,17 +22,18 @@ const LogIn = z.object({
     email: z.email(),
 });
 const Content = z.object({
-    title: z.string().max(3),
+    title: z.string().min(3),
     type: z.enum(['youtube', 'tweet']),
     tags: z.array(z.object(z.string())),
     url: z.string(),
-    desc: z.string().max(5),
+    desc: z.string().min(5),
 })
 const Thought = z.object({
-    title: z.string().max(3),
-    tags: z.array(z.object(z.string())),
+    title: z.string().min(3),
+    tags: z.string(),
     imageUrl: z.string(),
-    desc: z.string().max(5),
+    type: z.string(),
+    desc: z.string().min(5),
 })
 // ---------------------------------------------------------
 
@@ -44,7 +45,7 @@ declare global {
     namespace Express {
         interface Request {
             userId?: String;
-            file?: String;
+            file?: Multer.File;
         }
     }
 }
@@ -52,6 +53,7 @@ declare global {
 
 // ----------------------------------------- Middleware => (CORS, Body Parse)
 app.use(cors())
+app.use("/uploads", express.static("uploads"));
 app.use(express.json())
 // AUTH Middleware
 const middleAuth = (req: Request, res: Response, next: NextFunction): void => {
@@ -98,7 +100,8 @@ interface IContent extends Document {
 }
 interface IThought extends Document {
     title: String,
-    tags: Array<String>,
+    tags: String,
+    type: String,
     imageUrl: String,
     description: String,
     createdAt: Date,
@@ -125,7 +128,8 @@ const ContentSchema = new Schema<IContent>({
 const ContentModel = mongoose.model<IContent>('content', ContentSchema);
 const ThoughtSchema = new Schema<IThought>({
     title: { type: String, required: true },
-    tags: Array,
+    tags: String,
+    type: { type: String, required: true },
     imageUrl: { type: String, required: true },
     description: { type: String, required: true },
     createdAt: { type: Date, required: true },
@@ -222,15 +226,21 @@ app.get('/v0/api/get-all-content', middleAuth, async (req, res) => {
 // -----------------------------------------------------
 
 // -------------------------------------------- Though routes
-app.post('/v0/api/add-thought', middleAuth, upload.single("image"), async (req, res) => {
+app.post('/v0/api/add-thought', middleAuth, upload.single("imageUrl"), async (req, res) => {
     try {
-        const image = req.file;
-        console.log("File:", image);
-        const imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+        let imageUrl = ''
+        if (req.file) {
+            const image = req.file;
+            console.log("File:", image);
+            imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+        }
         const { title, desc, type, tags } = req.body;
+        console.log(title, desc, type, tags, imageUrl);
+        console.log("tags", typeof tags)
+        console.log("tags", typeof tags[0])
         const result = Thought.safeParse({ title, desc, type, tags, imageUrl });
         if (result.success) {
-            await ThoughtModel.create({ title, description: desc, tags, imageUrl })
+            await ThoughtModel.create({ title, description: desc, tags, imageUrl, createdAt: new Date().toDateString(), userId: new mongoose.Types.ObjectId(req.userId as string), type: "thought" })
             res.status(201).json({ message: 'Content added Successfully' })
         } else {
             res.status(400).json({
