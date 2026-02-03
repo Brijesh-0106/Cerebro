@@ -91,7 +91,7 @@ interface IUser extends Document {
 }
 interface IContent extends Document {
     title: String,
-    type: String,
+    type: "youtube" | "tweet",
     tags: Array<String>,
     contentUrl: String,
     description: String,
@@ -102,7 +102,7 @@ interface IThought extends Document {
     title: String,
     tags: String,
     type: String,
-    imageUrl: String,
+    imageUrl?: String,
     description: String,
     createdAt: Date,
     userId: Types.ObjectId;
@@ -130,7 +130,7 @@ const ThoughtSchema = new Schema<IThought>({
     title: { type: String, required: true },
     tags: String,
     type: { type: String, required: true },
-    imageUrl: { type: String, required: true },
+    imageUrl: { type: String, required: false },
     description: { type: String, required: true },
     createdAt: { type: Date, required: true },
     userId: { type: Schema.Types.ObjectId, ref: UserModel, required: true },
@@ -223,6 +223,34 @@ app.get('/v0/api/get-all-content', middleAuth, async (req, res) => {
         })
     }
 })
+app.get('/v0/api/get-all-youtube-content', middleAuth, async (req, res) => {
+    console.log("-----------get-all-content API")
+    const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
+    let AllUserContent = await ContentModel.find({ userId: ObjtId, type: "youtube" });
+    if (AllUserContent) {
+        res.status(200).json({
+            AllUserContent
+        })
+    } else {
+        res.status(500).json({
+            message: null
+        })
+    }
+})
+app.get('/v0/api/get-all-tweet-content', middleAuth, async (req, res) => {
+    console.log("-----------get-all-content API")
+    const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
+    let AllUserContent = await ContentModel.find({ userId: ObjtId, type: "tweet" });
+    if (AllUserContent) {
+        res.status(200).json({
+            AllUserContent
+        })
+    } else {
+        res.status(500).json({
+            message: null
+        })
+    }
+})
 // -----------------------------------------------------
 
 // -------------------------------------------- Though routes
@@ -236,12 +264,10 @@ app.post('/v0/api/add-thought', middleAuth, upload.single("imageUrl"), async (re
         }
         const { title, desc, type, tags } = req.body;
         console.log(title, desc, type, tags, imageUrl);
-        console.log("tags", typeof tags)
-        console.log("tags", typeof tags[0])
         const result = Thought.safeParse({ title, desc, type, tags, imageUrl });
         if (result.success) {
             await ThoughtModel.create({ title, description: desc, tags, imageUrl, createdAt: new Date().toDateString(), userId: new mongoose.Types.ObjectId(req.userId as string), type: "thought" })
-            res.status(201).json({ message: 'Content added Successfully' })
+            res.status(201).json({ message: 'Thought added Successfully' })
         } else {
             res.status(400).json({
                 error: result.error

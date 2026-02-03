@@ -8,27 +8,28 @@ import { CardAtom } from "../Recoil/CardAtom";
 import { Card } from "./Card";
 import { SkeletonGrid } from "./SkeletonGrid";
 
-// In your component
 const breakpointColumns = {
   default: 3,
   1100: 2,
   700: 1,
 };
 
-export const Cards = () => {
+export default function Youtube() {
   const [cards, setCards] = useRecoilState(CardAtom);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function asyncDataFetch() {
       setLoading(true);
-
-      const data = await fetch("http://localhost:3000/v0/api/get-all-content", {
-        method: "GET",
-        headers: {
-          token: localStorage.getItem("token") as string,
+      const data = await fetch(
+        "http://localhost:3000/v0/api/get-all-youtube-content/",
+        {
+          method: "GET",
+          headers: {
+            token: localStorage.getItem("token") as string,
+          },
         },
-      });
+      );
       const res = await data.json();
       setCards([...res["AllUserContent"]]);
       setLoading(false);
@@ -85,4 +86,4 @@ export const Cards = () => {
       {/* when no cards added */}
     </>
   );
-};
+}

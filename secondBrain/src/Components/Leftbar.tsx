@@ -4,6 +4,7 @@ import { CiLogout, CiSettings, CiTwitter } from "react-icons/ci";
 import { FaHistory } from "react-icons/fa";
 import { GiBrain, GiNotebook } from "react-icons/gi";
 import { IoChatboxEllipsesOutline } from "react-icons/io5";
+import { TbLayoutSidebarLeftCollapse } from "react-icons/tb";
 import { VscRobot } from "react-icons/vsc";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -16,35 +17,58 @@ export const Leftbar = () => {
   return (
     <span className="fixed z-3 top-0 left-0 w-60 p-2 h-screen bg-black text-white border-2 border-black flex flex-col justify-between">
       <div className="upper-section">
-        <div className="top-logo-section">
-          <div className="text-white text-xl bg-[#1c1e1f] pl-4 items-center gap-3 title flex mb-8">
+        <div className="top-logo-section flex justify-between">
+          <div className="text-white text-xl pl-4 items-center gap-3 title flex mb-8">
             <GiBrain size={36} color="#4f39f6" />
-            Cerebro
           </div>
+          <button className="cursor-pointer text-white text-xl pl-4 items-center gap-3 title flex mb-8">
+            <TbLayoutSidebarLeftCollapse />
+          </button>
         </div>
         <div className="mid-elems-section text-left flex flex-col gap-2 mb-8">
           <NavLink
-            className={
-              "cursor-pointer text-left text-[#a9a9a9]  pl-4 flex items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f]"
+            className={({ isActive }) =>
+              `cursor-pointer text-left text-[#a9a9a9]  pl-4 flex 
+            items-center gap-2 py-2 focus:text-white hover:text-white
+             focus:bg-[#1c1e1f] hover:bg-[#1c1e1f] ${isActive ? "text-white bg-[#1c1e1f]" : "text-[#a9a9a9]"}`
             }
             to={"/dashboard/all-content"}
           >
-            <IoChatboxEllipsesOutline size={20} /> All Content
+            <IoChatboxEllipsesOutline
+              size={20}
+              color="#9CA3AF
+"
+            />{" "}
+            All Content
           </NavLink>
           <NavLink
             to={"/dashboard/thoughts"}
-            className="cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f]"
+            className={({ isActive }) =>
+              `cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f] ${isActive ? "text-white bg-[#1c1e1f]" : "text-[#a9a9a9]"}`
+            }
           >
-            <GiNotebook size={20} color="#4f39f6" /> Thoughts
+            <GiNotebook
+              size={20}
+              color="#8B5CF6
+"
+            />{" "}
+            Thoughts
           </NavLink>
           <NavLink
-            to={"/dashboard/tweet"}
-            className="cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f]"
+            to={"/dashboard/tweeter-content"}
+            className={({ isActive }) =>
+              `cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f] ${isActive ? "text-white bg-[#1c1e1f]" : "text-[#a9a9a9]"}`
+            }
           >
-            <CiTwitter size={20} /> Twitter
+            <CiTwitter
+              size={20}
+              color="#1DA1F2
+"
+            />{" "}
+            Twitter
           </NavLink>
           <NavLink
-            to={"/dashboard/youtube"}
+            to={"/dashboard/youtube-content"}
             className="cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2  py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f]"
           >
             <AiOutlineYoutube color="red" size={20} /> Youtube
@@ -53,13 +77,23 @@ export const Leftbar = () => {
             to={"/dashboard/history"}
             className="cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f]"
           >
-            <FaHistory size={20} /> Chat history
+            <FaHistory
+              size={20}
+              color="#F59E0B
+"
+            />{" "}
+            Chat history
           </NavLink>
           <NavLink
             to={"/dashboard/chat-wtih-ai"}
             className="cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f]"
           >
-            <VscRobot size={20} /> Chat with AI
+            <VscRobot
+              size={20}
+              color="#22D3EE
+"
+            />{" "}
+            Chat with AI
           </NavLink>
         </div>
       </div>

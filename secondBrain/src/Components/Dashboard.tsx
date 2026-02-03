@@ -21,6 +21,7 @@ export const Dashboard = () => {
   const {
     setValue,
     watch,
+    reset,
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -32,6 +33,7 @@ export const Dashboard = () => {
   const {
     setValue: setValue2,
     watch: watch2,
+    reset: reset2,
     register: register2,
     handleSubmit: handleSubmit2,
     formState: { errors: errors2, isSubmitting: isSubmitting2 },
@@ -47,7 +49,7 @@ export const Dashboard = () => {
   const setThoughts = useSetRecoilState(ThoughtAtom);
   // ---------------------------------------------------------- ADD CONTENT CARD
   const createCard = async (formData: CardProps) => {
-    await fetch("http://localhost:3000/v0/api/add-content", {
+    const contentRes = await fetch("http://localhost:3000/v0/api/add-content", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -62,6 +64,10 @@ export const Dashboard = () => {
         url: formData.contentUrl,
       }),
     });
+
+    if (contentRes.status == 201) {
+      reset();
+    }
     const data = await fetch("http://localhost:3000/v0/api/get-all-content", {
       method: "GET",
       headers: {
@@ -88,13 +94,16 @@ export const Dashboard = () => {
     if (formData.imageUrl && formData.imageUrl.length > 0) {
       Data.append("imageUrl", formData.imageUrl[0]);
     }
-    await fetch("http://localhost:3000/v0/api/add-thought", {
+    const thoughtRes = await fetch("http://localhost:3000/v0/api/add-thought", {
       method: "POST",
       headers: {
         token: localStorage.getItem("token") as string,
       },
       body: Data,
     });
+    if (thoughtRes.status == 201) {
+      reset2();
+    }
     const data = await fetch("http://localhost:3000/v0/api/get-all-thoughts", {
       method: "GET",
       headers: {

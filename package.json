@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "concurrently": "^9.2.1",
+    "react-loading-skeleton": "^3.4.0",
     "react-select": "^5.10.2",
     "recoil": "^0.7.7"
   },
