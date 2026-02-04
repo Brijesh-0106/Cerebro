@@ -21,10 +21,15 @@ const LogIn = z.object({
     password: z.string().min(8),
     email: z.email(),
 });
+const TagSchema = z.object({
+    label: z.string(),
+    value: z.string(),
+    color: z.string(),
+})
 const Content = z.object({
     title: z.string().min(3),
     type: z.enum(['youtube', 'tweet']),
-    tags: z.array(z.object(z.string())),
+    tags: z.array(TagSchema),
     url: z.string(),
     desc: z.string().min(5),
 })
@@ -224,7 +229,7 @@ app.get('/v0/api/get-all-content', middleAuth, async (req, res) => {
     }
 })
 app.get('/v0/api/get-all-youtube-content', middleAuth, async (req, res) => {
-    console.log("-----------get-all-content API")
+    console.log("-----------get-all-youtube-content API")
     const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
     let AllUserContent = await ContentModel.find({ userId: ObjtId, type: "youtube" });
     if (AllUserContent) {
@@ -238,7 +243,7 @@ app.get('/v0/api/get-all-youtube-content', middleAuth, async (req, res) => {
     }
 })
 app.get('/v0/api/get-all-tweet-content', middleAuth, async (req, res) => {
-    console.log("-----------get-all-content API")
+    console.log("-----------get-all-tweeter-content API")
     const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
     let AllUserContent = await ContentModel.find({ userId: ObjtId, type: "tweet" });
     if (AllUserContent) {

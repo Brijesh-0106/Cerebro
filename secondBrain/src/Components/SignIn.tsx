@@ -204,7 +204,10 @@ export function SignIn() {
           </div>
         </form>
         <div className="text-white">
-          Already have an account? <Link to={"/login"}>Login</Link>
+          Already have an account?{" "}
+          <Link to={"/login"} className="text-blue-500">
+            Login
+          </Link>
         </div>
       </span>
     </div>

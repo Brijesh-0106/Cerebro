@@ -35,7 +35,7 @@ export default function Thought({
               <div
                 className="absolute inset-0 
                 bg-[linear-gradient(110deg,#1f2937,45%,#374151,55%,#1f2937)] 
-                bg-[length:200%_100%] 
+                bg-bg-size-[200%_100%]
                 animate-shimmer"
               />
             </div>
