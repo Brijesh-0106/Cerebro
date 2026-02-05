@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { AiOutlineYoutube } from "react-icons/ai";
 import { CiTwitter } from "react-icons/ci";
 import type { CardProps } from "../Models/CardProps";
@@ -9,6 +10,15 @@ export const Card = ({
   title,
   type,
 }: CardProps) => {
+  const [imgLoaded, setImgLoaded] = useState(false);
+  // useEffect(() => {
+  //   if ((window as any).twttr) {
+  //     (window as any).twttr.ready(() => {
+  //       setImgLoaded(true);
+  //     });
+  //   }
+  // }, []);
+
   return (
     <span className="mb-6 break-inside-avoid flex  max-w-84 flex-col rounded-xl border-2 gap-2 border-[#a9a9a9] p-4">
       {/* Header */}
@@ -17,7 +27,7 @@ export const Card = ({
           {type === "youtube" ? (
             <AiOutlineYoutube color="red" size={24} />
           ) : (
-            <CiTwitter color="blue" size={24} />
+            <CiTwitter color="#1DA1F2" size={24} />
           )}
         </span>
         <span className="text-[#a9a9a9] text-sm">{createdAt}</span>
@@ -28,14 +38,27 @@ export const Card = ({
 
       {/* Media */}
       {type === "youtube" ? (
-        <iframe
-          className="w-full h-full rounded-lg"
-          frameBorder="0"
-          allow="encrypted-media;"
-          referrerPolicy="strict-origin-when-cross-origin"
-          allowFullScreen
-          src={contentUrl}
-        />
+        <div className="relative h-65 overflow-hidden rounded-lg">
+          {!imgLoaded && (
+            <div className="absolute inset-0 bg-gray-800 overflow-hidden">
+              <div
+                className="absolute inset-0 
+                bg-[linear-gradient(110deg,#1f2937,45%,#374151,55%,#1f2937)] 
+               bg-size-[200%_100%]
+                animate-shimmer"
+              />
+            </div>
+          )}
+          <iframe
+            className="w-full h-full rounded-lg"
+            frameBorder="0"
+            allow="encrypted-media;"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+            onLoad={() => setImgLoaded(true)}
+            src={contentUrl}
+          />
+        </div>
       ) : (
         // 1)
         // https://www.youtube.com/watch?v=dR9B_gPxjkk&list=RDFWHcd8TH7dE&index=3 - link of top bar - if contains watch replace with embed
@@ -53,7 +76,7 @@ export const Card = ({
           </div>
         </div>
       )}
-
+      <div />
       {/* Description */}
       <div className="text-[#a9a9a9] text-sm">{description}</div>
     </span>

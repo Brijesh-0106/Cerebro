@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import Masonry from "react-masonry-css";
 import { useRecoilState } from "recoil";
 import imgSrc from "../assets/Gemini_Generated_Image_r70ze4r70ze4r70z.png";
 import type { ThoughtProps } from "../Models/CardProps";
 import { ThoughtAtom } from "../Recoil/Thought";
+import { SkeletonGrid } from "./SkeletonGrid";
 import Thought from "./Thought";
 
 const breakpointColumns = {
@@ -15,46 +16,30 @@ const breakpointColumns = {
 
 export default function Thoughts() {
   const [thoughts, setThoughts] = useRecoilState(ThoughtAtom);
+  const [loading, setLoading] = useState(false);
 
-  console.log(thoughts, "thoughts data");
-  async function asyncDataFetch() {
-    const data = await fetch("http://localhost:3000/v0/api/get-all-thoughts", {
-      method: "GET",
-      headers: {
-        token: localStorage.getItem("token") as string,
-      },
-    });
-    const res = await data.json();
-    setThoughts([...res["AllUserContent"]]);
-  }
   useEffect(() => {
+    async function asyncDataFetch() {
+      setLoading(true);
+      const data = await fetch(
+        "http://localhost:3000/v0/api/get-all-thoughts",
+        {
+          method: "GET",
+          headers: {
+            token: localStorage.getItem("token") as string,
+          },
+        },
+      );
+      const res = await data.json();
+      setThoughts([...res["AllUserThoughs"]]);
+      setLoading(false);
+    }
     asyncDataFetch();
   }, []);
   return (
     <>
-      {thoughts.length > 0 && (
-        <Masonry
-          breakpointCols={breakpointColumns}
-          className="flex ml-72 mt-13 px-5 pt-4 gap-4"
-          columnClassName="masonry-column"
-        >
-          {thoughts.map((elem: ThoughtProps) => {
-            return (
-              <Thought
-                title={elem.title}
-                _id={elem._id}
-                userId={elem.userId}
-                createdAt={elem.createdAt.split("T")[0]}
-                imageUrl={elem.imageUrl}
-                type={elem.type}
-                description={elem.description}
-                key={elem._id}
-              />
-            );
-          })}
-        </Masonry>
-      )}
-      {thoughts.length == 0 && (
+      {loading && <SkeletonGrid />}
+      {!thoughts.length && (
         <div className="flex ml-72 mt-13 px-5 pt-4 h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center">
           <div className="empty-cards-Image h-60 w-60">
             <img
@@ -77,6 +62,26 @@ export default function Thoughts() {
             </button>
           </div>
         </div>
+      )}
+      {thoughts.length > 0 && (
+        <Masonry
+          breakpointCols={breakpointColumns}
+          className="flex ml-72 mt-13 px-5 pt-4 gap-4"
+          columnClassName="masonry-column"
+        >
+          {thoughts.map((elem: ThoughtProps) => (
+            <Thought
+              title={elem.title}
+              _id={elem._id}
+              userId={elem.userId}
+              createdAt={elem.createdAt.split("T")[0]}
+              imageUrl={elem.imageUrl}
+              type={elem.type}
+              description={elem.description}
+              key={elem._id}
+            />
+          ))}
+        </Masonry>
       )}
     </>
   );

@@ -16,11 +16,13 @@ export const Dashboard = () => {
   const [openAddContentModal, setOpenAddContentModal] = useState(false);
   const [openAddThoughtsModal, setOpenAddThoughtsModal] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
+  const [alertType, setAlertType] = useState("success");
   const nav = useNavigate();
   const [showAlert, setShowAlert] = useState(false);
   const {
     setValue,
     watch,
+    reset,
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -32,6 +34,7 @@ export const Dashboard = () => {
   const {
     setValue: setValue2,
     watch: watch2,
+    reset: reset2,
     register: register2,
     handleSubmit: handleSubmit2,
     formState: { errors: errors2, isSubmitting: isSubmitting2 },
@@ -47,7 +50,7 @@ export const Dashboard = () => {
   const setThoughts = useSetRecoilState(ThoughtAtom);
   // ---------------------------------------------------------- ADD CONTENT CARD
   const createCard = async (formData: CardProps) => {
-    await fetch("http://localhost:3000/v0/api/add-content", {
+    const contentRes = await fetch("http://localhost:3000/v0/api/add-content", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -62,20 +65,32 @@ export const Dashboard = () => {
         url: formData.contentUrl,
       }),
     });
-    const data = await fetch("http://localhost:3000/v0/api/get-all-content", {
-      method: "GET",
-      headers: {
-        token: localStorage.getItem("token") as string,
-      },
-    });
-    const res = await data.json();
-    setCards([...res["AllUserContent"]]);
-    setOpenAddContentModal(false);
-    setAlertMsg("Successfully saved!");
-    setShowAlert(true);
-    setTimeout(() => {
-      setShowAlert(false);
-    }, 2500);
+
+    if (contentRes.status == 201) {
+      reset();
+      const data = await fetch("http://localhost:3000/v0/api/get-all-content", {
+        method: "GET",
+        headers: {
+          token: localStorage.getItem("token") as string,
+        },
+      });
+      const res = await data.json();
+      setCards([...res["AllUserContent"]]);
+      setOpenAddContentModal(false);
+      setAlertMsg("Successfully saved!");
+      setAlertType("success");
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 2500);
+    } else {
+      setAlertType("danger");
+      setAlertMsg("Sorry, Content is not saved!");
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 2500);
+    }
   };
   // ----------------------------------------------------------------- CREATE THOUGHT
   const createThought = async (formData: ThoughtProps) => {
@@ -88,28 +103,42 @@ export const Dashboard = () => {
     if (formData.imageUrl && formData.imageUrl.length > 0) {
       Data.append("imageUrl", formData.imageUrl[0]);
     }
-    await fetch("http://localhost:3000/v0/api/add-thought", {
+    const thoughtRes = await fetch("http://localhost:3000/v0/api/add-thought", {
       method: "POST",
       headers: {
         token: localStorage.getItem("token") as string,
       },
       body: Data,
     });
-    const data = await fetch("http://localhost:3000/v0/api/get-all-thoughts", {
-      method: "GET",
-      headers: {
-        token: localStorage.getItem("token") as string,
-      },
-    });
-    const res = await data.json();
-    setThoughts([...res["AllUserThoughs"]]);
-    setOpenAddThoughtsModal(false);
-    setAlertMsg("Thought stored!");
-    setShowAlert(true);
-    setTimeout(() => {
-      setShowAlert(false);
-    }, 2500);
-    nav("/dashboard/thoughts");
+    if (thoughtRes.status == 201) {
+      reset2();
+      const data = await fetch(
+        "http://localhost:3000/v0/api/get-all-thoughts",
+        {
+          method: "GET",
+          headers: {
+            token: localStorage.getItem("token") as string,
+          },
+        },
+      );
+      const res = await data.json();
+      setThoughts([...res["AllUserThoughs"]]);
+      setOpenAddThoughtsModal(false);
+      setAlertMsg("Thought is stored!");
+      setAlertType("success");
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 2500);
+      nav("/dashboard/thoughts");
+    } else {
+      setAlertType("danger");
+      setAlertMsg("Sorry, Thought is not stored!");
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 2500);
+    }
   };
 
   // -------------------------------------------------------------------- JSX
@@ -124,7 +153,7 @@ export const Dashboard = () => {
       >
         {showAlert && (
           <Alert
-            type="success"
+            type={alertType}
             title={alertMsg}
             onClose={() => console.log("Closed")}
           />
@@ -144,7 +173,7 @@ export const Dashboard = () => {
           <div className="fixed  inset-0 flex items-center justify-center z-50">
             <div className="bg-white text-black rounded-xl w-96">
               <div className="header border-b border-gray-400 p-2 font-semibold text-indigo-600 flex justify-between items-center">
-                Add Content{" "}
+                Capture a content for your future self
                 <IoMdClose
                   size={20}
                   className="cursor-pointer"
@@ -201,7 +230,7 @@ export const Dashboard = () => {
                               "Description must be at least 5 characters",
                           },
                         })}
-                        placeholder="Description..."
+                        placeholder="Why did you save this?..."
                         className="text-indigo-600 add-textArea focus:outline-none rounded w-full py-2 px-2"
                         rows={2}
                       ></textarea>
@@ -308,7 +337,7 @@ export const Dashboard = () => {
           <div className="fixed  inset-0 flex items-center justify-center z-50">
             <div className="bg-white text-black rounded-xl w-96">
               <div className="header border-b border-gray-400 p-2 font-semibold text-indigo-600 flex justify-between items-center">
-                Add Thought{" "}
+                Capture a thought for your future self
                 <IoMdClose
                   size={20}
                   className="cursor-pointer"
@@ -365,7 +394,7 @@ export const Dashboard = () => {
                               "Description must be at least 5 characters",
                           },
                         })}
-                        placeholder="Description..."
+                        placeholder="Why did you save this?..."
                         className="text-indigo-600 add-textArea focus:outline-none rounded w-full py-2 px-2"
                         rows={2}
                       ></textarea>
