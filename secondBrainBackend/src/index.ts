@@ -1,17 +1,30 @@
 // ----------------------------------------- Imports
+import { Pinecone } from '@pinecone-database/pinecone';
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import mongoose, { Document, Schema, Types } from 'mongoose';
+import OpenAI from "openai";
 import * as z from "zod";
+import { openaikey, PineconeKey } from './key';
 const { upload } = require("./storage");
 // -------------------------------------------
 
-// --------------------------------------------JWT config
+// --------------------------------------------VECTOR EMBEDDING CONFIG
+const openai = new OpenAI({
+    apiKey: openaikey
+});
+const pc = new Pinecone({
+    apiKey: PineconeKey
+});
+const pcIndex = pc.index("cerebro-embeddings");
+// -------------------------------------------
+
+// --------------------------------------------JWT CONFIG
 let SECRET_KEY = 'IncreaseEfforts'
 // -------------------------------------------
 
-// -------------------------------------------ZOD validations
+// -------------------------------------------ZOD VALIDATIONS
 const SignIn = z.object({
     name: z.string().min(3),
     email: z.email(),
@@ -42,7 +55,7 @@ const Thought = z.object({
 })
 // ---------------------------------------------------------
 
-// ----------------------------------------- Express Basics
+// ----------------------------------------- EXPRESS BASICS
 const port = 3000;
 const app = express();
 
@@ -56,7 +69,7 @@ declare global {
 }
 // ----------------------------------------- 
 
-// ----------------------------------------- Middleware => (CORS, Body Parse)
+// ----------------------------------------- MIDDLEWARES => (CORS, BODY PARSE)
 app.use(cors())
 app.use("/uploads", express.static("uploads"));
 app.use(express.json())
@@ -80,7 +93,7 @@ const middleAuth = (req: Request, res: Response, next: NextFunction): void => {
 }
 // ----------------------------------------- 
 
-// ----------------------------------------- DB Condig + Connnect
+// ----------------------------------------- DB CONFIG + CONNECT
 async function DbConnect() {
     await mongoose.connect('mongodb+srv://phenomenal:Phenomenal@cluster0.9ubnr8w.mongodb.net/NeuralNetwork')
     console.log("DB is connected");
@@ -88,7 +101,7 @@ async function DbConnect() {
 DbConnect()
 // ----------------------------------------- 
 
-// ----------------------------------------- Interface/Models
+// ----------------------------------------- INTERFACE/MODELS
 interface IUser extends Document {
     name: String,
     email: String,
@@ -114,7 +127,7 @@ interface IThought extends Document {
 }
 // -----------------------------------------
 
-// ----------------------------------------- Models & Schema
+// ----------------------------------------- mODELS & SCHEMA
 const UserSchema = new Schema<IUser>({
     name: { type: String, required: true },
     email: { type: String, unique: true, required: true },
@@ -144,7 +157,7 @@ const ThoughtModel = mongoose.model<IThought>('thought', ThoughtSchema);
 // ----------------------------------------- 
 
 
-// ----------------------------------------------Signin & Login Routes
+// ----------------------------------------------SIGNIN & LOGIN ROUTES
 app.post('/v0/api/signin', async (req: Request, res: Response) => {
     console.log("reached here", req.body)
     let { name, email, password } = req.body;
@@ -189,16 +202,39 @@ app.post('/v0/api/login', async (req, res) => {
 })
 // ----------------------------------------------
 
-// ----------------------------------------------Content Routes
+// ----------------------------------------------CONTENT ROUTES
 app.post('/v0/api/add-content', middleAuth, async (req, res) => {
     console.log("-----------add-content API")
+    let vectorInput = "";
     let { title, desc, type, tags, url } = req.body;
     console.log(title, type, tags, url, desc);
     console.log(req.userId);
     const result = Content.safeParse({ title, type, tags, url, desc })
     if (result.success) {
-        let user = await ContentModel.create({ title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose.Types.ObjectId(req.userId as string), createdAt: new Date().toDateString() });
-        if (user) {
+        vectorInput += `User context:\n${desc} \nTitle:\n${title} \nType:\n${type} \nTags:\n${JSON.stringify(tags)}`;
+        console.log(vectorInput, "Vector Input");
+        const embeddingResponse = await openai.embeddings.create({
+            model: "text-embedding-3-small",
+            input: vectorInput,
+        });
+        console.log(embeddingResponse, "embeddingResponse");
+        const content = await ContentModel.create({ title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose.Types.ObjectId(req.userId as string), createdAt: new Date().toDateString() });
+        if (content) {
+            // const records =
+            await pcIndex.upsert({
+                records: [
+                    {
+                        id: content._id.toString(),
+                        values: embeddingResponse.data[0].embedding,
+                        metadata: {
+                            userId: req.userId as string,
+                            type: type,
+                            tags: JSON.stringify(tags)
+                        },
+                    }
+                ],
+                namespace: req.userId as string
+            });
             res.status(201).json({
                 message: 'Content added Successfully',
             })
@@ -258,7 +294,7 @@ app.get('/v0/api/get-all-tweet-content', middleAuth, async (req, res) => {
 })
 // -----------------------------------------------------
 
-// -------------------------------------------- Though routes
+// -------------------------------------------- THOUGHT ROUTES
 app.post('/v0/api/add-thought', middleAuth, upload.single("imageUrl"), async (req, res) => {
     try {
         let imageUrl = ''
@@ -271,7 +307,10 @@ app.post('/v0/api/add-thought', middleAuth, upload.single("imageUrl"), async (re
         console.log(title, desc, type, tags, imageUrl);
         const result = Thought.safeParse({ title, desc, type, tags, imageUrl });
         if (result.success) {
-            await ThoughtModel.create({ title, description: desc, tags, imageUrl, createdAt: new Date().toDateString(), userId: new mongoose.Types.ObjectId(req.userId as string), type: "thought" })
+            await ThoughtModel.create({
+                title, description: desc, tags, imageUrl, createdAt: new Date().toDateString(),
+                userId: new mongoose.Types.ObjectId(req.userId as string), type: "thought"
+            })
             res.status(201).json({ message: 'Thought added Successfully' })
         } else {
             res.status(400).json({
@@ -297,8 +336,8 @@ app.get('/v0/api/get-all-thoughts', middleAuth, async (req, res) => {
         })
     }
 })
-// ----------------------------------------------------Server start
+// ----------------------------------------------------SERVER START
 app.listen(port, () => {
     console.log('Server is running on port ' + port)
 })
-// ----------------------------------------------------App end
+// --------------------------------------------------------------------------------END----------------------------------------------------------------------------------
