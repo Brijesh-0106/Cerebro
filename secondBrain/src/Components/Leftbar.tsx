@@ -93,7 +93,7 @@ export const Leftbar = () => {
               color="#22D3EE
 "
             />{" "}
-            Chat with AI
+            Ask AI
           </NavLink>
         </div>
       </div>

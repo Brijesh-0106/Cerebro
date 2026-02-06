@@ -210,7 +210,7 @@ app.post('/v0/api/add-content', middleAuth, async (req, res) => {
         const content = await ContentModel.create({ title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose.Types.ObjectId(req.userId as string), createdAt: new Date().toDateString() });
         if (content) {
             await pcIndex.upsert({
-                records: [  
+                records: [
                     {
                         id: content._id.toString(),
                         values: vector,
@@ -284,8 +284,9 @@ app.get('/v0/api/get-all-tweet-content', middleAuth, async (req, res) => {
 
 // -------------------------------------------- THOUGHT ROUTES
 app.post('/v0/api/add-thought', middleAuth, upload.single("imageUrl"), async (req, res) => {
+    let vectorInput = "";
+    let imageUrl = ''
     try {
-        let imageUrl = ''
         if (req.file) {
             const image = req.file;
             console.log("File:", image);
@@ -295,11 +296,34 @@ app.post('/v0/api/add-thought', middleAuth, upload.single("imageUrl"), async (re
         console.log(title, desc, type, tags, imageUrl);
         const result = Thought.safeParse({ title, desc, type, tags, imageUrl });
         if (result.success) {
-            await ThoughtModel.create({
+            vectorInput += `User context:\n${desc} \nTitle:\n${title} \nType:\n${"thought"} \nTags:\n${JSON.stringify(tags)}`;
+            const vector = await getEmbedding(vectorInput);
+            console.log("Generated vector:", vector);
+            const content = await ThoughtModel.create({
                 title, description: desc, tags, imageUrl, createdAt: new Date().toDateString(),
                 userId: new mongoose.Types.ObjectId(req.userId as string), type: "thought"
             })
-            res.status(201).json({ message: 'Thought added Successfully' })
+            if (content) {
+                await pcIndex.upsert({
+                    records: [
+                        {
+                            id: content._id.toString(),
+                            values: vector,
+                            metadata: {
+                                userId: req.userId as string,
+                                type: type,
+                                tags: JSON.stringify(tags)
+                            },
+                        }
+                    ],
+                    namespace: req.userId as string
+                });
+                res.status(201).json({ message: 'Thought added Successfully' })
+            } else {
+                res.status(400).json({
+                    error: result.error
+                })
+            }
         } else {
             res.status(400).json({
                 error: result.error
