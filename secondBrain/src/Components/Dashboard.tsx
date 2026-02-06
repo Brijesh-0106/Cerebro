@@ -160,7 +160,7 @@ export const Dashboard = () => {
         )}
         ;
         <Leftbar />
-        <Topbar curr={openAddThoughtsModal} setCurr={setOpenAddThoughtsModal} />
+        <Topbar curr={openAddContentModal} setCurr={setOpenAddContentModal} />
         {/* <Topbar curr={openAddContentModal} setCurr={setOpenAddContentModal} />  */}{" "}
         {/* addContentModal will stay */}
         {/* <Cards /> */}

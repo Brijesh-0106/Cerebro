@@ -1,6 +1,6 @@
-const multer = require("multer");
-const path = require("path");
 import { Request } from 'express';
+import multer from "multer";
+import path from "path";
 const storage = multer.diskStorage({
     destination: (req: Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
         cb(null, "uploads/");
@@ -12,6 +12,6 @@ const storage = multer.diskStorage({
     },
 });
 
-exports.upload = multer({
+export const upload = multer({
     storage
 });

@@ -4,20 +4,17 @@ import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import mongoose, { Document, Schema, Types } from 'mongoose';
-import OpenAI from "openai";
 import * as z from "zod";
-import { openaikey, PineconeKey, SECRET_KEY } from './Config/key';
-const { upload } = require("./storage");
+import { PineconeKey, SECRET_KEY } from './Config/key.js';
+import { getEmbedding } from './hfEmbedding.js';
+import { upload } from "./storage.js"; // Note: add .js extension
 // -------------------------------------------
 
 // --------------------------------------------VECTOR EMBEDDING CONFIG
-const openai = new OpenAI({
-    apiKey: openaikey
-});
 const pc = new Pinecone({
     apiKey: PineconeKey
 });
-const pcIndex = pc.index("cerebro-embeddings");
+const pcIndex = pc.index({ name: "cerebro-embeddings" });//NEED TO CREATE INDEX IN PINECONE FIRST
 // -------------------------------------------
 
 
@@ -209,20 +206,14 @@ app.post('/v0/api/add-content', middleAuth, async (req, res) => {
     const result = Content.safeParse({ title, type, tags, url, desc })
     if (result.success) {
         vectorInput += `User context:\n${desc} \nTitle:\n${title} \nType:\n${type} \nTags:\n${JSON.stringify(tags)}`;
-        console.log(vectorInput, "Vector Input");
-        const embeddingResponse = await openai.embeddings.create({
-            model: "text-embedding-3-small",
-            input: vectorInput,
-        });
-        console.log(embeddingResponse, "embeddingResponse");
+        const vector = await getEmbedding(vectorInput);
         const content = await ContentModel.create({ title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose.Types.ObjectId(req.userId as string), createdAt: new Date().toDateString() });
         if (content) {
-            // const records =
             await pcIndex.upsert({
-                records: [
+                records: [  
                     {
                         id: content._id.toString(),
-                        values: embeddingResponse.data[0].embedding,
+                        values: vector,
                         metadata: {
                             userId: req.userId as string,
                             type: type,
