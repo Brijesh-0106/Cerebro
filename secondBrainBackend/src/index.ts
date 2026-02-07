@@ -28,23 +28,12 @@ const LogIn = z.object({
     password: z.string().min(8),
     email: z.email(),
 });
-const TagSchema = z.object({
-    label: z.string(),
-    value: z.string(),
-    color: z.string(),
-})
 const Content = z.object({
     title: z.string().min(3),
-    type: z.enum(['youtube', 'tweet']),
-    tags: z.array(TagSchema),
-    url: z.string(),
-    desc: z.string().min(5),
-})
-const Thought = z.object({
-    title: z.string().min(3),
+    type: z.enum(['youtube', 'tweet', 'thought']),
     tags: z.string(),
+    url: z.string(),
     imageUrl: z.string(),
-    type: z.string(),
     desc: z.string().min(5),
 })
 // ---------------------------------------------------------
@@ -103,19 +92,11 @@ interface IUser extends Document {
 }
 interface IContent extends Document {
     title: String,
-    type: "youtube" | "tweet",
-    tags: Array<String>,
-    contentUrl: String,
-    description: String,
-    createdAt: Date,
-    userId: Types.ObjectId;
-}
-interface IThought extends Document {
-    title: String,
+    type: "youtube" | "tweet" | "thought",
     tags: String,
-    type: String,
-    imageUrl?: String,
+    contentUrl?: String,
     description: String,
+    imageUrl?: String,
     createdAt: Date,
     userId: Types.ObjectId;
 }
@@ -130,24 +111,15 @@ const UserSchema = new Schema<IUser>({
 const UserModel = mongoose.model<IUser>('user', UserSchema);
 const ContentSchema = new Schema<IContent>({
     title: { type: String, required: true },
-    type: { type: String, required: true, enum: ["youtube", "tweet"], },
-    tags: Array,
-    contentUrl: { type: String, required: true },
+    type: { type: String, required: true, enum: ["youtube", 'thought', "tweet"], },
+    tags: { type: String, required: false },
+    contentUrl: { type: String, required: false },
     description: { type: String, required: true },
+    imageUrl: { type: String, required: false },
     createdAt: { type: Date, required: true },
     userId: { type: Schema.Types.ObjectId, ref: UserModel, required: true },
 })
 const ContentModel = mongoose.model<IContent>('content', ContentSchema);
-const ThoughtSchema = new Schema<IThought>({
-    title: { type: String, required: true },
-    tags: String,
-    type: { type: String, required: true },
-    imageUrl: { type: String, required: false },
-    description: { type: String, required: true },
-    createdAt: { type: Date, required: true },
-    userId: { type: Schema.Types.ObjectId, ref: UserModel, required: true },
-})
-const ThoughtModel = mongoose.model<IThought>('thought', ThoughtSchema);
 // ----------------------------------------- 
 
 
@@ -197,17 +169,23 @@ app.post('/v0/api/login', async (req, res) => {
 // ----------------------------------------------
 
 // ----------------------------------------------CONTENT ROUTES
-app.post('/v0/api/add-content', middleAuth, async (req, res) => {
+app.post('/v0/api/add-content', middleAuth, upload.single("imageUrl"), async (req, res) => {
     console.log("-----------add-content API")
+    let imageUrl = ''
     let vectorInput = "";
+    if (req.file) {
+        const image = req.file;
+        console.log("File:", image);
+        imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+    }
     let { title, desc, type, tags, url } = req.body;
     console.log(title, type, tags, url, desc);
     console.log(req.userId);
-    const result = Content.safeParse({ title, type, tags, url, desc })
+    const result = Content.safeParse({ title, type, tags, url, desc, imageUrl })
     if (result.success) {
         vectorInput += `User context:\n${desc} \nTitle:\n${title} \nType:\n${type} \nTags:\n${JSON.stringify(tags)}`;
         const vector = await getEmbedding(vectorInput);
-        const content = await ContentModel.create({ title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose.Types.ObjectId(req.userId as string), createdAt: new Date().toDateString() });
+        const content = await ContentModel.create({ imageUrl: imageUrl, title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose.Types.ObjectId(req.userId as string), createdAt: new Date().toISOString() });
         if (content) {
             await pcIndex.upsert({
                 records: [
@@ -241,7 +219,9 @@ app.post('/v0/api/add-content', middleAuth, async (req, res) => {
 app.get('/v0/api/get-all-content', middleAuth, async (req, res) => {
     console.log("-----------get-all-content API")
     const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
-    let AllUserContent = await ContentModel.find({ userId: ObjtId });
+    let AllUserContent = await ContentModel
+        .find({ userId: ObjtId })
+        .sort({ createdAt: -1 });
     if (AllUserContent) {
         res.status(200).json({
             AllUserContent
@@ -252,10 +232,13 @@ app.get('/v0/api/get-all-content', middleAuth, async (req, res) => {
         })
     }
 })
+
 app.get('/v0/api/get-all-youtube-content', middleAuth, async (req, res) => {
     console.log("-----------get-all-youtube-content API")
     const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
-    let AllUserContent = await ContentModel.find({ userId: ObjtId, type: "youtube" });
+    let AllUserContent = await ContentModel
+        .find({ userId: ObjtId, type: "youtube" })
+        .sort({ createdAt: -1 });
     if (AllUserContent) {
         res.status(200).json({
             AllUserContent
@@ -266,10 +249,13 @@ app.get('/v0/api/get-all-youtube-content', middleAuth, async (req, res) => {
         })
     }
 })
+
 app.get('/v0/api/get-all-tweet-content', middleAuth, async (req, res) => {
     console.log("-----------get-all-tweeter-content API")
     const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
-    let AllUserContent = await ContentModel.find({ userId: ObjtId, type: "tweet" });
+    let AllUserContent = await ContentModel
+        .find({ userId: ObjtId, type: "tweet" })
+        .sort({ createdAt: -1 });
     if (AllUserContent) {
         res.status(200).json({
             AllUserContent
@@ -283,61 +269,63 @@ app.get('/v0/api/get-all-tweet-content', middleAuth, async (req, res) => {
 // -----------------------------------------------------
 
 // -------------------------------------------- THOUGHT ROUTES
-app.post('/v0/api/add-thought', middleAuth, upload.single("imageUrl"), async (req, res) => {
-    let vectorInput = "";
-    let imageUrl = ''
-    try {
-        if (req.file) {
-            const image = req.file;
-            console.log("File:", image);
-            imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
-        }
-        const { title, desc, type, tags } = req.body;
-        console.log(title, desc, type, tags, imageUrl);
-        const result = Thought.safeParse({ title, desc, type, tags, imageUrl });
-        if (result.success) {
-            vectorInput += `User context:\n${desc} \nTitle:\n${title} \nType:\n${"thought"} \nTags:\n${JSON.stringify(tags)}`;
-            const vector = await getEmbedding(vectorInput);
-            console.log("Generated vector:", vector);
-            const content = await ThoughtModel.create({
-                title, description: desc, tags, imageUrl, createdAt: new Date().toDateString(),
-                userId: new mongoose.Types.ObjectId(req.userId as string), type: "thought"
-            })
-            if (content) {
-                await pcIndex.upsert({
-                    records: [
-                        {
-                            id: content._id.toString(),
-                            values: vector,
-                            metadata: {
-                                userId: req.userId as string,
-                                type: type,
-                                tags: JSON.stringify(tags)
-                            },
-                        }
-                    ],
-                    namespace: req.userId as string
-                });
-                res.status(201).json({ message: 'Thought added Successfully' })
-            } else {
-                res.status(400).json({
-                    error: result.error
-                })
-            }
-        } else {
-            res.status(400).json({
-                error: result.error
-            })
-        }
-    } catch (err) {
-        console.error(err);
-        res.status(500).json("Internal Server Error");
-    }
-})
+// app.post('/v0/api/add-thought', middleAuth, async (req, res) => {
+//     let vectorInput = "";
+//     let imageUrl = ''
+//     try {
+//         if (req.file) {
+//             const image = req.file;
+//             console.log("File:", image);
+//             imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+//         }
+//         const { title, desc, type, tags } = req.body;
+//         console.log(title, desc, type, tags, imageUrl);
+//         const result = Thought.safeParse({ title, desc, type, tags, imageUrl });
+//         if (result.success) {
+//             vectorInput += `User context:\n${desc} \nTitle:\n${title} \nType:\n${"thought"} \nTags:\n${JSON.stringify(tags)}`;
+//             const vector = await getEmbedding(vectorInput);
+//             console.log("Generated vector:", vector);
+//             const content = await ThoughtModel.create({
+//                 title, description: desc, tags, imageUrl, createdAt: new Date().toDateString(),
+//                 userId: new mongoose.Types.ObjectId(req.userId as string), type: "thought"
+//             })
+//             if (content) {
+//                 await pcIndex.upsert({
+//                     records: [
+//                         {
+//                             id: content._id.toString(),
+//                             values: vector,
+//                             metadata: {
+//                                 userId: req.userId as string,
+//                                 type: type,
+//                                 tags: JSON.stringify(tags)
+//                             },
+//                         }
+//                     ],
+//                     namespace: req.userId as string
+//                 });
+//                 res.status(201).json({ message: 'Thought added Successfully' })
+//             } else {
+//                 res.status(400).json({
+//                     error: result.error
+//                 })
+//             }
+//         } else {
+//             res.status(400).json({
+//                 error: result.error
+//             })
+//         }
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json("Internal Server Error");
+//     }
+// })
 app.get('/v0/api/get-all-thoughts', middleAuth, async (req, res) => {
     console.log("-----------get-all-thoughts API")
     const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
-    let AllUserThoughs = await ThoughtModel.find({ userId: ObjtId });
+    let AllUserThoughs = await ContentModel
+        .find({ userId: ObjtId, type: "thought" })
+        .sort({ createdAt: -1 });
     if (AllUserThoughs) {
         res.status(200).json({
             AllUserThoughs

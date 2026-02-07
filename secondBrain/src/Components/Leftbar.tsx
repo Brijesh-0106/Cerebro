@@ -47,11 +47,7 @@ export const Leftbar = () => {
               `cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f] ${isActive ? "text-white bg-[#1c1e1f]" : "text-[#a9a9a9]"}`
             }
           >
-            <GiNotebook
-              size={20}
-              color="#8B5CF6
-"
-            />{" "}
+            <GiNotebook size={20} color="#E6D8F2" />
             Thoughts
           </NavLink>
           <NavLink

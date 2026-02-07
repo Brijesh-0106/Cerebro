@@ -3,8 +3,8 @@ import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import Masonry from "react-masonry-css";
 import { useRecoilState } from "recoil";
 import imgSrc from "../assets/Gemini_Generated_Image_r70ze4r70ze4r70z.png";
-import type { ThoughtProps } from "../Models/CardProps";
-import { ThoughtAtom } from "../Recoil/Thought";
+import type { CardProps } from "../Models/CardProps";
+import { CardAtom } from "../Recoil/CardAtom";
 import { SkeletonGrid } from "./SkeletonGrid";
 import Thought from "./Thought";
 
@@ -15,7 +15,7 @@ const breakpointColumns = {
 };
 
 export default function Thoughts() {
-  const [thoughts, setThoughts] = useRecoilState(ThoughtAtom);
+  const [cards, setCards] = useRecoilState(CardAtom);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function Thoughts() {
         },
       );
       const res = await data.json();
-      setThoughts([...res["AllUserThoughs"]]);
+      setCards([...res["AllUserThoughs"]]);
       setLoading(false);
     }
     asyncDataFetch();
@@ -39,7 +39,7 @@ export default function Thoughts() {
   return (
     <>
       {loading && <SkeletonGrid />}
-      {!thoughts.length && (
+      {!cards.length && (
         <div className="flex ml-72 mt-13 px-5 pt-4 h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center">
           <div className="empty-cards-Image h-60 w-60">
             <img
@@ -63,20 +63,20 @@ export default function Thoughts() {
           </div>
         </div>
       )}
-      {thoughts.length > 0 && (
+      {cards.length > 0 && (
         <Masonry
           breakpointCols={breakpointColumns}
           className="flex ml-72 mt-13 px-5 pt-4 gap-4"
           columnClassName="masonry-column"
         >
-          {thoughts.map((elem: ThoughtProps) => (
+          {cards.map((elem: CardProps) => (
             <Thought
               title={elem.title}
               _id={elem._id}
               userId={elem.userId}
               createdAt={elem.createdAt.split("T")[0]}
               imageUrl={elem.imageUrl}
-              type={elem.type}
+              type={"thought"}
               description={elem.description}
               key={elem._id}
             />

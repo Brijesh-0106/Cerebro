@@ -19,7 +19,7 @@ export default function Thought({
       {/* Header */}
       <div className="flex justify-between items-center">
         <span className="text-[#a9a9a9]">
-          {type === "thought" && <GiNotebook size={24} color="#8B5CF6" />}
+          {type === "thought" && <GiNotebook size={24} color="#E6D8F2" />}
         </span>
         <span className="text-[#a9a9a9] text-sm">{createdAt}</span>
       </div>
@@ -42,9 +42,11 @@ export default function Thought({
           )}
 
           <img
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             src={imageUrl}
-            className={`h-full w-full object-cover ${
-              imgLoaded ? "opacity-100" : "opacity-0"
+            className={`h-full w-full rounded-lg object-cover ${
+              imgLoaded ? "opacity-100 " : "opacity-0"
             }`}
             onLoad={() => setImgLoaded(true)}
           />

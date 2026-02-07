@@ -1,23 +1,19 @@
 import { useState } from "react";
 import { AiOutlineYoutube } from "react-icons/ai";
 import { CiTwitter } from "react-icons/ci";
+import { GiNotebook } from "react-icons/gi";
+import "react-loading-skeleton/dist/skeleton.css";
 import type { CardProps } from "../Models/CardProps";
 
 export const Card = ({
   createdAt,
   contentUrl,
   description,
+  imageUrl,
   title,
   type,
 }: CardProps) => {
   const [imgLoaded, setImgLoaded] = useState(false);
-  // useEffect(() => {
-  //   if ((window as any).twttr) {
-  //     (window as any).twttr.ready(() => {
-  //       setImgLoaded(true);
-  //     });
-  //   }
-  // }, []);
 
   return (
     <span className="mb-6 break-inside-avoid flex  max-w-84 flex-col rounded-xl border-2 gap-2 border-[#a9a9a9] p-4">
@@ -26,8 +22,10 @@ export const Card = ({
         <span className="text-[#a9a9a9]">
           {type === "youtube" ? (
             <AiOutlineYoutube color="red" size={24} />
-          ) : (
+          ) : type === "tweet" ? (
             <CiTwitter color="#1DA1F2" size={24} />
+          ) : (
+            <GiNotebook size={24} color="#E6D8F2" />
           )}
         </span>
         <span className="text-[#a9a9a9] text-sm">{createdAt}</span>
@@ -59,7 +57,7 @@ export const Card = ({
             src={contentUrl}
           />
         </div>
-      ) : (
+      ) : type == "tweet" ? (
         // 1)
         // https://www.youtube.com/watch?v=dR9B_gPxjkk&list=RDFWHcd8TH7dE&index=3 - link of top bar - if contains watch replace with embed
         // https://youtu.be/dR9B_gPxjkk?si=NDtndqPdjAW1lkRI - link of share -  if contains youtu.be replace with youtube.com/embed
@@ -75,6 +73,30 @@ export const Card = ({
             </div>
           </div>
         </div>
+      ) : (
+        imageUrl && (
+          <div className="relative h-65 overflow-hidden rounded-lg">
+            {!imgLoaded && (
+              <div className="absolute inset-0 bg-gray-800 overflow-hidden">
+                <div
+                  className="absolute inset-0 
+                bg-[linear-gradient(110deg,#1f2937,45%,#374151,55%,#1f2937)] 
+                bg-bg-size-[200%_100%]
+                animate-shimmer"
+                />
+              </div>
+            )}
+            <img
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              src={imageUrl}
+              className={`h-full w-full object-cover ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              onLoad={() => setImgLoaded(true)}
+            />
+          </div>
+        )
       )}
       <div />
       {/* Description */}

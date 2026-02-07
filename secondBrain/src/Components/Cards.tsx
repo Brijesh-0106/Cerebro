@@ -20,7 +20,7 @@ export const Cards = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function asyncDataFetch() {
+    async function asyncContentDataFetch() {
       setLoading(true);
 
       const data = await fetch("http://localhost:3000/v0/api/get-all-content", {
@@ -29,11 +29,13 @@ export const Cards = () => {
           token: localStorage.getItem("token") as string,
         },
       });
+
       const res = await data.json();
       setCards([...res["AllUserContent"]]);
+
       setLoading(false);
     }
-    asyncDataFetch();
+    asyncContentDataFetch();
   }, []);
   return (
     <>
@@ -72,6 +74,7 @@ export const Cards = () => {
             <Card
               title={elem.title}
               _id={elem._id}
+              imageUrl={elem.imageUrl}
               userId={elem.userId}
               createdAt={elem.createdAt.split("T")[0]}
               contentUrl={elem.contentUrl}
@@ -82,6 +85,7 @@ export const Cards = () => {
           ))}
         </Masonry>
       )}
+
       {/* when no cards added */}
     </>
   );
