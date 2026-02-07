@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { IoMdClose } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
 import type { CardProps } from "../Models/CardProps";
 import { CardAtom } from "../Recoil/CardAtom";
@@ -13,12 +14,14 @@ import { UserArea } from "./UserArea";
 export const Dashboard = () => {
   const [openAddContentModal, setOpenAddContentModal] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
+  const nav = useNavigate();
   const [alertType, setAlertType] = useState("success");
   const [showAlert, setShowAlert] = useState(false);
   const {
     setValue,
     watch,
     reset,
+    setError,
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -33,14 +36,30 @@ export const Dashboard = () => {
   const setCards = useSetRecoilState(CardAtom);
   // ---------------------------------------------------------- ADD CONTENT CARD
   const createCard = async (formData: CardProps) => {
+    if (formData.type == "youtube") {
+      if (formData.contentUrl?.includes("watch?v=")) {
+        formData.contentUrl = formData.contentUrl.replace("watch?v=", "embed/");
+      } else if (formData.contentUrl?.includes("youtu.be")) {
+        formData.contentUrl = formData.contentUrl.replace(
+          "youtu.be",
+          "www.youtube.com/embed",
+        );
+      } else if (!formData.contentUrl?.includes("www.youtube.com/embed")) {
+        setError("contentUrl", {
+          type: "InValid URL",
+          message: "Please enter a valid YouTube link",
+        });
+        return;
+      }
+    }
     const Data = new FormData();
+    if (formData.imageUrl && formData.imageUrl.length > 0) {
+      Data.append("imageUrl", formData.imageUrl[0]);
+    }
     Data.append("tags", JSON.stringify(formData.tags));
     Data.append("desc", formData.description);
     Data.append("title", formData.title);
     Data.append("type", formData.type);
-    if (formData.imageUrl && formData.imageUrl.length > 0) {
-      Data.append("imageUrl", formData.imageUrl[0]);
-    }
     Data.append("url", formData.contentUrl as string);
     const contentRes = await fetch("http://localhost:3000/v0/api/add-content", {
       method: "POST",
@@ -64,6 +83,7 @@ export const Dashboard = () => {
       setAlertMsg("Successfully saved!");
       setAlertType("success");
       setShowAlert(true);
+      nav("/dashboard/all-content");
       setTimeout(() => {
         setShowAlert(false);
       }, 2500);

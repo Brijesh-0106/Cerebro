@@ -267,59 +267,6 @@ app.get('/v0/api/get-all-tweet-content', middleAuth, async (req, res) => {
     }
 })
 // -----------------------------------------------------
-
-// -------------------------------------------- THOUGHT ROUTES
-// app.post('/v0/api/add-thought', middleAuth, async (req, res) => {
-//     let vectorInput = "";
-//     let imageUrl = ''
-//     try {
-//         if (req.file) {
-//             const image = req.file;
-//             console.log("File:", image);
-//             imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
-//         }
-//         const { title, desc, type, tags } = req.body;
-//         console.log(title, desc, type, tags, imageUrl);
-//         const result = Thought.safeParse({ title, desc, type, tags, imageUrl });
-//         if (result.success) {
-//             vectorInput += `User context:\n${desc} \nTitle:\n${title} \nType:\n${"thought"} \nTags:\n${JSON.stringify(tags)}`;
-//             const vector = await getEmbedding(vectorInput);
-//             console.log("Generated vector:", vector);
-//             const content = await ThoughtModel.create({
-//                 title, description: desc, tags, imageUrl, createdAt: new Date().toDateString(),
-//                 userId: new mongoose.Types.ObjectId(req.userId as string), type: "thought"
-//             })
-//             if (content) {
-//                 await pcIndex.upsert({
-//                     records: [
-//                         {
-//                             id: content._id.toString(),
-//                             values: vector,
-//                             metadata: {
-//                                 userId: req.userId as string,
-//                                 type: type,
-//                                 tags: JSON.stringify(tags)
-//                             },
-//                         }
-//                     ],
-//                     namespace: req.userId as string
-//                 });
-//                 res.status(201).json({ message: 'Thought added Successfully' })
-//             } else {
-//                 res.status(400).json({
-//                     error: result.error
-//                 })
-//             }
-//         } else {
-//             res.status(400).json({
-//                 error: result.error
-//             })
-//         }
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json("Internal Server Error");
-//     }
-// })
 app.get('/v0/api/get-all-thoughts', middleAuth, async (req, res) => {
     console.log("-----------get-all-thoughts API")
     const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
