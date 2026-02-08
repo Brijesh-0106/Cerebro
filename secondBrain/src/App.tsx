@@ -7,6 +7,7 @@ import { Login } from "./Components/Login";
 import { SignIn } from "./Components/SignIn";
 import Thoughts from "./Components/Thoughts";
 
+import { ChatWithAI } from "./Components/ChatWithAI";
 import Tweets from "./Components/Tweets";
 import Youtube from "./Components/Youtube";
 
@@ -21,6 +22,7 @@ function App() {
           <Route path="thoughts" element={<Thoughts />} />
           <Route path="youtube-content" element={<Youtube />} />
           <Route path="tweeter-content" element={<Tweets />} />
+          <Route path="chat-with-ai" element={<ChatWithAI />} />
         </Route>
       </Routes>
     </>

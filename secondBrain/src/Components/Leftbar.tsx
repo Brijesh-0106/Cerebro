@@ -81,7 +81,7 @@ export const Leftbar = () => {
             Chat history
           </NavLink>
           <NavLink
-            to={"/dashboard/chat-wtih-ai"}
+            to={"/dashboard/chat-with-ai"}
             className="cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f]"
           >
             <VscRobot
@@ -94,7 +94,7 @@ export const Leftbar = () => {
         </div>
       </div>
       <div className="lower-section">
-        <div className="bottom-profile-section p-2 bg-[#1c1e1f] rounded">
+        <div className="bottom-profile-section p-2 bg-[#30302E] rounded">
           <div className="profile+name flex items-center gap-2 mb-4">
             <span className="rounded-full">
               <CgProfile size={24} />

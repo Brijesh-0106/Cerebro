@@ -1,0 +1,82 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { IoMdArrowUp } from "react-icons/io";
+import type { chatProps } from "../Models/CardProps";
+import type { ConversationProps } from "../Models/ConversationProps";
+export const ChatWithAI = () => {
+  const [msgList, setMsgList] = useState<ConversationProps[]>([]);
+  function sendChat() {
+    if (!userChat || userChat.trim() === "") return; // Guard clause
+    const newMessage: ConversationProps = {
+      role: "assistant",
+      content: userChat,
+      timeStamp: new Date().toLocaleString(),
+    };
+    setMsgList((prevMsgList) => [...prevMsgList, newMessage]);
+    // console.log(msgList, "msgList");
+    reset();
+  }
+  const { watch, reset, register, handleSubmit } = useForm<chatProps>();
+
+  const userChat = watch("userInput");
+  return (
+    <div className=" ml-72 mt-13 p-5 flex flex-col items-center">
+      <div className="w-205 mb-28">
+        {msgList.map((msg: ConversationProps, ind) => (
+          <>
+            {msg.role == "user" ? (
+              <>
+                <div
+                  key={ind}
+                  className="rounded-lg max-w-lg text-white bg-indigo-600 mt-4 w-fit p-2 ml-auto"
+                >
+                  {msg.content}
+                </div>
+                <div className="text-[#a9a9a9] ml-auto text-xs mb-4 text-right">
+                  {msg.timeStamp}
+                </div>
+              </>
+            ) : (
+              <div
+                key={ind}
+                className="rounded-lg text-white w-fit border border-[#a9a9a9] mt-4 mb-4 bg-[#30302E] p-2"
+              >
+                {msg.content}
+              </div>
+            )}
+          </>
+        ))}
+      </div>
+      <div className="w-205 min-h-20 z-10 bg-[#30302E] rounded-3xl mb-2 border border-[#a9a9a9] p-3 fixed gap-2 bottom-0">
+        <form onSubmit={handleSubmit(sendChat)} className="flex">
+          <div className="w-full">
+            <textarea
+              {...register("userInput", {})}
+              className="text-white w-full p-2 focus:outline-none movie-glow-text h-full resize-none"
+              placeholder="💬 Chat with Your Second Brain..."
+            />
+          </div>
+          <span>
+            {userChat !== "" ? (
+              <button
+                onClick={sendChat}
+                type="submit"
+                className="cursor-pointer mt-2 bg-[#ffffff] right-4 top-2 rounded-lg p-1"
+              >
+                <IoMdArrowUp size={20} color="#4f39f6" />
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={true}
+                className="cursor-pointer mt-2 bg-[#a9a9a9] right-4 top-2 rounded-lg p-1"
+              >
+                <IoMdArrowUp size={20} color="#000" />
+              </button>
+            )}
+          </span>
+        </form>
+      </div>
+    </div>
+  );
+};

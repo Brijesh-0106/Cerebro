@@ -9,6 +9,11 @@ export interface CardProps {
   tags?: Array<Option>;
   userId?: string;
 }
+export interface chatProps {
+  _id?: string;
+  userInput: string;
+  userId?: string;
+}
 export interface ThoughtProps {
   _id?: string;
   type: "thought";

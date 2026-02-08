@@ -3,7 +3,7 @@ import { MdOutlineAddPhotoAlternate } from "react-icons/md";
 
 export const Topbar = (props: any) => {
   return (
-    <div className="fixed bg-[#1c1e1f] z-2 border-b border-b-[rgb(37,40,51)] top-0 w-screen flex justify-between py-3 px-8 gap-4 max-h-16">
+    <div className="fixed bg-[#30302E] z-2 border-b border-b-[rgb(37,40,51)] top-0 w-screen flex justify-between py-3 px-8 gap-4 max-h-16">
       <div className="text-white ml-60 text-xl flex justify-center">
         {" "}
         Cerebro
