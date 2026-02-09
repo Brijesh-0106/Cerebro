@@ -5,17 +5,36 @@ import type { chatProps } from "../Models/CardProps";
 import type { ConversationProps } from "../Models/ConversationProps";
 export const ChatWithAI = () => {
   const [msgList, setMsgList] = useState<ConversationProps[]>([]);
-  function sendChat() {
+  const [isAIResReady, setIsAIResReady] = useState<boolean>(false);
+
+  const sendChat = async () => {
     if (!userChat || userChat.trim() === "") return; // Guard clause
+    setIsAIResReady(() => false);
     const newMessage: ConversationProps = {
-      role: "assistant",
+      role: "user", //assitant or user
       content: userChat,
       timeStamp: new Date().toLocaleString(),
     };
     setMsgList((prevMsgList) => [...prevMsgList, newMessage]);
-    // console.log(msgList, "msgList");
+    // const Data = new FormData();
+    // Data.append("content", newMessage.content);
+    // Data.append("role", newMessage.role);
+    // Data.append("timeStamp", newMessage.timeStamp);
+    await fetch("http://localhost:3000/v0/api/add-chat", {
+      headers: {
+        token: localStorage.getItem("token") || "",
+        "Content-Type": "application/json", // ✅ Critical
+      },
+      method: "POST",
+      body: JSON.stringify({
+        content: newMessage.content,
+        role: newMessage.role,
+        timeStamp: newMessage.timeStamp,
+      }),
+    });
+    setIsAIResReady(() => true);
     reset();
-  }
+  };
   const { watch, reset, register, handleSubmit } = useForm<chatProps>();
 
   const userChat = watch("userInput");
@@ -46,6 +65,24 @@ export const ChatWithAI = () => {
             )}
           </>
         ))}
+        {!isAIResReady && (
+          <>
+            <div className="flex gap-1 px-3 py-1 bg-[#30302E] rounded-lg w-fit items-center">
+              <div
+                className="w-1.5 h-1.5 mt-1 bg-gray-400 rounded-full animate-bounce"
+                style={{ animationDelay: "0ms" }}
+              ></div>
+              <div
+                className="w-1.5 h-1.5 mt-1 bg-gray-400 rounded-full animate-bounce"
+                style={{ animationDelay: "150ms" }}
+              ></div>
+              <div
+                className="w-1.5 h-1.5 mt-1 bg-gray-400 rounded-full animate-bounce"
+                style={{ animationDelay: "300ms" }}
+              ></div>
+            </div>
+          </>
+        )}
       </div>
       <div className="w-205 min-h-20 z-10 bg-[#30302E] rounded-3xl mb-2 border border-[#a9a9a9] p-3 fixed gap-2 bottom-0">
         <form onSubmit={handleSubmit(sendChat)} className="flex">
@@ -59,7 +96,6 @@ export const ChatWithAI = () => {
           <span>
             {userChat !== "" ? (
               <button
-                onClick={sendChat}
                 type="submit"
                 className="cursor-pointer mt-2 bg-[#ffffff] right-4 top-2 rounded-lg p-1"
               >

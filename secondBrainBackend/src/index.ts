@@ -36,6 +36,11 @@ const Content = z.object({
     imageUrl: z.string(),
     desc: z.string().min(5),
 })
+const Conversation = z.object({
+    content: z.string(),
+    role: z.enum(['assistant', 'user']),
+    timeStamp: z.string(),
+})
 // ---------------------------------------------------------
 
 // ----------------------------------------- EXPRESS BASICS
@@ -100,6 +105,17 @@ interface IContent extends Document {
     createdAt: Date,
     userId: Types.ObjectId;
 }
+interface IMessage extends Document {
+    content: String,
+    role: "assistant" | "user",
+    timeStamp: String,
+    sourceIds?: Array<Types.ObjectId>;
+}
+interface IConversation extends Document {
+    messages: Array<IMessage>
+    userId: Types.ObjectId;
+}
+
 // -----------------------------------------
 
 // ----------------------------------------- mODELS & SCHEMA
@@ -120,6 +136,18 @@ const ContentSchema = new Schema<IContent>({
     userId: { type: Schema.Types.ObjectId, ref: UserModel, required: true },
 })
 const ContentModel = mongoose.model<IContent>('content', ContentSchema);
+const ConversationSchema = new Schema<IConversation>({
+    messages: {
+        type: [{
+            content: { type: String, required: true },
+            role: { type: String, required: true },
+            timeStamp: { type: String, required: true },
+            sourceIds: [{ type: Schema.Types.ObjectId, ref: ContentModel, required: true }]
+        }], required: true
+    },
+    userId: { type: Schema.Types.ObjectId, ref: UserModel, required: true },
+})
+const ConversationModel = mongoose.model<IConversation>('chat', ConversationSchema);
 // ----------------------------------------- 
 
 
@@ -168,6 +196,35 @@ app.post('/v0/api/login', async (req, res) => {
 })
 // ----------------------------------------------
 
+// --------------------------------------------- CONVERSATION ROUTES
+app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
+    console.log("-----------add-conversation API")
+    let { content, role, timeStamp } = req.body;
+    let vectorInput = "";
+    const result = Conversation.safeParse({ content, role, timeStamp });
+    if (result.success) {
+        vectorInput += `User Query:\n${content}`;
+        const vector = await getEmbedding(vectorInput);
+        const vectorResult = await pcIndex.namespace(req.userId as string).query({
+            vector: vector,
+            topK: 1,
+            includeMetadata: true,  // ✅ Add this
+            includeValues: false     // Don't need the vectors back
+            //         filter: {     //check this
+            //     score: { $gte: 0.7 }  // Only results with 70%+ match
+            // }
+        })
+        console.log("Vector Search Result:", vectorResult);
+        res.status(200).json({
+            vectorResult
+        })
+    }
+    else {
+        res.status(400).json({
+            error: result.error
+        })
+    }
+})
 // ----------------------------------------------CONTENT ROUTES
 app.post('/v0/api/add-content', middleAuth, upload.single("imageUrl"), async (req, res) => {
     console.log("-----------add-content API")

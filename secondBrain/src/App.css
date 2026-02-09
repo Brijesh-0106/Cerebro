@@ -37,3 +37,14 @@
 .masonry-column:first-child {
   padding-left: 0;
 }
+.movie-glow-text {
+  animation: 3s linear infinite shine;
+}
+@keyframes shine {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
