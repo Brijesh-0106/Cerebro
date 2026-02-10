@@ -1,26 +1,26 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { IoMdArrowUp } from "react-icons/io";
 import type { chatProps } from "../Models/CardProps";
 import type { ConversationProps } from "../Models/ConversationProps";
+
 export const ChatWithAI = () => {
   const [msgList, setMsgList] = useState<ConversationProps[]>([]);
-  const [isAIResReady, setIsAIResReady] = useState<boolean>(false);
+  const [isAIResReady, setIsAIResReady] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const sendChat = async () => {
     if (!userChat || userChat.trim() === "") return; // Guard clause
     setIsAIResReady(() => false);
+    setIsLoading(() => true);
     const newMessage: ConversationProps = {
       role: "user", //assitant or user
       content: userChat,
       timeStamp: new Date().toLocaleString(),
     };
     setMsgList((prevMsgList) => [...prevMsgList, newMessage]);
-    // const Data = new FormData();
-    // Data.append("content", newMessage.content);
-    // Data.append("role", newMessage.role);
-    // Data.append("timeStamp", newMessage.timeStamp);
-    await fetch("http://localhost:3000/v0/api/add-chat", {
+    const chatRes = await fetch("http://localhost:3000/v0/api/add-chat", {
       headers: {
         token: localStorage.getItem("token") || "",
         "Content-Type": "application/json", // ✅ Critical
@@ -32,10 +32,22 @@ export const ChatWithAI = () => {
         timeStamp: newMessage.timeStamp,
       }),
     });
+    const res = await chatRes.json();
+    const newAIMessage: ConversationProps = {
+      role: "assistant", //assitant or user
+      content: res.AIResponse.content,
+      timeStamp: res.AIResponse.timeStamp,
+    };
+    setMsgList((prevMsgList) => [...prevMsgList, newAIMessage]);
     setIsAIResReady(() => true);
+    setIsLoading(() => false);
     reset();
+    console.log("check after loading:", userChat);
   };
-  const { watch, reset, register, handleSubmit } = useForm<chatProps>();
+
+  const { watch, reset, register, handleSubmit } = useForm<chatProps>({
+    defaultValues: { userInput: "" },
+  });
 
   const userChat = watch("userInput");
   return (
@@ -51,14 +63,14 @@ export const ChatWithAI = () => {
                 >
                   {msg.content}
                 </div>
-                <div className="text-[#a9a9a9] ml-auto text-xs mb-4 text-right">
+                <div className="text-[#a9a9a9] ml-auto  text-xs mb-4 text-right">
                   {msg.timeStamp}
                 </div>
               </>
             ) : (
               <div
                 key={ind}
-                className="rounded-lg text-white w-fit border border-[#a9a9a9] mt-4 mb-4 bg-[#30302E] p-2"
+                className="rounded-lg text-white w-fit border max-w-lg border-[#a9a9a9] mt-4 mb-4 bg-[#30302E] p-2"
               >
                 {msg.content}
               </div>
@@ -94,22 +106,32 @@ export const ChatWithAI = () => {
             />
           </div>
           <span>
-            {userChat !== "" ? (
-              <button
-                type="submit"
-                className="cursor-pointer mt-2 bg-[#ffffff] right-4 top-2 rounded-lg p-1"
-              >
-                <IoMdArrowUp size={20} color="#4f39f6" />
-              </button>
-            ) : (
+            {isLoading && (
               <button
                 type="submit"
                 disabled={true}
                 className="cursor-pointer mt-2 bg-[#a9a9a9] right-4 top-2 rounded-lg p-1"
               >
-                <IoMdArrowUp size={20} color="#000" />
+                <AiOutlineLoading3Quarters size={20} color="#000" />
               </button>
             )}
+            {!isLoading &&
+              (userChat !== "" ? (
+                <button
+                  type="submit"
+                  className="cursor-pointer mt-2 bg-[#ffffff] right-4 top-2 rounded-lg p-1"
+                >
+                  <IoMdArrowUp size={20} color="#4f39f6" />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={true}
+                  className="cursor-pointer mt-2 bg-[#a9a9a9] right-4 top-2 rounded-lg p-1"
+                >
+                  <IoMdArrowUp size={20} color="#000" />
+                </button>
+              ))}
           </span>
         </form>
       </div>

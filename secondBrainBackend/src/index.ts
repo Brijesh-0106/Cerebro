@@ -142,7 +142,7 @@ const ConversationSchema = new Schema<IConversation>({
             content: { type: String, required: true },
             role: { type: String, required: true },
             timeStamp: { type: String, required: true },
-            sourceIds: [{ type: Schema.Types.ObjectId, ref: ContentModel, required: true }]
+            sourceIds: [{ type: Schema.Types.ObjectId, ref: ContentModel, required: false }]
         }], required: true
     },
     userId: { type: Schema.Types.ObjectId, ref: UserModel, required: true },
@@ -203,21 +203,83 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
     let vectorInput = "";
     const result = Conversation.safeParse({ content, role, timeStamp });
     if (result.success) {
-        vectorInput += `User Query:\n${content}`;
-        const vector = await getEmbedding(vectorInput);
-        const vectorResult = await pcIndex.namespace(req.userId as string).query({
-            vector: vector,
-            topK: 1,
-            includeMetadata: true,  // ✅ Add this
-            includeValues: false     // Don't need the vectors back
-            //         filter: {     //check this
-            //     score: { $gte: 0.7 }  // Only results with 70%+ match
-            // }
-        })
-        console.log("Vector Search Result:", vectorResult);
-        res.status(200).json({
-            vectorResult
-        })
+        try {
+            vectorInput += `${content}`;
+            const vector = await getEmbedding(vectorInput);
+            const vectorResult = await pcIndex.namespace(req.userId as string).query({
+                vector: vector,
+                topK: 2,
+                includeMetadata: true,  // ✅ Add this
+                includeValues: false     // Don't need the vectors back
+            })
+            console.log("Vector Search Result:", vectorResult);
+            const strongMatches = vectorResult.matches.filter((elem) =>
+                elem.score && elem.score > 0.35
+            )
+            console.log("filtered Search Result:", strongMatches);
+            const existingChat = await ConversationModel.findOne({
+                userId: req.userId
+            })
+            let AIResponse;
+            if (existingChat) {
+                existingChat.messages.push({ content, role: "user", timeStamp } as any)
+                if (strongMatches.length > 0) {
+                    AIResponse = {
+                        role: "asstistant", timeStamp: new Date().toLocaleString(),
+                        content: `Based on your content, I found "${strongMatches.length}" item${strongMatches.length > 1 ? 's' : ''} related to "${content}".`,
+                        sourceIds: strongMatches.map(r => r.id)
+                    } as any
+                    existingChat.messages.push(
+                        AIResponse
+                    )
+                } else {
+                    AIResponse = {
+                        role: "assistant", timeStamp: new Date().toLocaleString(),
+                        content: `I couldn't find anything about "${content}" in your saved content. Try adding more content or rephrasing your question.`,
+                        sourceIds: []
+                    } as any
+                    existingChat.messages.push(
+                        AIResponse
+                    )
+                }
+                await existingChat?.save();
+            }
+            else {
+                const firstChat = await ConversationModel.create({
+                    messages: [{ content, role: "user", timeStamp }],
+                    userId: req.userId
+                })
+
+                if (strongMatches.length > 0) {
+                    AIResponse = {
+                        role: "asstistant", timeStamp: new Date().toLocaleString(),
+                        content: `Based on your content, I found "${strongMatches.length}" item${strongMatches.length > 1 ? 's' : ''} related to "${content}".`,
+                        sourceIds: strongMatches.map(r => r.id)
+                    } as any
+                    firstChat.messages.push(
+                        AIResponse
+                    )
+                } else {
+                    AIResponse = {
+                        role: "assistant", timeStamp: new Date().toLocaleString(),
+                        content: `I couldn't find anything about "${content}" in your saved content. Try adding more content or rephrasing your question.`,
+                        sourceIds: []
+                    } as any
+                    firstChat.messages.push(
+                        AIResponse
+                    )
+                }
+                await firstChat?.save();
+            }
+            res.status(200).json({
+                AIResponse
+            })
+        } catch (err) {
+            console.error('Search error:', err);
+            res.status(500).json({
+                error: 'Search failed'
+            })
+        }
     }
     else {
         res.status(400).json({
