@@ -287,6 +287,20 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
         })
     }
 })
+
+app.get('/v0/api/load-chat', middleAuth, async (req, res) => {
+    console.log("-----------load-chat API")
+    try {
+        const existingChat = await ConversationModel.findOne({
+            userId: req.userId
+        })
+        res.json({
+            "messages": existingChat?.messages || []
+        })
+    } catch (err) {
+        res.status(500).json({ err })
+    }
+})
 // ----------------------------------------------CONTENT ROUTES
 app.post('/v0/api/add-content', middleAuth, upload.single("imageUrl"), async (req, res) => {
     console.log("-----------add-content API")

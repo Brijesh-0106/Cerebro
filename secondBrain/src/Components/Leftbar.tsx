@@ -1,7 +1,6 @@
 import { AiOutlineYoutube } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
 import { CiLogout, CiSettings, CiTwitter } from "react-icons/ci";
-import { FaHistory } from "react-icons/fa";
 import { GiBrain, GiNotebook } from "react-icons/gi";
 import { IoChatboxEllipsesOutline } from "react-icons/io5";
 import { TbLayoutSidebarLeftCollapse } from "react-icons/tb";
@@ -69,17 +68,7 @@ export const Leftbar = () => {
           >
             <AiOutlineYoutube color="red" size={20} /> Youtube
           </NavLink>
-          <NavLink
-            to={"/dashboard/history"}
-            className="cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f]"
-          >
-            <FaHistory
-              size={20}
-              color="#F59E0B
-"
-            />{" "}
-            Chat history
-          </NavLink>
+
           <NavLink
             to={"/dashboard/chat-with-ai"}
             className="cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f]"

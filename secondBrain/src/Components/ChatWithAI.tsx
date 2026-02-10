@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { CgProfile } from "react-icons/cg";
+import { GiBrain } from "react-icons/gi";
 import { IoMdArrowUp } from "react-icons/io";
 import type { chatProps } from "../Models/CardProps";
 import type { ConversationProps } from "../Models/ConversationProps";
@@ -9,6 +11,10 @@ export const ChatWithAI = () => {
   const [msgList, setMsgList] = useState<ConversationProps[]>([]);
   const [isAIResReady, setIsAIResReady] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { watch, reset, register, handleSubmit } = useForm<chatProps>({
+    defaultValues: { userInput: "" },
+  });
+  const userChat = watch("userInput");
 
   const sendChat = async () => {
     if (!userChat || userChat.trim() === "") return; // Guard clause
@@ -45,11 +51,20 @@ export const ChatWithAI = () => {
     console.log("check after loading:", userChat);
   };
 
-  const { watch, reset, register, handleSubmit } = useForm<chatProps>({
-    defaultValues: { userInput: "" },
-  });
-
-  const userChat = watch("userInput");
+  useEffect(() => {
+    const fetchChatHistory = async () => {
+      const chatRes = await fetch("http://localhost:3000/v0/api/load-chat", {
+        headers: {
+          token: localStorage.getItem("token") || "",
+        },
+        method: "GET",
+      });
+      const data = await chatRes.json();
+      setMsgList(data.messages);
+    };
+    fetchChatHistory();
+  }, []);
+  // HTML
   return (
     <div className=" ml-72 mt-13 p-5 flex flex-col items-center">
       <div className="w-205 mb-28">
@@ -57,22 +72,31 @@ export const ChatWithAI = () => {
           <>
             {msg.role == "user" ? (
               <>
-                <div
-                  key={ind}
-                  className="rounded-lg max-w-lg text-white bg-indigo-600 mt-4 w-fit p-2 ml-auto"
-                >
-                  {msg.content}
+                <div key={ind} className="mt-6 w-fit flex items-center ml-auto">
+                  <div className="rounded-lg max-w-lg p-2 w-fit text-white bg-indigo-600">
+                    {msg.content}
+                  </div>
+                  <div className="text-white ml-2">
+                    {" "}
+                    <CgProfile size={28} />
+                  </div>
                 </div>
-                <div className="text-[#a9a9a9] ml-auto  text-xs mb-4 text-right">
+                <div className="text-[#a9a9a9] ml-auto  text-xs mb-6 text-right">
                   {msg.timeStamp}
                 </div>
               </>
             ) : (
-              <div
-                key={ind}
-                className="rounded-lg text-white w-fit border max-w-lg border-[#a9a9a9] mt-4 mb-4 bg-[#30302E] p-2"
-              >
-                {msg.content}
+              <div className="flex items-center my-12">
+                <div className="text-white mr-2">
+                  {" "}
+                  <GiBrain size={28} color="#4f39f6" />
+                </div>
+                <div
+                  key={ind}
+                  className="rounded-lg text-white w-fit max-w-lg bg-[#30302E] p-2"
+                >
+                  {msg.content}
+                </div>
               </div>
             )}
           </>
