@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
@@ -23,6 +23,7 @@ export const ChatWithAI = () => {
     defaultValues: { userInput: "" },
   });
   const userChat = watch("userInput");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const sendChat = async () => {
     if (!userChat || userChat.trim() === "") return; // Guard clause
@@ -49,18 +50,24 @@ export const ChatWithAI = () => {
     const res = await chatRes.json();
     const newAIMessage: ConversationProps = {
       role: "assistant", //assitant or user
-      content: res.AIResponse.content,
-      sourceIds: res.AIResponse.sourceIds,
-      timeStamp: res.AIResponse.timeStamp,
+      content: res.AIResponse.messages[0].content,
+      sourceIds: res.AIResponse.messages[0].sourceIds,
+      timeStamp: res.AIResponse.messages[0].timeStamp,
     };
     setMsgList((prevMsgList) => [...prevMsgList, newAIMessage]);
-    const element = document.getElementById("message-container");
-    console.log(element, "check element to be highlighted");
-    element?.scrollIntoView({ block: "end", behavior: "smooth" });
+    // scrollToBottom();
     setIsAIResReady(() => true);
     setIsLoading(() => false);
     reset();
-    console.log("check after loading:", userChat);
+    console.log("check after loading:", newAIMessage);
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [msgList]); // Scroll whenever msgList changes
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -74,6 +81,7 @@ export const ChatWithAI = () => {
       const data = await chatRes.json();
       setMsgList(data.messages);
       console.log(data, "In first fetch");
+      // scrollToBottom();
     };
     fetchChatHistory();
   }, []);
@@ -109,7 +117,7 @@ export const ChatWithAI = () => {
                     </div>
                     <div
                       key={ind}
-                      className="rounded-lg text-white w-fit max-w-lg bg-[#30302E] p-2"
+                      className="rounded-lg text-white w-fit max-w-full bg-[#30302E] p-2"
                     >
                       {msg.content}
                     </div>
@@ -124,10 +132,7 @@ export const ChatWithAI = () => {
                         <CompactCard
                           title={elem.title}
                           _id={elem._id}
-                          imageUrl={elem.imageUrl}
-                          userId={elem.userId}
-                          createdAt={elem.createdAt}
-                          contentUrl={elem.contentUrl}
+                          createdAt={elem.createdAt.split("T")[0]}
                           type={elem.type}
                           description={elem.description}
                           key={elem._id}
@@ -159,6 +164,7 @@ export const ChatWithAI = () => {
             </div>
           </>
         )}
+        <div ref={messagesEndRef} />
       </div>
       <div className="w-205 min-h-20 z-10 bg-[#30302E] rounded-3xl mb-2 border border-[#a9a9a9] p-3 fixed gap-2 bottom-0">
         <form onSubmit={handleSubmit(sendChat)} className="flex">

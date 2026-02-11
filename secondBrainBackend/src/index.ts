@@ -197,6 +197,23 @@ app.post('/v0/api/login', async (req, res) => {
 // ----------------------------------------------
 
 // --------------------------------------------- CONVERSATION ROUTES
+
+app.get('/v0/api/load-chat', middleAuth, async (req, res) => {
+    console.log("-----------load-chat API")
+    try {
+        const existingChat = await ConversationModel.findOne(
+            { userId: req.userId },
+            { messages: 1, _id: 0 }
+        ).populate('messages.sourceIds');
+        console.log(existingChat)
+        res.json({
+            "messages": existingChat?.messages || []
+        })
+    } catch (err) {
+        res.status(500).json({ err })
+    }
+})
+
 app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
     console.log("-----------add-conversation API")
     let { content, role, timeStamp } = req.body;
@@ -271,6 +288,10 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
                 }
                 await firstChat?.save();
             }
+            AIResponse = await ConversationModel.findOne(
+                { userId: req.userId },
+                { messages: { $slice: -1 }, _id: 0 }
+            ).populate('messages.sourceIds');
             res.status(200).json({
                 AIResponse
             })
@@ -285,22 +306,6 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
         res.status(400).json({
             error: result.error
         })
-    }
-})
-
-app.get('/v0/api/load-chat', middleAuth, async (req, res) => {
-    console.log("-----------load-chat API")
-    try {
-        const existingChat = await ConversationModel.findOne(
-            { userId: req.userId },
-            { messages: 1, _id: 0 }
-        ).populate('messages.sourceIds');
-        console.log(existingChat)
-        res.json({
-            "messages": existingChat?.messages || []
-        })
-    } catch (err) {
-        res.status(500).json({ err })
     }
 })
 // ----------------------------------------------CONTENT ROUTES

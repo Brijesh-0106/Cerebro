@@ -44,7 +44,14 @@ export const Cards = () => {
       const element = document.getElementById(highlightId);
       console.log(element, "check element to be highlighted");
       element?.scrollIntoView({ behavior: "smooth" });
-      element?.classList.add("ring-4", "ring-indigo-500"); // Highlight
+      element?.classList.add(
+        "ring-4",
+        "ring-indigo-500",
+        "shadow-2xl",
+        "highlighted-card",
+        "shadow-indigo-500/50",
+        "animate-pulse",
+      ); // Highlight
     }
   }, []);
   return (

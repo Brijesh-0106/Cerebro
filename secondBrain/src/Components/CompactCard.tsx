@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { AiOutlineYoutube } from "react-icons/ai";
 import { CiTwitter } from "react-icons/ci";
 import { GiNotebook } from "react-icons/gi";
@@ -9,14 +8,12 @@ import type { CardProps } from "../Models/CardProps";
 
 export const CompactCard = ({
   createdAt,
-  contentUrl,
   description,
   _id,
-  imageUrl,
   title,
   type,
 }: CardProps) => {
-  const [imgLoaded, setImgLoaded] = useState(false);
+  // const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
     <>
