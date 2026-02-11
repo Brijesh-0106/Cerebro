@@ -4,8 +4,16 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
 import { GiBrain } from "react-icons/gi";
 import { IoMdArrowUp } from "react-icons/io";
-import type { chatProps } from "../Models/CardProps";
+import Masonry from "react-masonry-css";
+import type { CardProps, chatProps } from "../Models/CardProps";
 import type { ConversationProps } from "../Models/ConversationProps";
+import { CompactCard } from "./CompactCard";
+
+const breakpointColumns = {
+  default: 3,
+  1100: 2,
+  700: 1,
+};
 
 export const ChatWithAI = () => {
   const [msgList, setMsgList] = useState<ConversationProps[]>([]);
@@ -42,9 +50,13 @@ export const ChatWithAI = () => {
     const newAIMessage: ConversationProps = {
       role: "assistant", //assitant or user
       content: res.AIResponse.content,
+      sourceIds: res.AIResponse.sourceIds,
       timeStamp: res.AIResponse.timeStamp,
     };
     setMsgList((prevMsgList) => [...prevMsgList, newAIMessage]);
+    const element = document.getElementById("message-container");
+    console.log(element, "check element to be highlighted");
+    element?.scrollIntoView({ block: "end", behavior: "smooth" });
     setIsAIResReady(() => true);
     setIsLoading(() => false);
     reset();
@@ -61,16 +73,18 @@ export const ChatWithAI = () => {
       });
       const data = await chatRes.json();
       setMsgList(data.messages);
+      console.log(data, "In first fetch");
     };
     fetchChatHistory();
   }, []);
   // HTML
   return (
     <div className=" ml-72 mt-13 p-5 flex flex-col items-center">
-      <div className="w-205 mb-28">
+      <div id="message-container" className="w-205 mb-28">
         {msgList.map((msg: ConversationProps, ind) => (
           <>
             {msg.role == "user" ? (
+              // FOR USER MESSAGE
               <>
                 <div key={ind} className="mt-6 w-fit flex items-center ml-auto">
                   <div className="rounded-lg max-w-lg p-2 w-fit text-white bg-indigo-600">
@@ -86,18 +100,44 @@ export const ChatWithAI = () => {
                 </div>
               </>
             ) : (
-              <div className="flex items-center my-12">
-                <div className="text-white mr-2">
-                  {" "}
-                  <GiBrain size={28} color="#4f39f6" />
+              // FOR AI MESSAGE
+              <>
+                <div className="my-12">
+                  <div className="flex items-center ">
+                    <div className="text-white mr-2">
+                      <GiBrain size={28} color="#4f39f6" />
+                    </div>
+                    <div
+                      key={ind}
+                      className="rounded-lg text-white w-fit max-w-lg bg-[#30302E] p-2"
+                    >
+                      {msg.content}
+                    </div>
+                  </div>
+                  {msg.sourceIds && msg.sourceIds.length > 0 && (
+                    <Masonry
+                      breakpointCols={breakpointColumns}
+                      className="flex px-5 pt-4 gap-4"
+                      columnClassName="masonry-column"
+                    >
+                      {msg.sourceIds.map((elem: CardProps) => (
+                        <CompactCard
+                          title={elem.title}
+                          _id={elem._id}
+                          imageUrl={elem.imageUrl}
+                          userId={elem.userId}
+                          createdAt={elem.createdAt}
+                          contentUrl={elem.contentUrl}
+                          type={elem.type}
+                          description={elem.description}
+                          key={elem._id}
+                        />
+                      ))}
+                    </Masonry>
+                  )}
                 </div>
-                <div
-                  key={ind}
-                  className="rounded-lg text-white w-fit max-w-lg bg-[#30302E] p-2"
-                >
-                  {msg.content}
-                </div>
-              </div>
+                {/* {JSON.stringify(msg.sourceIds)} */}
+              </>
             )}
           </>
         ))}

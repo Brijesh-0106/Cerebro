@@ -4,5 +4,5 @@ export interface ConversationProps {
   role: "user" | "assistant";
   content: string;
   timeStamp: string;
-  sources?: CardProps[];
+  sourceIds?: CardProps[];
 }

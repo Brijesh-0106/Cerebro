@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import Masonry from "react-masonry-css";
+import { useSearchParams } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import imgSrc from "../assets/Gemini_Generated_Image_r70ze4r70ze4r70z.png";
 import type { CardProps } from "../Models/CardProps";
@@ -18,6 +19,7 @@ const breakpointColumns = {
 export const Cards = () => {
   const [cards, setCards] = useRecoilState(CardAtom);
   const [loading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     async function asyncContentDataFetch() {
@@ -36,6 +38,14 @@ export const Cards = () => {
       setLoading(false);
     }
     asyncContentDataFetch();
+    const highlightId = searchParams.get("highlight");
+    console.log(highlightId, "check highlight id from url");
+    if (highlightId) {
+      const element = document.getElementById(highlightId);
+      console.log(element, "check element to be highlighted");
+      element?.scrollIntoView({ behavior: "smooth" });
+      element?.classList.add("ring-4", "ring-indigo-500"); // Highlight
+    }
   }, []);
   return (
     <>

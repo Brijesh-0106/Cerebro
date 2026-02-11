@@ -9,6 +9,7 @@ export const Card = ({
   createdAt,
   contentUrl,
   description,
+  _id,
   imageUrl,
   title,
   type,
@@ -16,7 +17,10 @@ export const Card = ({
   const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
-    <span className="mb-6 break-inside-avoid flex  max-w-84 flex-col rounded-xl border-2 gap-2 border-[#a9a9a9] p-4">
+    <span
+      id={_id}
+      className="mb-6 break-inside-avoid flex max-w-84 flex-col rounded-xl border-2 gap-2 border-[#a9a9a9] p-4"
+    >
       {/* Header */}
       <div className="flex justify-between items-center">
         <span className="text-[#a9a9a9]">
@@ -58,10 +62,6 @@ export const Card = ({
           />
         </div>
       ) : type == "tweet" ? (
-        // 1)
-        // https://www.youtube.com/watch?v=dR9B_gPxjkk&list=RDFWHcd8TH7dE&index=3 - link of top bar - if contains watch replace with embed
-        // https://youtu.be/dR9B_gPxjkk?si=NDtndqPdjAW1lkRI - link of share -  if contains youtu.be replace with youtube.com/embed
-        // https://www.youtube.com/embed/dR9B_gPxjkk?si=NDtndqPdjAW1lkRI - link of embedded - use same
         <div className="h-65 flex items-center justify-center overflow-hidden">
           <div className="h-65 overflow-hidden flex justify-center items-start">
             <div className="w-65">

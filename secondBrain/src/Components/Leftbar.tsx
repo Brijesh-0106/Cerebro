@@ -73,11 +73,7 @@ export const Leftbar = () => {
             to={"/dashboard/chat-with-ai"}
             className="cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f]"
           >
-            <VscRobot
-              size={20}
-              color="#22D3EE
-"
-            />{" "}
+            <VscRobot size={20} color="#22D3EE" />
             Ask AI
           </NavLink>
         </div>
