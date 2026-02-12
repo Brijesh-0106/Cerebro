@@ -39,26 +39,17 @@ export const Cards = () => {
     }
     asyncContentDataFetch();
     const highlightId = searchParams.get("highlight");
-    console.log(highlightId, "check highlight id from url");
     if (highlightId) {
       const element = document.getElementById(highlightId);
-      console.log(element, "check element to be highlighted");
       element?.scrollIntoView({ behavior: "smooth" });
-      element?.classList.add(
-        "ring-4",
-        "ring-indigo-500",
-        "shadow-2xl",
-        "highlighted-card",
-        "shadow-indigo-500/50",
-        "animate-pulse",
-      ); // Highlight
+      element?.classList.add("shadow-xl", "highlighted-card"); // Highlight
     }
   }, []);
   return (
     <>
       {loading && <SkeletonGrid />}
       {!cards.length && (
-        <div className="flex ml-72 mt-13 px-5 pt-4 h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center">
+        <div className="flex ml-65 mt-13 px-5 pt-4 h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center">
           <div className="empty-cards-Image h-60 w-60">
             <img
               src={imgSrc}
@@ -74,7 +65,7 @@ export const Cards = () => {
             </div>
           </div>
           <div className="empty-cards-boxes">
-            <button className="cursor-pointer px-3 py-1 bg-[#E6D8F2]  rounded flex items-center gap-1">
+            <button className="px-3 py-1 bg-[#E6D8F2]  rounded flex items-center gap-1">
               <HiOutlineChatBubbleLeftRight size={20} />
               Add Thought
             </button>

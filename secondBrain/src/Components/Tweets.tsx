@@ -39,7 +39,7 @@ export default function Tweets() {
     <>
       {loading && <SkeletonGrid />}
       {!cards.length && (
-        <div className="flex ml-72 mt-13 px-5 pt-4 h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center">
+        <div className="flex ml-65 mt-13 px-5 pt-4 h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center">
           <div className="empty-cards-Image h-60 w-60">
             <img
               src={imgSrc}
@@ -55,9 +55,9 @@ export default function Tweets() {
             </div>
           </div>
           <div className="empty-cards-boxes">
-            <button className="cursor-pointer px-3 py-1 bg-[#E6D8F2]  rounded flex items-center gap-1">
+            <button className="px-3 py-1 bg-[#E6D8F2]  rounded flex items-center gap-1">
               <HiOutlineChatBubbleLeftRight size={20} />
-              Add Thought
+              Add Tweet
             </button>
           </div>
         </div>

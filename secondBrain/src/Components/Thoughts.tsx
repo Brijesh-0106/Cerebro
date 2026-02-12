@@ -40,7 +40,7 @@ export default function Thoughts() {
     <>
       {loading && <SkeletonGrid />}
       {!cards.length && (
-        <div className="flex ml-72 mt-13 px-5 pt-4 h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center">
+        <div className="flex ml-65 mt-13 px-5 pt-4 h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center">
           <div className="empty-cards-Image h-60 w-60">
             <img
               src={imgSrc}
@@ -56,7 +56,7 @@ export default function Thoughts() {
             </div>
           </div>
           <div className="empty-cards-boxes">
-            <button className="cursor-pointer px-3 py-1 bg-[#E6D8F2]  rounded flex items-center gap-1">
+            <button className="px-3 py-1 bg-[#E6D8F2]  rounded flex items-center gap-1">
               <HiOutlineChatBubbleLeftRight size={20} />
               Add Thought
             </button>
@@ -66,7 +66,7 @@ export default function Thoughts() {
       {cards.length > 0 && (
         <Masonry
           breakpointCols={breakpointColumns}
-          className="flex ml-72 mt-13 px-5 pt-4 gap-4"
+          className="flex ml-65 mr-8 mt-13 px-5 pt-4 gap-4"
           columnClassName="masonry-column"
         >
           {cards.map((elem: CardProps) => (

@@ -225,7 +225,7 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
             const vector = await getEmbedding(vectorInput);
             const vectorResult = await pcIndex.namespace(req.userId as string).query({
                 vector: vector,
-                topK: 2,
+                topK: 3,
                 includeMetadata: true,  // ✅ Add this
                 includeValues: false     // Don't need the vectors back
             })
