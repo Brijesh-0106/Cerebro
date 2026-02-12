@@ -3,8 +3,10 @@ import { useForm } from "react-hook-form";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
 import { GiBrain } from "react-icons/gi";
+import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import { IoMdArrowUp } from "react-icons/io";
 import Masonry from "react-masonry-css";
+import imgSrc from "../../public/Assets/Gemini_Generated_Image_7667fc7667fc7667.png";
 import type { CardProps, chatProps } from "../Models/CardProps";
 import type { ConversationProps } from "../Models/ConversationProps";
 import { CompactCard } from "./CompactCard";
@@ -89,63 +91,93 @@ export const ChatWithAI = () => {
   return (
     <div className=" ml-72 mt-13 p-5 flex flex-col items-center">
       <div id="message-container" className="w-205 mb-28">
-        {msgList.map((msg: ConversationProps, ind) => (
-          <>
-            {msg.role == "user" ? (
-              // FOR USER MESSAGE
-              <>
-                <div key={ind} className="mt-6 w-fit flex items-center ml-auto">
-                  <div className="rounded-lg max-w-lg p-2 w-fit text-white bg-indigo-600">
-                    {msg.content}
-                  </div>
-                  <div className="text-white ml-2">
-                    {" "}
-                    <CgProfile size={28} />
-                  </div>
-                </div>
-                <div className="text-[#a9a9a9] ml-auto  text-xs mb-6 text-right">
-                  {msg.timeStamp}
-                </div>
-              </>
-            ) : (
-              // FOR AI MESSAGE
-              <>
-                <div className="my-12">
-                  <div className="flex items-center ">
-                    <div className="text-white mr-2">
-                      <GiBrain size={28} color="#4f39f6" />
-                    </div>
-                    <div
-                      key={ind}
-                      className="rounded-lg text-white w-fit max-w-full bg-[#30302E] p-2"
-                    >
+        {!msgList.length && (
+          <div className="flex h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center">
+            <div className="empty-cards-Image h-60">
+              <img
+                src={imgSrc}
+                className="rounded-3xl h-full w-full border-1 border-[#a9a9a9] object-cover"
+              />
+            </div>
+            <div className="empty-cards-desc text-white">
+              <div className="text-white text-xl text-center">
+                Welcome to your second brain
+              </div>
+              <div className="text-center mt-3 text-[#a9a9a9]">
+                Chat with Your Second Brain and see how it can assist you with
+                your thoughts, tweets, youtube videos and more! Start by asking
+                a question or sharing a thought.
+              </div>
+            </div>
+            <div className="empty-cards-boxes">
+              <button className="px-3 py-1 bg-[#E6D8F2]  rounded flex items-center gap-1">
+                <HiOutlineChatBubbleLeftRight size={20} />
+                Start Chatting
+              </button>
+            </div>
+          </div>
+        )}
+        {msgList.length > 0 &&
+          msgList.map((msg: ConversationProps, ind) => (
+            <>
+              {msg.role == "user" ? (
+                // FOR USER MESSAGE
+                <>
+                  <div
+                    key={ind}
+                    className="mt-6 w-fit flex items-center ml-auto"
+                  >
+                    <div className="rounded-lg max-w-lg p-2 w-fit text-white bg-indigo-600">
                       {msg.content}
                     </div>
+                    <div className="text-white ml-2">
+                      {" "}
+                      <CgProfile size={28} />
+                    </div>
                   </div>
-                  {msg.sourceIds && msg.sourceIds.length > 0 && (
-                    <Masonry
-                      breakpointCols={breakpointColumns}
-                      className="flex px-5 pt-4 gap-4"
-                      columnClassName="masonry-column"
-                    >
-                      {msg.sourceIds.map((elem: CardProps) => (
-                        <CompactCard
-                          title={elem.title}
-                          _id={elem._id}
-                          createdAt={elem.createdAt.split("T")[0]}
-                          type={elem.type}
-                          description={elem.description}
-                          key={elem._id}
-                        />
-                      ))}
-                    </Masonry>
-                  )}
-                </div>
-                {/* {JSON.stringify(msg.sourceIds)} */}
-              </>
-            )}
-          </>
-        ))}
+                  <div className="text-[#a9a9a9] ml-auto  text-xs mb-6 text-right">
+                    {msg.timeStamp}
+                  </div>
+                </>
+              ) : (
+                // FOR AI MESSAGE
+                <>
+                  <div className="my-12">
+                    <div className="flex items-center ">
+                      <div className="text-white mr-2">
+                        <GiBrain size={28} color="#4f39f6" />
+                      </div>
+                      <div
+                        key={ind}
+                        className="rounded-lg text-white w-fit max-w-full bg-[#30302E] p-2"
+                      >
+                        {msg.content}
+                      </div>
+                    </div>
+                    {msg.sourceIds && msg.sourceIds.length > 0 && (
+                      <Masonry
+                        breakpointCols={breakpointColumns}
+                        className="flex px-5 pt-4 gap-4"
+                        columnClassName="masonry-column"
+                      >
+                        {msg.sourceIds.map((elem: CardProps) => (
+                          <CompactCard
+                            title={elem.title}
+                            _id={elem._id}
+                            createdAt={elem.createdAt.split("T")[0]}
+                            type={elem.type}
+                            description={elem.description}
+                            key={elem._id}
+                          />
+                        ))}
+                      </Masonry>
+                    )}
+                  </div>
+                  {/* {JSON.stringify(msg.sourceIds)} */}
+                </>
+              )}
+            </>
+          ))}
         {!isAIResReady && (
           <>
             <div className="flex gap-1 px-3 py-1 bg-[#30302E] rounded-lg w-fit items-center">

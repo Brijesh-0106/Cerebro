@@ -52,6 +52,6 @@
 .highlighted-card {
   border: 2px solid rgb(250, 204, 21);
   box-shadow:
-    0 0 30px rgba(250, 204, 21, 1),
-    0 0 50px rgba(250, 204, 21, 0.8);
+    0 0 30px rgba(99, 102, 241, 0.6),
+    0 0 50px rgba(99, 102, 241, 0.9);
 }
