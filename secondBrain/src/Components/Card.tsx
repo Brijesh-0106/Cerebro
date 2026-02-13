@@ -113,7 +113,7 @@ export const Card = ({
           />
         </div>
       ) : type == "tweet" ? (
-        <div className="max-h-65 relative overflow-hidden rounded-lg">
+        <div className="h-65 relative overflow-hidden rounded-lg">
           {!tweetLoaded && (
             <div className="absolute inset-0 bg-gray-800 overflow-hidden">
               <div className="absolute inset-0 bg-[linear-gradient(110deg,#1f2937,45%,#374151,55%,#1f2937)] bg-size-[200%_100%] animate-shimmer" />
@@ -121,7 +121,7 @@ export const Card = ({
           )}
           <div
             ref={tweetRef}
-            className={`max-h-65 overflow-hidden flex justify-center items-start ${
+            className={`h-65 overflow-hidden flex justify-center items-start ${
               tweetLoaded ? "opacity-100" : "opacity-0"
             }`}
           >
