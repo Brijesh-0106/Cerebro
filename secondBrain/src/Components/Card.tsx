@@ -9,7 +9,7 @@ declare global {
   interface Window {
     twttr?: {
       widgets: {
-        load: () => void;
+        load: (element?: HTMLElement | null) => Promise<void>;
       };
     };
   }
@@ -31,8 +31,29 @@ export const Card = ({
     if (type === "tweet" && tweetRef.current) {
       const loadTwitter = () => {
         if (window.twttr && window.twttr.widgets) {
-          window.twttr.widgets.load();
-          setTimeout(() => setTweetLoaded(true), 1000);
+          window.twttr.widgets.load(tweetRef.current).then(() => {
+            // Observe when tweet iframe is added and loaded
+            const observer = new MutationObserver(() => {
+              const iframe = tweetRef.current?.querySelector("iframe");
+              if (iframe) {
+                iframe.onload = () => {
+                  setTweetLoaded(true);
+                  observer.disconnect();
+                };
+              }
+            });
+
+            observer.observe(tweetRef.current!, {
+              childList: true,
+              subtree: true,
+            });
+
+            // Fallback
+            setTimeout(() => {
+              setTweetLoaded(true);
+              observer.disconnect();
+            }, 5000);
+          });
         }
       };
 
@@ -92,7 +113,7 @@ export const Card = ({
           />
         </div>
       ) : type == "tweet" ? (
-        <div className="h-65 relative overflow-hidden">
+        <div className="max-h-65 relative overflow-hidden rounded-lg">
           {!tweetLoaded && (
             <div className="absolute inset-0 bg-gray-800 overflow-hidden">
               <div className="absolute inset-0 bg-[linear-gradient(110deg,#1f2937,45%,#374151,55%,#1f2937)] bg-size-[200%_100%] animate-shimmer" />
@@ -100,14 +121,10 @@ export const Card = ({
           )}
           <div
             ref={tweetRef}
-            className={`h-65 overflow-hidden flex justify-center items-start ${
+            className={`max-h-65 overflow-hidden flex justify-center items-start ${
               tweetLoaded ? "opacity-100" : "opacity-0"
             }`}
           >
-            {/* <a href="https://twitter.com/arya_saloni18/status/2021944950091620746?ref_src=twsrc%5Etfw"> EMBEDDING */}
-            {/* <a href="https://twitter.com/arya_saloni18/status/2021944950091620746"> EMBEDDING */}
-            {/* https://x.com/arya_saloni18/status/2021944950091620746?s=20 SHARE LINK */}
-            {/* https://x.com/arya_saloni18/status/2021944950091620746 */}
             <div className="w-65">
               <div className="scale-50 origin-top-left w-130">
                 <blockquote className="twitter-tweet" data-dnt="true">
