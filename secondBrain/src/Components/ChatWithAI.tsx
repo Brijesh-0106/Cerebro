@@ -20,6 +20,7 @@ const breakpointColumns = {
 export const ChatWithAI = () => {
   const [msgList, setMsgList] = useState<ConversationProps[]>([]);
   const [isAIResReady, setIsAIResReady] = useState<boolean>(true);
+  const [nochat, setNoChat] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { watch, reset, register, handleSubmit } = useForm<chatProps>({
     defaultValues: { userInput: "" },
@@ -37,6 +38,7 @@ export const ChatWithAI = () => {
       timeStamp: new Date().toLocaleString(),
     };
     setMsgList((prevMsgList) => [...prevMsgList, newMessage]);
+    setNoChat(() => false);
     const chatRes = await fetch("http://localhost:3000/v0/api/add-chat", {
       headers: {
         token: localStorage.getItem("token") || "",
@@ -82,6 +84,7 @@ export const ChatWithAI = () => {
       });
       const data = await chatRes.json();
       setMsgList(data.messages);
+      if (!msgList.length) setNoChat(() => true);
       console.log(data, "In first fetch");
       // scrollToBottom();
     };
@@ -89,14 +92,14 @@ export const ChatWithAI = () => {
   }, []);
   // HTML
   return (
-    <div className=" ml-72 mt-13 p-5 flex flex-col items-center">
+    <div className=" ml-72 mt-6 p-5 flex flex-col items-center">
       <div id="message-container" className="w-205 mb-28">
-        {!msgList.length && (
-          <div className="flex h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center">
+        {!msgList.length && nochat && (
+          <div className="flex mt-20 gap-4 flex-col justify-center items-center">
             <div className="empty-cards-Image h-60">
               <img
                 src={imgSrc}
-                className="rounded-3xl h-full w-full border-1 border-[#a9a9a9] object-cover"
+                className="rounded-3xl h-full w-full border border-[#a9a9a9] object-cover"
               />
             </div>
             <div className="empty-cards-desc text-white">

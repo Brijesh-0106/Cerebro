@@ -44,10 +44,31 @@ export const Dashboard = () => {
           "youtu.be",
           "www.youtube.com/embed",
         );
-      } else if (!formData.contentUrl?.includes("www.youtube.com/embed")) {
+      } else if (
+        !formData.contentUrl?.includes("www.youtube.com/embed") &&
+        !formData.contentUrl?.includes("https://")
+      ) {
         setError("contentUrl", {
           type: "InValid URL",
           message: "Please enter a valid YouTube link",
+        });
+        return;
+      }
+    } else if (formData.type == "tweet") {
+      if (formData.contentUrl?.includes("x.com")) {
+        formData.contentUrl = formData.contentUrl.replace(
+          "x.com",
+          "twitter.com",
+        );
+      } else if (
+        !formData.contentUrl?.includes("x.com") &&
+        !formData.contentUrl?.includes("twitter.com") &&
+        !formData.contentUrl?.includes("status") &&
+        !formData.contentUrl?.includes("https://")
+      ) {
+        setError("contentUrl", {
+          type: "InValid URL",
+          message: "Please enter a valid Twitter link",
         });
         return;
       }
