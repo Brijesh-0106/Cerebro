@@ -1,14 +1,19 @@
 import { useState } from "react";
-
+type styleType = {
+  bg: string;
+  border: string;
+  icon: string;
+};
 export const Alert = ({
   title = "Successfully saved!",
-  onClose: any,
   type = "success", // success, error, warning, info
+}: {
+  title?: string;
+  type?: "success" | "error" | "warning" | "info";
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const handleClose = () => {
     setIsVisible(false);
-    if (onClose) onClose();
   };
 
   if (!isVisible) return null;
@@ -36,7 +41,7 @@ export const Alert = ({
     },
   };
 
-  const currentStyle = styles[type];
+  const currentStyle: styleType = styles[type];
 
   return (
     <div className="fixed top-20 right-4 z-50 animate-slide-in">
@@ -45,7 +50,7 @@ export const Alert = ({
       >
         <div className="flex items-start gap-3">
           {/* Icon */}
-          <div className={`${currentStyle.icon} flex-shrink-0 mt-0.5`}>
+          <div className={`${currentStyle.icon} shrink-0 mt-0.5`}>
             {type === "success" && (
               <svg
                 className="w-5 h-5"

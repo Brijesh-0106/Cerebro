@@ -10,12 +10,12 @@ import { Leftbar } from "./Leftbar";
 import MultiTagSelect from "./MultiTagSelect";
 import { Topbar } from "./Topbar";
 import { UserArea } from "./UserArea";
-
+type alertType = "success" | "error" | "warning" | "info";
 export const Dashboard = () => {
   const [openAddContentModal, setOpenAddContentModal] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
   const nav = useNavigate();
-  const [alertType, setAlertType] = useState("success");
+  const [alertType, setAlertType] = useState<alertType>("success");
   const [showAlert, setShowAlert] = useState(false);
   const {
     setValue,
@@ -109,7 +109,7 @@ export const Dashboard = () => {
         setShowAlert(false);
       }, 2500);
     } else {
-      setAlertType("danger");
+      setAlertType("error");
       setAlertMsg("Sorry, Content is not saved!");
       setShowAlert(true);
       setTimeout(() => {
@@ -128,13 +128,7 @@ export const Dashboard = () => {
             : "min-w-screen min-h-screen max-w-screen bg-[radial-gradient(1200px_600px_at_top_left,rgba(112,59,247,0.65)_0%,rgba(112,59,247,0.25)_35%,rgba(18,18,18,0)_60%),radial-gradient(1200px_600px_at_bottom_right,rgba(112,59,247,0.65)_0%,rgba(112,59,247,0.25)_35%,rgba(18,18,18,0)_60%),linear-gradient(135deg,#121212_45%,#000_75%)]"
         }
       >
-        {showAlert && (
-          <Alert
-            type={alertType}
-            title={alertMsg}
-            onClose={() => console.log("Closed")}
-          />
-        )}
+        {showAlert && <Alert type={alertType} title={alertMsg} />}
         ;
         <Leftbar />
         <Topbar curr={openAddContentModal} setCurr={setOpenAddContentModal} />
