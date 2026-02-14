@@ -1,18 +1,22 @@
 // ----------------------------------------- Imports
 import { Pinecone } from '@pinecone-database/pinecone';
 import cors from 'cors';
+import dotenv from "dotenv";
 import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import mongoose, { Document, Schema, Types } from 'mongoose';
 import * as z from "zod";
-import { PineconeKey, SECRET_KEY } from './Config/key.js';
+require('dotenv').config();
+// import { PineconeKey, SECRET_KEY } from './Config/key.js';
 import { getEmbedding } from './hfEmbedding.js';
 import { upload } from "./storage.js"; // Note: add .js extension
+dotenv.config();
+
 // -------------------------------------------
 
 // --------------------------------------------VECTOR EMBEDDING CONFIG
 const pc = new Pinecone({
-    apiKey: PineconeKey
+    apiKey: process.env.PineconeKey as string,
 });
 const pcIndex = pc.index({ name: "cerebro-embeddings" });//NEED TO CREATE INDEX IN PINECONE FIRST
 // -------------------------------------------
@@ -72,7 +76,7 @@ const middleAuth = (req: Request, res: Response, next: NextFunction): void => {
             return;
         }
 
-        let payload = jwt.verify(token, SECRET_KEY) as string;
+        let payload = jwt.verify(token, process.env.SECRET_KEY as string) as string;
         req.userId = payload
         next()
     } catch (error) {
@@ -178,7 +182,7 @@ app.post('/v0/api/login', async (req, res) => {
         let user = await UserModel.findOne({ email, password });
         console.log(user);
         if (user) {
-            let token = jwt.sign(user._id.toString(), SECRET_KEY)
+            let token = jwt.sign(user._id.toString(), process.env.secret_KEY as string);
             res.status(200).json({
                 message: 'Login in Successfully',
                 token: token
