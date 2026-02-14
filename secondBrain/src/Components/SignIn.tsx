@@ -19,17 +19,20 @@ export function SignIn() {
   } = useForm<SignInProps>();
 
   const signin = async (data: SignInProps) => {
-    const res = await fetch("http://localhost:3000/v0/api/signin", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v0/api/signin`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: data.userNameInput,
+          email: data.emailInput,
+          password: data.passwordInput,
+        }),
       },
-      body: JSON.stringify({
-        name: data.userNameInput,
-        email: data.emailInput,
-        password: data.passwordInput,
-      }),
-    });
+    );
     if (res.status == 200) {
       await res.json();
       setShowAlert(true);

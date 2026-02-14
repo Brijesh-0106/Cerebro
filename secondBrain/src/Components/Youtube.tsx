@@ -22,7 +22,7 @@ export default function Youtube() {
     async function asyncDataFetch() {
       setLoading(true);
       const data = await fetch(
-        "http://localhost:3000/v0/api/get-all-youtube-content/",
+        `${import.meta.env.VITE_BACKEND_URL}/v0/api/get-all-youtube-content/`,
         {
           method: "GET",
           headers: {

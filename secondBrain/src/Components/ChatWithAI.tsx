@@ -39,18 +39,21 @@ export const ChatWithAI = () => {
     };
     setMsgList((prevMsgList) => [...prevMsgList, newMessage]);
     setNoChat(() => false);
-    const chatRes = await fetch("http://localhost:3000/v0/api/add-chat", {
-      headers: {
-        token: localStorage.getItem("token") || "",
-        "Content-Type": "application/json", // ✅ Critical
+    const chatRes = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v0/api/add-chat`,
+      {
+        headers: {
+          token: localStorage.getItem("token") || "",
+          "Content-Type": "application/json", // ✅ Critical
+        },
+        method: "POST",
+        body: JSON.stringify({
+          content: newMessage.content,
+          role: newMessage.role,
+          timeStamp: newMessage.timeStamp,
+        }),
       },
-      method: "POST",
-      body: JSON.stringify({
-        content: newMessage.content,
-        role: newMessage.role,
-        timeStamp: newMessage.timeStamp,
-      }),
-    });
+    );
     const res = await chatRes.json();
     const newAIMessage: ConversationProps = {
       role: "assistant", //assitant or user
@@ -75,12 +78,15 @@ export const ChatWithAI = () => {
 
   useEffect(() => {
     const fetchChatHistory = async () => {
-      const chatRes = await fetch("http://localhost:3000/v0/api/load-chat", {
-        headers: {
-          token: localStorage.getItem("token") || "",
+      const chatRes = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/v0/api/load-chat`,
+        {
+          headers: {
+            token: localStorage.getItem("token") || "",
+          },
+          method: "GET",
         },
-        method: "GET",
-      });
+      );
       const data = await chatRes.json();
       setMsgList(data.messages);
       if (!msgList.length) setNoChat(() => true);

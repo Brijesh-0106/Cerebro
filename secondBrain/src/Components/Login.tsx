@@ -16,16 +16,19 @@ export function Login() {
   const nav = useNavigate();
 
   const login = async (credentials: LoginProps) => {
-    const data = await fetch("http://localhost:3000/v0/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const data = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v0/api/login`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          password: credentials.passwordInput,
+          email: credentials.emailInput,
+        }),
       },
-      body: JSON.stringify({
-        password: credentials.passwordInput,
-        email: credentials.emailInput,
-      }),
-    });
+    );
     if (data.status == 200) {
       const res = await data.json();
       localStorage.setItem("token", res.token);

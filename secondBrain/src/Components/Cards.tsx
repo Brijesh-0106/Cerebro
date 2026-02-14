@@ -25,12 +25,15 @@ export const Cards = () => {
     async function asyncContentDataFetch() {
       setLoading(true);
 
-      const data = await fetch("http://localhost:3000/v0/api/get-all-content", {
-        method: "GET",
-        headers: {
-          token: localStorage.getItem("token") as string,
+      const data = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/v0/api/get-all-content`,
+        {
+          method: "GET",
+          headers: {
+            token: localStorage.getItem("token") as string,
+          },
         },
-      });
+      );
 
       const res = await data.json();
       setCards([...res["AllUserContent"]]);
