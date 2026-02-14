@@ -12,7 +12,6 @@ export default function Thought({
   type,
 }: ThoughtProps) {
   const [imgLoaded, setImgLoaded] = useState(false);
-  console.log(imgLoaded);
 
   return (
     <span className="mb-6 break-inside-avoid flex flex-col rounded-xl border-2 gap-2 border-[#a9a9a9] p-4">

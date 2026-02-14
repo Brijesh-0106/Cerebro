@@ -2,21 +2,26 @@
 import { Pinecone } from '@pinecone-database/pinecone';
 import cors from 'cors';
 import dotenv from "dotenv";
+
+
+// import 'dotenv/config';
 import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import mongoose, { Document, Schema, Types } from 'mongoose';
 import * as z from "zod";
-require('dotenv').config();
 // import { PineconeKey, SECRET_KEY } from './Config/key.js';
+import path from 'path/win32';
 import { getEmbedding } from './hfEmbedding.js';
-import { upload } from "./storage.js"; // Note: add .js extension
-dotenv.config();
+import { upload } from "./storage.js"; // Note: add .js extension   
+// dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.join(process.cwd(), '../.env') });
+// dotenv.config();
 
 // -------------------------------------------
 
 // --------------------------------------------VECTOR EMBEDDING CONFIG
 const pc = new Pinecone({
-    apiKey: process.env.PineconeKey as string,
+    apiKey: process.env.PINECONE_API_KEY as string,
 });
 const pcIndex = pc.index({ name: "cerebro-embeddings" });//NEED TO CREATE INDEX IN PINECONE FIRST
 // -------------------------------------------
@@ -70,7 +75,6 @@ const middleAuth = (req: Request, res: Response, next: NextFunction): void => {
     try {
         let token = req.header('Token') as string;
 
-        console.log(req.header('Token'))
         if (!token) {
             res.status(403).json({ error: "You don't access for this" })
             return;
@@ -88,7 +92,6 @@ const middleAuth = (req: Request, res: Response, next: NextFunction): void => {
 // ----------------------------------------- DB CONFIG + CONNECT
 async function DbConnect() {
     await mongoose.connect('mongodb+srv://phenomenal:Phenomenal@cluster0.9ubnr8w.mongodb.net/NeuralNetwork')
-    console.log("DB is connected");
 }
 DbConnect()
 // ----------------------------------------- 
@@ -157,10 +160,7 @@ const ConversationModel = mongoose.model<IConversation>('chat', ConversationSche
 
 // ----------------------------------------------SIGNIN & LOGIN ROUTES
 app.post('/v0/api/signin', async (req: Request, res: Response) => {
-    console.log("reached here", req.body)
     let { name, email, password } = req.body;
-    console.log(name, email, password);
-    debugger
     const result = SignIn.safeParse({ name, email, password });
     if (result.success) {
         await UserModel.create({ name, email, password });
@@ -176,11 +176,9 @@ app.post('/v0/api/signin', async (req: Request, res: Response) => {
 
 app.post('/v0/api/login', async (req, res) => {
     let { email, password } = req.body;
-    console.log(email, password);
     const result = LogIn.safeParse({ password, email })
     if (result.success) {
         let user = await UserModel.findOne({ email, password });
-        console.log(user);
         if (user) {
             let token = jwt.sign(user._id.toString(), process.env.secret_KEY as string);
             res.status(200).json({
@@ -203,13 +201,11 @@ app.post('/v0/api/login', async (req, res) => {
 // --------------------------------------------- CONVERSATION ROUTES
 
 app.get('/v0/api/load-chat', middleAuth, async (req, res) => {
-    console.log("-----------load-chat API")
     try {
         const existingChat = await ConversationModel.findOne(
             { userId: req.userId },
             { messages: 1, _id: 0 }
         ).populate('messages.sourceIds');
-        console.log(existingChat)
         res.json({
             "messages": existingChat?.messages || []
         })
@@ -219,7 +215,6 @@ app.get('/v0/api/load-chat', middleAuth, async (req, res) => {
 })
 
 app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
-    console.log("-----------add-conversation API")
     let { content, role, timeStamp } = req.body;
     let vectorInput = "";
     const result = Conversation.safeParse({ content, role, timeStamp });
@@ -233,11 +228,9 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
                 includeMetadata: true,  // ✅ Add this
                 includeValues: false     // Don't need the vectors back
             })
-            console.log("Vector Search Result:", vectorResult);
             const strongMatches = vectorResult.matches.filter((elem) =>
                 elem.score && elem.score > 0.35
             )
-            console.log("filtered Search Result:", strongMatches);
             const existingChat = await ConversationModel.findOne({
                 userId: req.userId
             })
@@ -314,17 +307,13 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
 })
 // ----------------------------------------------CONTENT ROUTES
 app.post('/v0/api/add-content', middleAuth, upload.single("imageUrl"), async (req, res) => {
-    console.log("-----------add-content API")
     let imageUrl = ''
     let vectorInput = "";
     if (req.file) {
         const image = req.file;
-        console.log("File:", image);
         imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
     }
     let { title, desc, type, tags, url } = req.body;
-    console.log(title, type, tags, url, desc);
-    console.log(req.userId);
     const result = Content.safeParse({ title, type, tags, url, desc, imageUrl })
     if (result.success) {
         vectorInput += `User context:\n${desc} \nTitle:\n${title} \nType:\n${type} \nTags:\n${JSON.stringify(tags)}`;
@@ -361,7 +350,6 @@ app.post('/v0/api/add-content', middleAuth, upload.single("imageUrl"), async (re
 })
 
 app.get('/v0/api/get-all-content', middleAuth, async (req, res) => {
-    console.log("-----------get-all-content API")
     const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
     let AllUserContent = await ContentModel
         .find({ userId: ObjtId })
@@ -378,7 +366,6 @@ app.get('/v0/api/get-all-content', middleAuth, async (req, res) => {
 })
 
 app.get('/v0/api/get-all-youtube-content', middleAuth, async (req, res) => {
-    console.log("-----------get-all-youtube-content API")
     const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
     let AllUserContent = await ContentModel
         .find({ userId: ObjtId, type: "youtube" })
@@ -395,7 +382,6 @@ app.get('/v0/api/get-all-youtube-content', middleAuth, async (req, res) => {
 })
 
 app.get('/v0/api/get-all-tweet-content', middleAuth, async (req, res) => {
-    console.log("-----------get-all-tweeter-content API")
     const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
     let AllUserContent = await ContentModel
         .find({ userId: ObjtId, type: "tweet" })
@@ -412,7 +398,6 @@ app.get('/v0/api/get-all-tweet-content', middleAuth, async (req, res) => {
 })
 // -----------------------------------------------------
 app.get('/v0/api/get-all-thoughts', middleAuth, async (req, res) => {
-    console.log("-----------get-all-thoughts API")
     const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
     let AllUserThoughs = await ContentModel
         .find({ userId: ObjtId, type: "thought" })

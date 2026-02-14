@@ -63,7 +63,6 @@ export const ChatWithAI = () => {
     setIsAIResReady(() => true);
     setIsLoading(() => false);
     reset();
-    console.log("check after loading:", newAIMessage);
   };
 
   useEffect(() => {
@@ -85,7 +84,6 @@ export const ChatWithAI = () => {
       const data = await chatRes.json();
       setMsgList(data.messages);
       if (!msgList.length) setNoChat(() => true);
-      console.log(data, "In first fetch");
       // scrollToBottom();
     };
     fetchChatHistory();
