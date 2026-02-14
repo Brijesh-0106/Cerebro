@@ -48,11 +48,7 @@ export function SignIn() {
         <div className="text-white text-2xl justify-center items-center gap-3 title flex mb-8">
           <GiBrain size={48} color="#4f39f6" />
           {showAlert && (
-            <Alert
-              title="User Created Successfully"
-              type="success"
-              onClose={() => console.log("Closed")}
-            />
+            <Alert title="User Created Successfully" type="success" />
           )}
           Cerebro
         </div>
