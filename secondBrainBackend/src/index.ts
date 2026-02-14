@@ -15,8 +15,7 @@ import { getEmbedding } from './hfEmbedding.js';
 import { upload } from "./storage.js"; // Note: add .js extension   
 // dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 dotenv.config({ path: path.join(process.cwd(), '../.env') });
-// dotenv.config();
-
+console.log('All env vars:', process.env);
 // -------------------------------------------
 
 // --------------------------------------------VECTOR EMBEDDING CONFIG
@@ -79,7 +78,7 @@ const middleAuth = (req: Request, res: Response, next: NextFunction): void => {
             res.status(403).json({ error: "You don't access for this" })
             return;
         }
-
+        console.log("SECRET_KEY", process.env.SECRET_KEY);
         let payload = jwt.verify(token, process.env.SECRET_KEY as string) as string;
         req.userId = payload
         next()
@@ -180,7 +179,8 @@ app.post('/v0/api/login', async (req, res) => {
     if (result.success) {
         let user = await UserModel.findOne({ email, password });
         if (user) {
-            let token = jwt.sign(user._id.toString(), process.env.secret_KEY as string);
+            console.log("SECRET_KEY", process.env.SECRET_KEY);
+            let token = jwt.sign(user._id.toString(), process.env.SECRET_KEY as string);
             res.status(200).json({
                 message: 'Login in Successfully',
                 token: token
