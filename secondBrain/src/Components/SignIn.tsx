@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CiLock } from "react-icons/ci";
 import { FaGoogle } from "react-icons/fa";
@@ -7,10 +7,13 @@ import { MdOutlineAttachEmail, MdOutlinePerson } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
 import type { SignInProps } from "../Models/SignInProps";
 import { Alert } from "./Alert";
+import GoogleSignIn from "./GoogleSignIn";
 
 export function SignIn() {
   const nav = useNavigate();
+  const googleButtonRef = useRef<HTMLDivElement>(null);
   const [showAlert, setShowAlert] = useState(false);
+  const [error, setError] = useState("");
 
   const {
     register,
@@ -18,21 +21,31 @@ export function SignIn() {
     formState: { errors, isSubmitting },
   } = useForm<SignInProps>();
 
+  const handleGoogleSuccess = (
+    token: string,
+    user: Record<string, unknown>,
+  ) => {
+    console.log("Signed in successfully:", user);
+    // Redirect to dashboard or home
+    nav("/dashboard/all-content");
+  };
+
+  const handleGoogleError = (error: string) => {
+    setError(error);
+  };
+
   const signin = async (data: SignInProps) => {
-    const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v0/api/signin`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: data.userNameInput,
-          email: data.emailInput,
-          password: data.passwordInput,
-        }),
+    const res = await fetch(`http://localhost:3000/v0/api/signin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({
+        name: data.userNameInput,
+        email: data.emailInput,
+        password: data.passwordInput,
+      }),
+    });
     if (res.status == 200) {
       await res.json();
       setShowAlert(true);
@@ -45,20 +58,39 @@ export function SignIn() {
     }
   };
 
+  const handleCustomButtonClick = () => {
+    const googleButton =
+      googleButtonRef.current?.querySelector('div[role="button"]');
+    console.log(googleButton);
+    if (googleButton) {
+      (googleButton as HTMLElement).click();
+    }
+  };
+
   return (
     <div className="bg-custom-gradient w-full h-screen bg-[rgb(18,18,18,1)] flex justify-center items-center">
       <span className="max-w-sm flex flex-col gap-4">
         <div className="text-white text-2xl justify-center items-center gap-3 title flex mb-8">
-          <GiBrain size={48} color="#4f39f6" />
           {showAlert && (
             <Alert title="User Created Successfully" type="success" />
           )}
+          <GiBrain size={48} color="#4f39f6" />
           Cerebro
         </div>
+        {error && <div className="error-message">{error}</div>}
         <div className="flex justify-center">
-          <button className="cursor-pointer rounded justify-center bg-indigo-600 text-center text-white py-4 px-4 flex items-center gap-2">
+          <button
+            onClick={handleCustomButtonClick}
+            className="cursor-pointer rounded justify-center bg-indigo-600 text-center text-white flex py-4 px-4 items-center gap-2"
+          >
             <FaGoogle size={24} /> Sign up with Google
           </button>
+          <div ref={googleButtonRef} style={{ display: "none" }}>
+            <GoogleSignIn
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+            />
+          </div>
         </div>
         <div className="text-white text-center">
           or, sign up with your email

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { CgProfile } from "react-icons/cg";
 import { GiBrain } from "react-icons/gi";
 import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import { IoMdArrowUp } from "react-icons/io";
@@ -21,6 +20,17 @@ export const ChatWithAI = () => {
   const [msgList, setMsgList] = useState<ConversationProps[]>([]);
   const [isAIResReady, setIsAIResReady] = useState<boolean>(true);
   const [nochat, setNoChat] = useState<boolean>(false);
+  const [userPicture] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        return JSON.parse(storedUser).picture || "";
+      } catch {
+        return "";
+      }
+    }
+    return "";
+  });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { watch, reset, register, handleSubmit } = useForm<chatProps>({
     defaultValues: { userInput: "" },
@@ -39,21 +49,18 @@ export const ChatWithAI = () => {
     };
     setMsgList((prevMsgList) => [...prevMsgList, newMessage]);
     setNoChat(() => false);
-    const chatRes = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v0/api/add-chat`,
-      {
-        headers: {
-          token: localStorage.getItem("token") || "",
-          "Content-Type": "application/json", // ✅ Critical
-        },
-        method: "POST",
-        body: JSON.stringify({
-          content: newMessage.content,
-          role: newMessage.role,
-          timeStamp: newMessage.timeStamp,
-        }),
+    const chatRes = await fetch(`http://localhost:3000/v0/api/add-chat`, {
+      headers: {
+        token: localStorage.getItem("token") || "",
+        "Content-Type": "application/json", // ✅ Critical
       },
-    );
+      method: "POST",
+      body: JSON.stringify({
+        content: newMessage.content,
+        role: newMessage.role,
+        timeStamp: newMessage.timeStamp,
+      }),
+    });
     const res = await chatRes.json();
     const newAIMessage: ConversationProps = {
       role: "assistant", //assitant or user
@@ -78,15 +85,12 @@ export const ChatWithAI = () => {
 
   useEffect(() => {
     const fetchChatHistory = async () => {
-      const chatRes = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/v0/api/load-chat`,
-        {
-          headers: {
-            token: localStorage.getItem("token") || "",
-          },
-          method: "GET",
+      const chatRes = await fetch(`http://localhost:3000/v0/api/load-chat`, {
+        headers: {
+          token: localStorage.getItem("token") || "",
         },
-      );
+        method: "GET",
+      });
       const data = await chatRes.json();
       setMsgList(data.messages);
       if (!msgList.length) setNoChat(() => true);
@@ -138,8 +142,12 @@ export const ChatWithAI = () => {
                       {msg.content}
                     </div>
                     <div className="text-white ml-2">
-                      {" "}
-                      <CgProfile size={28} />
+                      {/* <CgProfile size={28} /> */}
+                      <img
+                        src={userPicture}
+                        alt="User Profile"
+                        className="w-8 h-8 rounded-full"
+                      />
                     </div>
                   </div>
                   <div className="text-[#a9a9a9] ml-auto  text-xs mb-6 text-right">

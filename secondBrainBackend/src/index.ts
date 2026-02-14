@@ -2,21 +2,31 @@
 import { Pinecone } from '@pinecone-database/pinecone';
 import cors from 'cors';
 import dotenv from "dotenv";
-
-
-// import 'dotenv/config';
 import express, { NextFunction, Request, Response } from 'express';
+import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
 import mongoose, { Document, Schema, Types } from 'mongoose';
-import * as z from "zod";
-// import { PineconeKey, SECRET_KEY } from './Config/key.js';
 import path from 'path/win32';
+import * as z from "zod";
 import { getEmbedding } from './hfEmbedding.js';
 import { upload } from "./storage.js"; // Note: add .js extension   
-// dotenv.config({ path: path.resolve(process.cwd(), '.env') });
-dotenv.config({ path: path.join(process.cwd(), '../.env') });
-console.log('All env vars:', process.env);
 // -------------------------------------------
+
+// --------------------------------------------DOTENV CONFIG
+dotenv.config({ path: path.join(process.cwd(), '../.env') });
+// -------------------------------------------
+
+
+// --------------------------------------------OAUTH2 CONFIG
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+interface GoogleTokenPayload {
+    email?: string;
+    name?: string;
+    picture?: string;
+    sub?: string;
+}
+// -------------------------------------------
+
 
 // --------------------------------------------VECTOR EMBEDDING CONFIG
 const pc = new Pinecone({
@@ -80,6 +90,7 @@ const middleAuth = (req: Request, res: Response, next: NextFunction): void => {
         }
         console.log("SECRET_KEY", process.env.SECRET_KEY);
         let payload = jwt.verify(token, process.env.SECRET_KEY as string) as string;
+        console.log("req.userId", payload);
         req.userId = payload
         next()
     } catch (error) {
@@ -158,6 +169,51 @@ const ConversationModel = mongoose.model<IConversation>('chat', ConversationSche
 
 
 // ----------------------------------------------SIGNIN & LOGIN ROUTES
+
+app.post("/v0/api/google", async (req: Request, res: Response) => {
+    try {
+        const { token } = req.body;
+
+        if (!token) {
+            return res.status(400).json({ error: 'Token is required' });
+        }
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload() as GoogleTokenPayload;
+        if (!payload || !payload.email) {
+            return res.status(400).json({ error: 'Invalid token' });
+        }
+        const { email, name, picture, sub: googleId } = payload;
+        console.log("Google auth picture:", picture);
+        let User = await UserModel.findOne({ email });
+        const user = {
+            id: googleId,
+            email,
+            name,
+            picture,
+        };
+
+        if (User) {
+
+        } else {
+            User = await UserModel.create({ name: name || "Google User", email, password: googleId });
+        }
+        const jwtToken = jwt.sign(
+            User._id.toString(),
+            process.env.SECRET_KEY!,
+        );
+        return res.status(200).json({
+            success: true,
+            token: jwtToken,
+            user,
+        });
+    } catch (error) {
+        console.error('Google auth error:', error);
+        res.status(401).json({ error: 'Invalid token' });
+    }
+})
 app.post('/v0/api/signin', async (req: Request, res: Response) => {
     let { name, email, password } = req.body;
     const result = SignIn.safeParse({ name, email, password });

@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CiLock } from "react-icons/ci";
 import { FaGoogle } from "react-icons/fa";
@@ -5,34 +6,55 @@ import { GiBrain } from "react-icons/gi";
 import { MdOutlineAttachEmail } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
 import type { LoginProps } from "../Models/SignInProps";
+import GoogleSignIn from "./GoogleSignIn";
 
 export function Login() {
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+  const nav = useNavigate();
+  const [error, setError] = useState("");
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginProps>();
 
-  const nav = useNavigate();
+  const handleGoogleSuccess = (
+    token: string,
+    user: Record<string, unknown>,
+  ) => {
+    console.log("Signed in successfully:", user);
+    // Redirect to dashboard or home
+    nav("/dashboard/all-content");
+  };
+
+  const handleGoogleError = (error: string) => {
+    setError(error);
+  };
 
   const login = async (credentials: LoginProps) => {
-    const data = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v0/api/login`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          password: credentials.passwordInput,
-          email: credentials.emailInput,
-        }),
+    const data = await fetch(`http://localhost:3000/v0/api/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({
+        password: credentials.passwordInput,
+        email: credentials.emailInput,
+      }),
+    });
     if (data.status == 200) {
       const res = await data.json();
       localStorage.setItem("token", res.token);
       nav("/dashboard/all-content");
+    }
+  };
+  const handleCustomButtonClick = () => {
+    const googleButton =
+      googleButtonRef.current?.querySelector('div[role="button"]');
+    console.log(googleButton);
+    if (googleButton) {
+      (googleButton as HTMLElement).click();
     }
   };
 
@@ -43,10 +65,20 @@ export function Login() {
           <GiBrain size={48} color="#4f39f6" />
           Cerebro
         </div>
+        {error && <div className="error-message">{error}</div>}
         <div className="flex justify-center">
-          <button className="cursor-pointer rounded justify-center bg-indigo-600 text-center text-white py-4 px-4 flex items-center gap-2">
+          <button
+            onClick={handleCustomButtonClick}
+            className="cursor-pointer rounded justify-center bg-indigo-600 text-center text-white py-4 px-4 flex items-center gap-2"
+          >
             <FaGoogle size={24} /> Sign up with Google
           </button>
+          <div ref={googleButtonRef} style={{ display: "none" }}>
+            <GoogleSignIn
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+            />
+          </div>
         </div>
         <div className="text-white text-center">
           or, sign up with your email

@@ -20,33 +20,28 @@ export const Cards = () => {
   const [cards, setCards] = useRecoilState(CardAtom);
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
-
   useEffect(() => {
-    async function asyncContentDataFetch() {
-      setLoading(true);
-
-      const data = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/v0/api/get-all-content`,
-        {
-          method: "GET",
-          headers: {
-            token: localStorage.getItem("token") as string,
-          },
-        },
-      );
-
-      const res = await data.json();
-      setCards([...res["AllUserContent"]]);
-
-      setLoading(false);
-    }
-    asyncContentDataFetch();
     const highlightId = searchParams.get("highlight");
     if (highlightId) {
       const element = document.getElementById(highlightId);
       element?.scrollIntoView({ behavior: "smooth" });
       element?.classList.add("shadow-xl", "highlighted-card"); // Highlight
     }
+  }, [cards]);
+  useEffect(() => {
+    async function asyncContentDataFetch() {
+      setLoading(true);
+      const data = await fetch(`http://localhost:3000/v0/api/get-all-content`, {
+        method: "GET",
+        headers: {
+          token: localStorage.getItem("token") as string,
+        },
+      });
+      const res = await data.json();
+      setCards([...res["AllUserContent"]]);
+      setLoading(false);
+    }
+    asyncContentDataFetch();
   }, []);
   return (
     <>

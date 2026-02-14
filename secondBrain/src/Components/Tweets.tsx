@@ -21,7 +21,7 @@ export default function Tweets() {
     async function asyncDataFetch() {
       setLoading(true);
       const data = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/v0/api/get-all-tweet-content/`,
+        `http://localhost:3000/v0/api/get-all-tweet-content/`,
         {
           method: "GET",
           headers: {

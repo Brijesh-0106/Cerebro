@@ -22,7 +22,7 @@ export default function Thoughts() {
     async function asyncDataFetch() {
       setLoading(true);
       const data = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/v0/api/get-all-thoughts`,
+        `http://localhost:3000/v0/api/get-all-thoughts`,
         {
           method: "GET",
           headers: {

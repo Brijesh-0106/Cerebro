@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { AiOutlineYoutube } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
 import { CiLogout, CiSettings, CiTwitter } from "react-icons/ci";
@@ -9,8 +10,33 @@ import { NavLink, useNavigate } from "react-router-dom";
 
 export const Leftbar = () => {
   const nav = useNavigate();
+  const [userPicture] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        return JSON.parse(storedUser).picture || "";
+      } catch {
+        return "";
+      }
+    }
+    return "";
+  });
+  const [userName] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        return JSON.parse(storedUser).name || "";
+      } catch {
+        return "";
+      }
+    }
+    return "";
+  });
   const logout = () => {
     localStorage.removeItem("token");
+    if (localStorage.getItem("user")) {
+      localStorage.removeItem("user");
+    }
     nav("/login");
   };
   return (
@@ -81,10 +107,14 @@ export const Leftbar = () => {
       <div className="lower-section">
         <div className="bottom-profile-section p-2 bg-[#30302E] rounded">
           <div className="profile+name flex items-center gap-2 mb-4">
-            <span className="rounded-full">
-              <CgProfile size={24} />
-            </span>
-            <span>Profile name</span>
+            {userPicture == "" ? (
+              <span className="rounded-full">
+                <CgProfile size={24} />
+              </span>
+            ) : (
+              <img src={userPicture} className="rounded-full w-7 h-7" />
+            )}
+            <span>{userName}</span>
           </div>
           <div className="flex items-center gap-2 mb-4">
             <CiSettings size={24} />
