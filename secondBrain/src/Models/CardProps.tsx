@@ -30,3 +30,5 @@ export type Option = {
   value: string;
   color: string;
 };
+
+export type alertType = "success" | "error" | "warning" | "info";

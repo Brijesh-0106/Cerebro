@@ -3,14 +3,14 @@ import { useForm } from "react-hook-form";
 import { IoMdClose } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
-import type { CardProps } from "../Models/CardProps";
+import type { alertType, CardProps } from "../Models/CardProps";
 import { CardAtom } from "../Recoil/CardAtom";
 import { Alert } from "./Alert";
 import { Leftbar } from "./Leftbar";
 import MultiTagSelect from "./MultiTagSelect";
 import { Topbar } from "./Topbar";
 import { UserArea } from "./UserArea";
-type alertType = "success" | "error" | "warning" | "info";
+
 export const Dashboard = () => {
   const [openAddContentModal, setOpenAddContentModal] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
