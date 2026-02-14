@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { AiOutlineYoutube } from "react-icons/ai";
 import { CiTwitter } from "react-icons/ci";
 import { GiNotebook } from "react-icons/gi";
-import "react-loading-skeleton/dist/skeleton.css";
 import type { CardProps } from "../Models/CardProps";
 // Add at top of file or in a types.d.ts
 declare global {

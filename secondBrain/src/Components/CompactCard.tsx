@@ -2,7 +2,6 @@ import { AiOutlineYoutube } from "react-icons/ai";
 import { CiTwitter } from "react-icons/ci";
 import { GiNotebook } from "react-icons/gi";
 import { RiArrowRightUpFill } from "react-icons/ri";
-import "react-loading-skeleton/dist/skeleton.css";
 import { NavLink } from "react-router-dom";
 import type { CardProps } from "../Models/CardProps";
 

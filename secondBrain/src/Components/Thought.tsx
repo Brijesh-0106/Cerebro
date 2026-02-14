@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { GiNotebook } from "react-icons/gi";
-import "react-loading-skeleton/dist/skeleton.css";
 
 import type { ThoughtProps } from "../Models/CardProps";
 
