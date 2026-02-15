@@ -19,10 +19,7 @@ export function Login() {
     formState: { errors, isSubmitting },
   } = useForm<LoginProps>();
 
-  const handleGoogleSuccess = (
-    token: string,
-    user: Record<string, unknown>,
-  ) => {
+  const handleGoogleSuccess = (user: Record<string, unknown>) => {
     console.log("Signed in successfully:", user);
     // Redirect to dashboard or home
     nav("/dashboard/all-content");
@@ -33,16 +30,19 @@ export function Login() {
   };
 
   const login = async (credentials: LoginProps) => {
-    const data = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v0/api/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const data = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v0/api/login`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          password: credentials.passwordInput,
+          email: credentials.emailInput,
+        }),
       },
-      body: JSON.stringify({
-        password: credentials.passwordInput,
-        email: credentials.emailInput,
-      }),
-    });
+    );
     if (data.status == 200) {
       const res = await data.json();
       localStorage.setItem("token", res.token);
