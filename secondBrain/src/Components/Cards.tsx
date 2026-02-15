@@ -2,24 +2,33 @@ import { useEffect, useState } from "react";
 import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import Masonry from "react-masonry-css";
 import { useSearchParams } from "react-router-dom";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import imgSrc from "../assets/Gemini_Generated_Image_r70ze4r70ze4r70z.png";
 import type { CardProps } from "../Models/CardProps";
 import { CardAtom } from "../Recoil/CardAtom";
+import { SideBarAtom } from "../Recoil/SideBarAtom";
 import { Card } from "./Card";
 import { SkeletonGrid } from "./SkeletonGrid";
-
-// In your component
-const breakpointColumns = {
-  default: 3,
-  1100: 2,
-  700: 1,
-};
 
 export const Cards = () => {
   const [cards, setCards] = useRecoilState(CardAtom);
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
+  const isSideBarCollapsed = useRecoilValue(SideBarAtom);
+  // In your component
+  const breakpointColumns = isSideBarCollapsed
+    ? {
+        default: 4, // 4 columns when sidebar collapsed
+        1400: 3, // 3 columns on smaller screens
+        1100: 2,
+        700: 1,
+      }
+    : {
+        default: 3, // 3 columns when sidebar open
+        1100: 2,
+        700: 1,
+      };
+
   useEffect(() => {
     const highlightId = searchParams.get("highlight");
     if (highlightId) {
@@ -47,7 +56,9 @@ export const Cards = () => {
     <>
       {loading && <SkeletonGrid />}
       {!cards.length && (
-        <div className="flex ml-65 mt-13 px-5 pt-4 h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center">
+        <div
+          className={`flex ${isSideBarCollapsed ? "ml-13.75" : "ml-65"} mt-13 px-5 pt-4 h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center`}
+        >
           <div className="empty-cards-Image h-60 w-60">
             <img
               src={imgSrc}
@@ -73,7 +84,7 @@ export const Cards = () => {
       {cards.length > 0 && (
         <Masonry
           breakpointCols={breakpointColumns}
-          className="flex ml-72 mt-13 px-5 pt-4 gap-4"
+          className={`flex ${isSideBarCollapsed ? "ml-13.75" : "ml-72"} mt-13 px-5 pt-4 gap-4`}
           columnClassName="masonry-column"
         >
           {cards.map((elem: CardProps) => (

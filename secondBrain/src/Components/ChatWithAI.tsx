@@ -4,22 +4,34 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { GiBrain } from "react-icons/gi";
 import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import { IoMdArrowUp } from "react-icons/io";
+import ReactMarkdown from "react-markdown";
 import Masonry from "react-masonry-css";
+import { useRecoilValue } from "recoil";
 import imgSrc from "../../public/Assets/Gemini_Generated_Image_7667fc7667fc7667.png";
 import type { CardProps, chatProps } from "../Models/CardProps";
 import type { ConversationProps } from "../Models/ConversationProps";
+import { SideBarAtom } from "../Recoil/SideBarAtom";
 import { CompactCard } from "./CompactCard";
-
-const breakpointColumns = {
-  default: 3,
-  1100: 2,
-  700: 1,
-};
 
 export const ChatWithAI = () => {
   const [msgList, setMsgList] = useState<ConversationProps[]>([]);
   const [isAIResReady, setIsAIResReady] = useState<boolean>(true);
   const [nochat, setNoChat] = useState<boolean>(false);
+  const isSideBarCollapsed = useRecoilValue(SideBarAtom);
+  // In your component
+  const breakpointColumns = isSideBarCollapsed
+    ? {
+        default: 4, // 4 columns when sidebar collapsed
+        1400: 3, // 3 columns on smaller screens
+        1100: 2,
+        700: 1,
+      }
+    : {
+        default: 3, // 3 columns when sidebar open
+        1100: 2,
+        700: 1,
+      };
+
   const [userPicture] = useState(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -98,9 +110,12 @@ export const ChatWithAI = () => {
     };
     fetchChatHistory();
   }, []);
+
   // HTML
   return (
-    <div className=" ml-72 mt-6 p-5 flex flex-col items-center">
+    <div
+      className={`${isSideBarCollapsed ? "ml-13.75" : "ml-72"} mt-6 p-5 flex flex-col items-center`}
+    >
       <div id="message-container" className="w-205 mb-28">
         {!msgList.length && nochat && (
           <div className="flex mt-20 gap-4 flex-col justify-center items-center">
@@ -166,7 +181,7 @@ export const ChatWithAI = () => {
                         key={ind}
                         className="rounded-lg text-white w-fit max-w-full bg-[#30302E] p-2"
                       >
-                        {msg.content}
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
                       </div>
                     </div>
                     {msg.sourceIds && msg.sourceIds.length > 0 && (

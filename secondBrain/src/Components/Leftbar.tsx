@@ -7,8 +7,11 @@ import { IoChatboxEllipsesOutline } from "react-icons/io5";
 import { TbLayoutSidebarLeftCollapse } from "react-icons/tb";
 import { VscRobot } from "react-icons/vsc";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useRecoilState } from "recoil";
+import { SideBarAtom } from "../Recoil/SideBarAtom";
 
 export const Leftbar = () => {
+  const [isCollapsed, setIsCollapsed] = useRecoilState(SideBarAtom);
   const nav = useNavigate();
   const [userPicture] = useState(() => {
     const storedUser = localStorage.getItem("user");
@@ -39,74 +42,112 @@ export const Leftbar = () => {
     }
     nav("/login");
   };
+  const uncollapseSideBar = () => {
+    if (isCollapsed) {
+      setIsCollapsed(false);
+    }
+  };
   return (
-    <span className="fixed z-3 top-0 left-0 w-60 p-2 h-screen bg-black text-white border-2 border-black flex flex-col justify-between">
+    <span
+      className={`fixed z-3 top-0 left-0 ${isCollapsed ? "w-13.75" : "w-60"} p-2 h-screen bg-black text-white border-2 border-black flex flex-col justify-between`}
+    >
       <div className="upper-section">
         <div className="top-logo-section flex justify-between">
-          <div className="text-white text-xl pl-4 items-center gap-3 title flex mb-8">
+          <div
+            className={`text-white text-xl ${isCollapsed ? "" : "pl-4"} items-center gap-3 title flex mb-8`}
+          >
             <GiBrain size={36} color="#4f39f6" />
           </div>
-          <button className="cursor-pointer text-white text-xl pl-4 items-center gap-3 title flex mb-8">
+          <button
+            onClick={() => {
+              setIsCollapsed(true);
+            }}
+            style={isCollapsed ? { display: "none" } : {}}
+            className="cursor-pointer text-white text-xl pl-4  gap-3 title mb-8"
+          >
             <TbLayoutSidebarLeftCollapse />
           </button>
         </div>
-        <div className="mid-elems-section text-left flex flex-col gap-2 mb-8">
+        <div
+          className={`mid-elems-section text-left flex flex-col ${isCollapsed ? "items-center" : ""} gap-2 mb-8`}
+        >
           <NavLink
+            onClick={() => {
+              uncollapseSideBar();
+            }}
             className={({ isActive }) =>
-              `cursor-pointer text-left text-[#a9a9a9]  pl-4 flex 
+              `cursor-pointer text-left text-[#a9a9a9]  ${isCollapsed ? "flex w-full justify-center" : "pl-4"} flex 
             items-center gap-2 py-2 focus:text-white hover:text-white
-             focus:bg-[#1c1e1f] hover:bg-[#1c1e1f] ${isActive ? "text-white bg-[#1c1e1f]" : "text-[#a9a9a9]"}`
+             focus:bg-[#30302E] hover:bg-[#30302E] ${isActive ? "text-white bg-[#30302E] rounded-md" : "text-[#a9a9a9]"}`
             }
             to={"/dashboard/all-content"}
           >
             <IoChatboxEllipsesOutline
+              title="All Content"
               size={20}
-              color="#9CA3AF
-"
-            />{" "}
-            All Content
+              color="#9CA3AF"
+            />
+            {!isCollapsed && "All Content"}
           </NavLink>
           <NavLink
             to={"/dashboard/thoughts"}
+            onClick={() => {
+              uncollapseSideBar();
+            }}
             className={({ isActive }) =>
-              `cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f] ${isActive ? "text-white bg-[#1c1e1f]" : "text-[#a9a9a9]"}`
+              `cursor-pointer flex text-[#a9a9a9] ${isCollapsed ? "flex w-full justify-center" : "pl-4"} items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#30302E] hover:bg-[#30302E] ${isActive ? "text-white bg-[#30302E]  rounded-md" : "text-[#a9a9a9]"}`
             }
           >
-            <GiNotebook size={20} color="#E6D8F2" />
-            Thoughts
+            <GiNotebook title="Thoughts" size={20} color="#E6D8F2" />
+            {!isCollapsed && "Thoughts"}
           </NavLink>
           <NavLink
             to={"/dashboard/tweeter-content"}
+            onClick={() => {
+              uncollapseSideBar();
+            }}
             className={({ isActive }) =>
-              `cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f] ${isActive ? "text-white bg-[#1c1e1f]" : "text-[#a9a9a9]"}`
+              `cursor-pointer flex text-[#a9a9a9] ${isCollapsed ? "flex w-full justify-center" : "pl-4"} items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#30302E] hover:bg-[#30302E] ${isActive ? "text-white bg-[#30302E]  rounded-md" : "text-[#a9a9a9]"}`
             }
           >
-            <CiTwitter
-              size={20}
-              color="#1DA1F2
-"
-            />{" "}
-            Twitter
+            <CiTwitter title="Twitter" size={20} color="#1DA1F2" />
+            {!isCollapsed && "Twitter"}
           </NavLink>
           <NavLink
+            onClick={() => {
+              uncollapseSideBar();
+            }}
             to={"/dashboard/youtube-content"}
-            className="cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2  py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f]"
+            className={({ isActive }) =>
+              `cursor-pointer flex text-[#a9a9a9] ${isCollapsed ? "flex w-full justify-center" : "pl-4"} items-center gap-2  py-2 focus:text-white hover:text-white focus:bg-[#30302E] hover:bg-[#30302E] ${isActive ? "text-white bg-[#30302E]  rounded-md" : "text-[#a9a9a9]"}`
+            }
           >
-            <AiOutlineYoutube color="red" size={20} /> Youtube
+            <AiOutlineYoutube title="Youtube" color="red" size={20} />
+            {!isCollapsed && "Youtube"}
           </NavLink>
 
           <NavLink
+            onClick={() => {
+              uncollapseSideBar();
+            }}
             to={"/dashboard/chat-with-ai"}
-            className="cursor-pointer flex text-[#a9a9a9] pl-4 items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#1c1e1f] hover:bg-[#1c1e1f]"
+            className={({ isActive }) =>
+              `cursor-pointer flex text-[#a9a9a9] ${isCollapsed ? "flex w-full justify-center" : "pl-4"} items-center gap-2 py-2 focus:text-white hover:text-white focus:bg-[#30302E] hover:bg-[#30302E] ${isActive ? "text-white bg-[#30302E] rounded-md" : "text-[#a9a9a9]"}`
+            }
           >
-            <VscRobot size={20} color="#22D3EE" />
-            Ask AI
+            <VscRobot title="Ask AI" size={20} color="#22D3EE" />
+            {!isCollapsed && "Ask AI"}
           </NavLink>
         </div>
       </div>
       <div className="lower-section">
-        <div className="bottom-profile-section p-2 bg-[#30302E] rounded">
-          <div className="profile+name flex items-center gap-2 mb-4">
+        <div
+          className={`bottom-profile-section ${isCollapsed ? "" : "p-2 bg-[#30302E] rounded"} `}
+        >
+          <div
+            className="profile+name flex items-center gap-2 mb-4"
+            title="Profile"
+          >
             {userPicture == "" ? (
               <span className="rounded-full">
                 <CgProfile size={24} />
@@ -114,18 +155,18 @@ export const Leftbar = () => {
             ) : (
               <img src={userPicture} className="rounded-full w-7 h-7" />
             )}
-            <span>{userName}</span>
+            <span> {!isCollapsed && userName}</span>
           </div>
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-4" title="Settings">
             <CiSettings size={24} />
-            Settings
+            {!isCollapsed && "Settings"}
           </div>
           <button
             onClick={() => logout()}
             className="flex cursor-pointer items-center gap-2 mb-4"
           >
-            <CiLogout size={24} />
-            Logout
+            <CiLogout size={24} title="Logout" />
+            {!isCollapsed && "Logout"}
           </button>
         </div>
       </div>

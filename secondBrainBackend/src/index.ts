@@ -29,10 +29,16 @@ interface GoogleTokenPayload {
 
 
 // --------------------------------------------VECTOR EMBEDDING CONFIG
-const pc = new Pinecone({
-    apiKey: process.env.PINECONE_API_KEY as string,
-});
-const pcIndex = pc.index({ name: "cerebro-embeddings" });//NEED TO CREATE INDEX IN PINECONE FIRST
+let pcIndex;
+try {
+    const pc = new Pinecone({
+        apiKey: process.env.PINECONE_API_KEY as string,
+    });
+    pcIndex = pc.index({ name: "cerebro-embeddings" });//NEED TO CREATE INDEX IN PINECONE FIRST
+} catch (error) {
+    console.error('❌ Pinecone initialization failed:', error);
+    process.exit(1);
+}
 // -------------------------------------------
 
 
@@ -85,7 +91,7 @@ const middleAuth = (req: Request, res: Response, next: NextFunction): void => {
         let token = req.header('Token') as string;
 
         if (!token) {
-            res.status(403).json({ error: "You don't access for this" })
+            res.status(403).json({ error: "Authentication token required" })
             return;
         }
         console.log("SECRET_KEY", process.env.SECRET_KEY);
@@ -94,14 +100,25 @@ const middleAuth = (req: Request, res: Response, next: NextFunction): void => {
         req.userId = payload
         next()
     } catch (error) {
-        res.status(401).json({ message: "Invalid or expired token" });
+        if (error instanceof jwt.JsonWebTokenError) {
+            res.status(401).json({ error: "Invalid token" });
+        } else if (error instanceof jwt.TokenExpiredError) {
+            res.status(401).json({ error: "Token expired" });
+        } else {
+            res.status(500).json({ error: "Authentication failed" });
+        }
     }
 }
 // ----------------------------------------- 
 
 // ----------------------------------------- DB CONFIG + CONNECT
 async function DbConnect() {
-    await mongoose.connect('mongodb+srv://phenomenal:Phenomenal@cluster0.9ubnr8w.mongodb.net/NeuralNetwork')
+    try {
+        await mongoose.connect('mongodb+srv://phenomenal:Phenomenal@cluster0.9ubnr8w.mongodb.net/NeuralNetwork')
+    } catch (err) {
+        console.error('❌ Database connection failed:', err);
+        process.exit(1); // Exit if DB fails
+    }
 }
 DbConnect()
 // ----------------------------------------- 
@@ -218,10 +235,23 @@ app.post('/v0/api/signin', async (req: Request, res: Response) => {
     let { name, email, password } = req.body;
     const result = SignIn.safeParse({ name, email, password });
     if (result.success) {
-        await UserModel.create({ name, email, password });
-        res.status(200).json({
-            message: 'Sign in Successfully'
-        })
+        try {
+            const existingUser = await UserModel.findOne({ email });
+            if (existingUser) {
+                return res.status(409).json({
+                    error: 'User already exists'
+                });
+            }
+            await UserModel.create({ name, email, password });
+            res.status(200).json({
+                message: 'Sign in Successfully'
+            })
+        } catch (err) {
+            console.error('SignIn error:', err);
+            res.status(500).json({
+                error: 'Failed to create user'
+            });
+        }
     } else {
         res.status(400).json({
             error: result.error
@@ -233,18 +263,25 @@ app.post('/v0/api/login', async (req, res) => {
     let { email, password } = req.body;
     const result = LogIn.safeParse({ password, email })
     if (result.success) {
-        let user = await UserModel.findOne({ email, password });
-        if (user) {
-            console.log("SECRET_KEY", process.env.SECRET_KEY);
-            let token = jwt.sign(user._id.toString(), process.env.SECRET_KEY as string);
-            res.status(200).json({
-                message: 'Login in Successfully',
-                token: token
-            })
-        } else {
+        try {
+            let user = await UserModel.findOne({ email, password });
+            if (user) {
+                console.log("SECRET_KEY", process.env.SECRET_KEY);
+                let token = jwt.sign(user._id.toString(), process.env.SECRET_KEY as string);
+                res.status(200).json({
+                    message: 'Login in Successfully',
+                    token: token
+                })
+            } else {
+                res.status(500).json({
+                    error: 'Incorrect credentials'
+                })
+            }
+        } catch (error) {
+            console.error('Login error:', error);
             res.status(500).json({
-                error: 'Incorrect credentials'
-            })
+                error: 'Login failed'
+            });
         }
     } else {
         res.status(400).json({
@@ -296,7 +333,7 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
                 if (strongMatches.length > 0) {
                     AIResponse = {
                         role: "asstistant", timeStamp: new Date().toLocaleString(),
-                        content: `Based on your content, I found "${strongMatches.length}" item${strongMatches.length > 1 ? 's' : ''} related to "${content}".`,
+                        content: `Based on your content, I found **${strongMatches.length} item${strongMatches.length > 1 ? 's' : ''}** related to **${content}**.`,
                         sourceIds: strongMatches.map(r => r.id)
                     } as any
                     existingChat.messages.push(
@@ -305,7 +342,7 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
                 } else {
                     AIResponse = {
                         role: "assistant", timeStamp: new Date().toLocaleString(),
-                        content: `I couldn't find anything about "${content}" in your saved content. Try adding more content or rephrasing your question.`,
+                        content: `I couldn't find anything about **${content}** in your saved content. Try adding more content or rephrasing your question.`,
                         sourceIds: []
                     } as any
                     existingChat.messages.push(
@@ -323,7 +360,7 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
                 if (strongMatches.length > 0) {
                     AIResponse = {
                         role: "asstistant", timeStamp: new Date().toLocaleString(),
-                        content: `Based on your content, I found "${strongMatches.length}" item${strongMatches.length > 1 ? 's' : ''} related to "${content}".`,
+                        content: `Based on your content, I found **${strongMatches.length} item${strongMatches.length > 1 ? 's' : ''}** related to **${content}**.`,
                         sourceIds: strongMatches.map(r => r.id)
                     } as any
                     firstChat.messages.push(
@@ -332,7 +369,7 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
                 } else {
                     AIResponse = {
                         role: "assistant", timeStamp: new Date().toLocaleString(),
-                        content: `I couldn't find anything about "${content}" in your saved content. Try adding more content or rephrasing your question.`,
+                        content: `I couldn't find anything about **${content}** in your saved content. Try adding more content or rephrasing your question.`,
                         sourceIds: []
                     } as any
                     firstChat.messages.push(
@@ -349,10 +386,10 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
                 AIResponse
             })
         } catch (err) {
-            console.error('Search error:', err);
-            res.status(500).json({
-                error: 'Search failed'
-            })
+            console.error('Chat error:', err);
+            return res.status(500).json({
+                error: 'Search failed. Please try again.'
+            });
         }
     }
     else {
@@ -365,43 +402,65 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
 app.post('/v0/api/add-content', middleAuth, upload.single("imageUrl"), async (req, res) => {
     let imageUrl = ''
     let vectorInput = "";
-    if (req.file) {
-        const image = req.file;
-        imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
-    }
-    let { title, desc, type, tags, url } = req.body;
-    const result = Content.safeParse({ title, type, tags, url, desc, imageUrl })
-    if (result.success) {
-        vectorInput += `User context:\n${desc} \nTitle:\n${title} \nType:\n${type} \nTags:\n${JSON.stringify(tags)}`;
-        const vector = await getEmbedding(vectorInput);
-        const content = await ContentModel.create({ imageUrl: imageUrl, title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose.Types.ObjectId(req.userId as string), createdAt: new Date().toISOString() });
-        if (content) {
-            await pcIndex.upsert({
-                records: [
-                    {
-                        id: content._id.toString(),
-                        values: vector,
-                        metadata: {
-                            userId: req.userId as string,
-                            type: type,
-                            tags: JSON.stringify(tags)
-                        },
-                    }
-                ],
-                namespace: req.userId as string
-            });
-            res.status(201).json({
-                message: 'Content added Successfully',
-            })
+    try {
+        if (req.file) {
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(req.file.mimetype)) {
+                return res.status(400).json({
+                    error: 'Invalid file type. Only JPEG, PNG, and WebP allowed.'
+                });
+            }
+            if (req.file.size > 5 * 1024 * 1024) {
+                return res.status(400).json({
+                    error: 'File too large. Maximum size is 5MB.'
+                });
+            }
+            const image = req.file;
+            imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+        }
+        let { title, desc, type, tags, url } = req.body;
+
+        const result = Content.safeParse({ title, type, tags, url, desc, imageUrl })
+        if (result.success) {
+            const content = await ContentModel.create({ imageUrl: imageUrl, title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose.Types.ObjectId(req.userId as string), createdAt: new Date().toISOString() });
+            if (content) {
+                vectorInput += `User context:\n${desc} \nTitle:\n${title} \nType:\n${type} \nTags:\n${JSON.stringify(tags)}`;
+                getEmbedding(vectorInput).then((vector) => {
+                    pcIndex.upsert({
+                        records: [
+                            {
+                                id: content._id.toString(),
+                                values: vector,
+                                metadata: {
+                                    userId: req.userId as string,
+                                    type: type,
+                                    tags: JSON.stringify(tags)
+                                },
+                            }
+                        ],
+                        namespace: req.userId as string
+                    });
+                })
+                    .catch(err => console.error('Background embedding error:', err));
+                res.status(201).json({
+                    message: 'Content added Successfully',
+                })
+            } else {
+                res.status(500).json({
+                    message: 'Incorrect credentials'
+                })
+            }
         } else {
-            res.status(500).json({
-                message: 'Incorrect credentials'
+            res.status(400).json({
+                error: result.error
             })
         }
-    } else {
-        res.status(400).json({
-            error: result.error
-        })
+    } catch (err) {
+        console.error('Add content error:', err);
+
+        res.status(500).json({
+            error: 'Failed to add content'
+        });
     }
 })
 

@@ -13,6 +13,7 @@ import { UserArea } from "./UserArea";
 
 export const Dashboard = () => {
   const [openAddContentModal, setOpenAddContentModal] = useState(false);
+  // const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [alertMsg, setAlertMsg] = useState("");
   const nav = useNavigate();
   const [alertType, setAlertType] = useState<alertType>("success");
@@ -37,7 +38,9 @@ export const Dashboard = () => {
   // ---------------------------------------------------------- ADD CONTENT CARD
   const createCard = async (formData: CardProps) => {
     if (formData.type == "youtube") {
-      if (formData.contentUrl?.includes("watch?v=")) {
+      if (formData.contentUrl?.includes("shorts")) {
+        formData.contentUrl = formData.contentUrl.replace("shorts", "embed");
+      } else if (formData.contentUrl?.includes("watch?v=")) {
         formData.contentUrl = formData.contentUrl.replace("watch?v=", "embed/");
       } else if (formData.contentUrl?.includes("youtu.be")) {
         formData.contentUrl = formData.contentUrl.replace(
