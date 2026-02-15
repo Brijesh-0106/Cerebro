@@ -16,18 +16,21 @@ export const Cards = () => {
   const [searchParams] = useSearchParams();
   const isSideBarCollapsed = useRecoilValue(SideBarAtom);
   // In your component
-  const breakpointColumns = isSideBarCollapsed
-    ? {
-        default: 4, // 4 columns when sidebar collapsed
-        1400: 3, // 3 columns on smaller screens
-        1100: 2,
-        700: 1,
-      }
-    : {
-        default: 3, // 3 columns when sidebar open
-        1100: 2,
-        700: 1,
-      };
+  let breakpointColumns;
+  if (isSideBarCollapsed) {
+    breakpointColumns = {
+      default: 4,
+      1400: 3,
+      1100: 2,
+      700: 1,
+    };
+  } else {
+    breakpointColumns = {
+      default: 3,
+      1100: 2,
+      700: 1,
+    };
+  }
 
   useEffect(() => {
     const highlightId = searchParams.get("highlight");
@@ -40,12 +43,15 @@ export const Cards = () => {
   useEffect(() => {
     async function asyncContentDataFetch() {
       setLoading(true);
-      const data = await fetch(`http://localhost:3000/v0/api/get-all-content`, {
-        method: "GET",
-        headers: {
-          token: localStorage.getItem("token") as string,
+      const data = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/v0/api/get-all-content`,
+        {
+          method: "GET",
+          headers: {
+            token: localStorage.getItem("token") as string,
+          },
         },
-      });
+      );
       const res = await data.json();
       setCards([...res["AllUserContent"]]);
       setLoading(false);

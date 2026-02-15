@@ -85,22 +85,28 @@ export const Dashboard = () => {
     Data.append("title", formData.title);
     Data.append("type", formData.type);
     Data.append("url", formData.contentUrl as string);
-    const contentRes = await fetch(`http://localhost:3000/v0/api/add-content`, {
-      method: "POST",
-      headers: {
-        token: localStorage.getItem("token") as string,
-      },
-
-      body: Data,
-    });
-    if (contentRes.status == 201) {
-      reset();
-      const data = await fetch(`http://localhost:3000/v0/api/get-all-content`, {
-        method: "GET",
+    const contentRes = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v0/api/add-content`,
+      {
+        method: "POST",
         headers: {
           token: localStorage.getItem("token") as string,
         },
-      });
+
+        body: Data,
+      },
+    );
+    if (contentRes.status == 201) {
+      reset();
+      const data = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/v0/api/get-all-content`,
+        {
+          method: "GET",
+          headers: {
+            token: localStorage.getItem("token") as string,
+          },
+        },
+      );
       const res = await data.json();
       setCards([...res["AllUserContent"]]);
       setOpenAddContentModal(false);

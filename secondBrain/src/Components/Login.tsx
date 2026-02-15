@@ -33,7 +33,7 @@ export function Login() {
   };
 
   const login = async (credentials: LoginProps) => {
-    const data = await fetch(`http://localhost:3000/v0/api/login`, {
+    const data = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v0/api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

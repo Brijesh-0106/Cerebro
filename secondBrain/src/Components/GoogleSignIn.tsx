@@ -15,7 +15,7 @@ const GoogleSignIn: React.FC<GoogleSignInProps> = ({ onSuccess, onError }) => {
       }
 
       // Send the token to your backend
-      const response = await fetch(`http://localhost:3000/v0/api/google`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v0/api/google`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

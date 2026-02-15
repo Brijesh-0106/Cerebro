@@ -35,7 +35,7 @@ export function SignIn() {
   };
 
   const signin = async (data: SignInProps) => {
-    const res = await fetch(`http://localhost:3000/v0/api/signin`, {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v0/api/signin`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

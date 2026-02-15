@@ -14,24 +14,28 @@ export default function Youtube() {
   const [loading, setLoading] = useState(false);
   const isSideBarCollapsed = useRecoilValue(SideBarAtom);
   // In your component
-  const breakpointColumns = isSideBarCollapsed
-    ? {
-        default: 4, // 4 columns when sidebar collapsed
-        1400: 3, // 3 columns on smaller screens
-        1100: 2,
-        700: 1,
-      }
-    : {
-        default: 3, // 3 columns when sidebar open
-        1100: 2,
-        700: 1,
-      };
+  let breakpointColumns;
+
+  if (isSideBarCollapsed) {
+    breakpointColumns = {
+      default: 4,
+      1400: 3,
+      1100: 2,
+      700: 1,
+    };
+  } else {
+    breakpointColumns = {
+      default: 3,
+      1100: 2,
+      700: 1,
+    };
+  }
 
   useEffect(() => {
     async function asyncDataFetch() {
       setLoading(true);
       const data = await fetch(
-        `http://localhost:3000/v0/api/get-all-youtube-content/`,
+        `${import.meta.env.VITE_BACKEND_URL}/v0/api/get-all-youtube-content/`,
         {
           method: "GET",
           headers: {

@@ -18,19 +18,22 @@ export const ChatWithAI = () => {
   const [isAIResReady, setIsAIResReady] = useState<boolean>(true);
   const [nochat, setNoChat] = useState<boolean>(false);
   const isSideBarCollapsed = useRecoilValue(SideBarAtom);
-  // In your component
-  const breakpointColumns = isSideBarCollapsed
-    ? {
-        default: 4, // 4 columns when sidebar collapsed
-        1400: 3, // 3 columns on smaller screens
-        1100: 2,
-        700: 1,
-      }
-    : {
-        default: 3, // 3 columns when sidebar open
-        1100: 2,
-        700: 1,
-      };
+
+  let breakpointColumns;
+  if (isSideBarCollapsed) {
+    breakpointColumns = {
+      default: 4,
+      1400: 3,
+      1100: 2,
+      700: 1,
+    };
+  } else {
+    breakpointColumns = {
+      default: 3,
+      1100: 2,
+      700: 1,
+    };
+  }
 
   const [userPicture] = useState(() => {
     const storedUser = localStorage.getItem("user");
@@ -61,18 +64,21 @@ export const ChatWithAI = () => {
     };
     setMsgList((prevMsgList) => [...prevMsgList, newMessage]);
     setNoChat(() => false);
-    const chatRes = await fetch(`http://localhost:3000/v0/api/add-chat`, {
-      headers: {
-        token: localStorage.getItem("token") || "",
-        "Content-Type": "application/json", // ✅ Critical
+    const chatRes = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v0/api/add-chat`,
+      {
+        headers: {
+          token: localStorage.getItem("token") || "",
+          "Content-Type": "application/json", // ✅ Critical
+        },
+        method: "POST",
+        body: JSON.stringify({
+          content: newMessage.content,
+          role: newMessage.role,
+          timeStamp: newMessage.timeStamp,
+        }),
       },
-      method: "POST",
-      body: JSON.stringify({
-        content: newMessage.content,
-        role: newMessage.role,
-        timeStamp: newMessage.timeStamp,
-      }),
-    });
+    );
     const res = await chatRes.json();
     const newAIMessage: ConversationProps = {
       role: "assistant", //assitant or user
@@ -97,12 +103,15 @@ export const ChatWithAI = () => {
 
   useEffect(() => {
     const fetchChatHistory = async () => {
-      const chatRes = await fetch(`http://localhost:3000/v0/api/load-chat`, {
-        headers: {
-          token: localStorage.getItem("token") || "",
+      const chatRes = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/v0/api/load-chat`,
+        {
+          headers: {
+            token: localStorage.getItem("token") || "",
+          },
+          method: "GET",
         },
-        method: "GET",
-      });
+      );
       const data = await chatRes.json();
       setMsgList(data.messages);
       if (!msgList.length) setNoChat(() => true);
