@@ -1,17 +1,23 @@
-import { Request } from 'express';
 import multer from "multer";
-import path from "path";
-const storage = multer.diskStorage({
-    destination: (req: Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
-        cb(null, "uploads/");
-    },
-    filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
-        const uniqueName =
-            Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, uniqueName + path.extname(file.originalname));
-    },
-});
+
 
 export const upload = multer({
-    storage
+    storage: multer.memoryStorage()
 });
+
+// import cloudinary from "./cloudinaryStore";
+import cloudinary from "./cloudinaryStore.js";
+export const uploadImage = (fileBuffer: Buffer): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            { folder: "cerebro" },
+            (error, result) => {
+                if (error) return reject(error);
+                resolve(result!.secure_url);
+            }
+        );
+
+        stream.end(fileBuffer);
+    });
+};
+

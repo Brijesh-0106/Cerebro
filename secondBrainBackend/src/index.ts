@@ -9,7 +9,7 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 import path from 'path/win32';
 import * as z from "zod";
 import { getEmbedding } from './hfEmbedding.js';
-import { upload } from "./storage.js"; // Note: add .js extension   
+import { upload, uploadImage } from "./storage.js"; // Note: add .js extension   
 // -------------------------------------------
 
 // --------------------------------------------DOTENV CONFIG
@@ -415,8 +415,9 @@ app.post('/v0/api/add-content', middleAuth, upload.single("imageUrl"), async (re
                     error: 'File too large. Maximum size is 5MB.'
                 });
             }
-            const image = req.file;
-            imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+            imageUrl = await uploadImage(req.file.buffer);
+            // const image = req.file;
+            // imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
         }
         let { title, desc, type, tags, url } = req.body;
 
