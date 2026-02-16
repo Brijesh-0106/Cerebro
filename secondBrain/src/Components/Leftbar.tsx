@@ -32,6 +32,12 @@ export const Leftbar = () => {
       } catch {
         return "";
       }
+    } else {
+      try {
+        return localStorage.getItem("userName") || "";
+      } catch {
+        return "";
+      }
     }
     return "";
   });
@@ -155,7 +161,7 @@ export const Leftbar = () => {
             ) : (
               <img src={userPicture} className="rounded-full w-7 h-7" />
             )}
-            <span> {!isCollapsed && userName}</span>
+            <span> {!isCollapsed && (userName ? userName : "Guest User")}</span>
           </div>
           <div className="flex items-center gap-2 mb-4" title="Settings">
             <CiSettings size={24} />

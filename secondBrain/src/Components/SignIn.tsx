@@ -13,10 +13,11 @@ export function SignIn() {
   const nav = useNavigate();
   const googleButtonRef = useRef<HTMLDivElement>(null);
   const [showAlert, setShowAlert] = useState(false);
-  const [error, setError] = useState("");
+  const [errorGoogle, setErrorGoogle] = useState("");
 
   const {
     register,
+    setError,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<SignInProps>();
@@ -28,10 +29,17 @@ export function SignIn() {
   };
 
   const handleGoogleError = (error: string) => {
-    setError(error);
+    setErrorGoogle(error);
   };
 
   const signin = async (data: SignInProps) => {
+    if (data.passwordInput !== data.confirmPasswordInput) {
+      setError("confirmPasswordInput", {
+        type: "Password Validations",
+        message: "Password and Confirm Password doesn't match",
+      });
+      return;
+    }
     const res = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v0/api/signin`,
       {
@@ -53,8 +61,13 @@ export function SignIn() {
         setShowAlert(false);
         nav("/login");
       }, 1000);
-    } else {
-      alert("Temporary Closed");
+    } else if (res.status == 409) {
+      // alert("Temporary Closed");
+      setError("emailInput", {
+        type: "User Already Exist",
+        message: "User with this email already exist, Please try login",
+      });
+      return;
     }
   };
 
@@ -77,7 +90,7 @@ export function SignIn() {
           <GiBrain size={48} color="#4f39f6" />
           Cerebro
         </div>
-        {error && <div className="error-message">{error}</div>}
+        {errorGoogle && <div className="error-message">{errorGoogle}</div>}
         <div className="flex justify-center">
           <button
             onClick={handleCustomButtonClick}

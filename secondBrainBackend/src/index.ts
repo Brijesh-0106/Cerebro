@@ -270,7 +270,8 @@ app.post('/v0/api/login', async (req, res) => {
                 let token = jwt.sign(user._id.toString(), process.env.SECRET_KEY as string);
                 res.status(200).json({
                     message: 'Login in Successfully',
-                    token: token
+                    token: token,
+                    name: user.name
                 })
             } else {
                 res.status(500).json({

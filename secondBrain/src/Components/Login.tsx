@@ -11,7 +11,7 @@ import GoogleSignIn from "./GoogleSignIn";
 export function Login() {
   const googleButtonRef = useRef<HTMLDivElement>(null);
   const nav = useNavigate();
-  const [error, setError] = useState("");
+  const [errorGoogle, setErrorGoogle] = useState("");
 
   const {
     register,
@@ -26,7 +26,7 @@ export function Login() {
   };
 
   const handleGoogleError = (error: string) => {
-    setError(error);
+    setErrorGoogle(error);
   };
 
   const login = async (credentials: LoginProps) => {
@@ -45,8 +45,13 @@ export function Login() {
     );
     if (data.status == 200) {
       const res = await data.json();
+      localStorage.setItem("userName", res.name);
       localStorage.setItem("token", res.token);
       nav("/dashboard/all-content");
+    } else if (data.status == 500) {
+      const res = await data.json();
+      setErrorGoogle(res.error);
+      return;
     }
   };
   const handleCustomButtonClick = () => {
@@ -65,7 +70,7 @@ export function Login() {
           <GiBrain size={48} color="#4f39f6" />
           Cerebro
         </div>
-        {error && <div className="error-message">{error}</div>}
+        {errorGoogle && <div className="error-message">{errorGoogle}</div>}
         <div className="flex justify-center">
           <button
             onClick={handleCustomButtonClick}
