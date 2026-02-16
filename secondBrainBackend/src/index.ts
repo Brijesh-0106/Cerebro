@@ -322,8 +322,9 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
                 includeMetadata: true,  // ✅ Add this
                 includeValues: false     // Don't need the vectors back
             })
+            console.log(vectorResult, "All vector results")
             const strongMatches = vectorResult.matches.filter((elem) =>
-                elem.score && elem.score > 0.35
+                elem.score && elem.score > 0.25
             )
             const existingChat = await ConversationModel.findOne({
                 userId: req.userId
@@ -334,7 +335,7 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
                 if (strongMatches.length > 0) {
                     AIResponse = {
                         role: "asstistant", timeStamp: new Date().toLocaleString(),
-                        content: `Based on your content, I found **${strongMatches.length} item${strongMatches.length > 1 ? 's' : ''}** related to **${content}**.`,
+                        content: `Based on your content, I found following **${strongMatches.length} item${strongMatches.length > 1 ? 's' : ''}** related to **${content}**.`,
                         sourceIds: strongMatches.map(r => r.id)
                     } as any
                     existingChat.messages.push(
@@ -361,7 +362,7 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
                 if (strongMatches.length > 0) {
                     AIResponse = {
                         role: "asstistant", timeStamp: new Date().toLocaleString(),
-                        content: `Based on your content, I found **${strongMatches.length} item${strongMatches.length > 1 ? 's' : ''}** related to **${content}**.`,
+                        content: `Based on your content, I found following **${strongMatches.length} item${strongMatches.length > 1 ? 's' : ''}** related to **${content}**.`,
                         sourceIds: strongMatches.map(r => r.id)
                     } as any
                     firstChat.messages.push(
@@ -427,6 +428,8 @@ app.post('/v0/api/add-content', middleAuth, upload.single("imageUrl"), async (re
             const content = await ContentModel.create({ imageUrl: imageUrl, title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose.Types.ObjectId(req.userId as string), createdAt: new Date().toISOString() });
             if (content) {
                 vectorInput += `User context:\n${desc} \nTitle:\n${title} \nType:\n${type} \nTags:\n${JSON.stringify(tags)}`;
+                console.log(vectorInput);
+
                 getEmbedding(vectorInput).then((vector) => {
                     pcIndex.upsert({
                         records: [

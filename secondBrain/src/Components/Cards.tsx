@@ -35,9 +35,11 @@ export const Cards = () => {
   useEffect(() => {
     const highlightId = searchParams.get("highlight");
     if (highlightId) {
-      const element = document.getElementById(highlightId);
-      element?.scrollIntoView({ behavior: "smooth" });
-      element?.classList.add("shadow-xl", "highlighted-card"); // Highlight
+      setTimeout(() => {
+        const element = document.getElementById(highlightId);
+        element?.scrollIntoView({ behavior: "smooth", block: "center" });
+        element?.classList.add("shadow-xl", "highlighted-card");
+      }, 400); // Wait 300ms for layout
     }
   }, [cards]);
   useEffect(() => {
