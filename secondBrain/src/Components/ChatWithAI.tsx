@@ -188,72 +188,22 @@ export const ChatWithAI = () => {
                       </div>
                       <div
                         key={ind}
-                        className="rounded-lg text-white w-fit max-w-full bg-[#30302E] p-2"
+                        className="rounded-lg text-white w-fit max-w-full bg-[#000000] p-2"
                       >
                         <ReactMarkdown
                           components={{
-                            p: ({ node, children, ...props }) => {
-                              const text = String(children);
-                              if (text.includes("<blue>")) {
-                                const cleaned = text.replace(/<\/?blue>/g, "");
-                                return (
-                                  <p
-                                    className="text-orange-400 mb-2"
-                                    {...props}
-                                  >
-                                    {cleaned}
-                                  </p>
-                                );
-                              }
-                              if (text.includes("<purple>")) {
-                                const cleaned = text.replace(
-                                  /<\/?purple>/g,
-                                  "",
-                                );
-                                return (
-                                  <p
-                                    className="text-purple-300 mb-2"
-                                    {...props}
-                                  >
-                                    {cleaned}
-                                  </p>
-                                );
-                              }
+                            p: ({ children, ...props }) => {
                               return (
                                 <p className="text-gray-200 mb-2" {...props}>
                                   {children}
                                 </p>
                               );
                             },
-                            li: ({ node, children, ...props }) => {
-                              const text = String(children);
-                              if (text.includes("<blue>")) {
-                                const cleaned = text.replace(/<\/?blue>/g, "");
-                                return (
-                                  <li
-                                    className="text-blue-400 ml-5 mb-1"
-                                    {...props}
-                                  >
-                                    {cleaned}
-                                  </li>
-                                );
-                              }
-                              if (text.includes("<purple>")) {
-                                const cleaned = text.replace(
-                                  /<\/?purple>/g,
-                                  "",
-                                );
-                                return (
-                                  <li
-                                    className="text-purple-300 ml-5 mb-1"
-                                    {...props}
-                                  >
-                                    {cleaned}
-                                  </li>
-                                );
-                              }
+                            li: ({ children, ...props }) => {
+                              // Fix: join array children properly instead of String()
                               return (
                                 <li
+                                  style={{ listStyle: "inside" }}
                                   className="text-gray-200 ml-5 mb-1"
                                   {...props}
                                 >

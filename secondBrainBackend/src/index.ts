@@ -355,7 +355,7 @@ app.post('/v0/api/add-chat', middleAuth, async (req: Request, res: Response) => 
                                 content: `You are a concise assistant.
                                 STRICT RULES:
                                 - 2-4 sentence overview only
-                                - Then bullet points for key concepts
+                                - Then medium size bullet points for key concepts
                                 - Tag bullets with (Source 1) or (Source 2) at end
                                 - DO NOT add any "Note:" or disclaimer at end
                                 - DO NOT say "based on provided context"
