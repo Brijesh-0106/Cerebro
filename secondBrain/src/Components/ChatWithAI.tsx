@@ -190,7 +190,81 @@ export const ChatWithAI = () => {
                         key={ind}
                         className="rounded-lg text-white w-fit max-w-full bg-[#30302E] p-2"
                       >
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        <ReactMarkdown
+                          components={{
+                            p: ({ node, children, ...props }) => {
+                              const text = String(children);
+                              if (text.includes("<blue>")) {
+                                const cleaned = text.replace(/<\/?blue>/g, "");
+                                return (
+                                  <p
+                                    className="text-orange-400 mb-2"
+                                    {...props}
+                                  >
+                                    {cleaned}
+                                  </p>
+                                );
+                              }
+                              if (text.includes("<purple>")) {
+                                const cleaned = text.replace(
+                                  /<\/?purple>/g,
+                                  "",
+                                );
+                                return (
+                                  <p
+                                    className="text-purple-300 mb-2"
+                                    {...props}
+                                  >
+                                    {cleaned}
+                                  </p>
+                                );
+                              }
+                              return (
+                                <p className="text-gray-200 mb-2" {...props}>
+                                  {children}
+                                </p>
+                              );
+                            },
+                            li: ({ node, children, ...props }) => {
+                              const text = String(children);
+                              if (text.includes("<blue>")) {
+                                const cleaned = text.replace(/<\/?blue>/g, "");
+                                return (
+                                  <li
+                                    className="text-blue-400 ml-5 mb-1"
+                                    {...props}
+                                  >
+                                    {cleaned}
+                                  </li>
+                                );
+                              }
+                              if (text.includes("<purple>")) {
+                                const cleaned = text.replace(
+                                  /<\/?purple>/g,
+                                  "",
+                                );
+                                return (
+                                  <li
+                                    className="text-purple-300 ml-5 mb-1"
+                                    {...props}
+                                  >
+                                    {cleaned}
+                                  </li>
+                                );
+                              }
+                              return (
+                                <li
+                                  className="text-gray-200 ml-5 mb-1"
+                                  {...props}
+                                >
+                                  {children}
+                                </li>
+                              );
+                            },
+                          }}
+                        >
+                          {msg.content}
+                        </ReactMarkdown>
                       </div>
                     </div>
                     {msg.sourceIds && msg.sourceIds.length > 0 && (

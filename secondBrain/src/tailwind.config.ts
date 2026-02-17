@@ -6,6 +6,10 @@ const config: Config = {
         "./src/**/*.{js,ts,jsx,tsx}",
     ],
     theme: {
+        colors: {
+            'blue': 'rgb(112, 184, 255)',
+            'orange': 'rgb(251, 173, 96)',
+        },
         extend: {
             keyframes: {
                 shimmer: {

@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from "dotenv";
 import express, { NextFunction, Request, Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
+import Groq from "groq-sdk";
 import jwt from 'jsonwebtoken';
 import mongoose, { Document, Schema, Types } from 'mongoose';
 import path from 'path/win32';
@@ -16,6 +17,7 @@ import { upload, uploadImage } from "./storage.js"; // Note: add .js extension
 dotenv.config({ path: path.join(process.cwd(), '../.env') });
 // -------------------------------------------
 
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 // --------------------------------------------OAUTH2 CONFIG
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -119,6 +121,7 @@ async function DbConnect() {
         console.error('❌ Database connection failed:', err);
         process.exit(1); // Exit if DB fails
     }
+    console.log("CONNECTED to DB");
 }
 DbConnect()
 // ----------------------------------------- 
@@ -308,7 +311,7 @@ app.get('/v0/api/load-chat', middleAuth, async (req, res) => {
     }
 })
 
-app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
+app.post('/v0/api/add-chat', middleAuth, async (req: Request, res: Response) => {
     let { content, role, timeStamp } = req.body;
     let vectorInput = "";
     const result = Conversation.safeParse({ content, role, timeStamp });
@@ -318,7 +321,7 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
             const vector = await getEmbedding(vectorInput);
             const vectorResult = await pcIndex.namespace(req.userId as string).query({
                 vector: vector,
-                topK: 3,
+                topK: 2,
                 includeMetadata: true,  // ✅ Add this
                 includeValues: false     // Don't need the vectors back
             })
@@ -333,20 +336,73 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
             if (existingChat) {
                 existingChat.messages.push({ content, role: "user", timeStamp } as any)
                 if (strongMatches.length > 0) {
+                    let sourceIds = strongMatches.map(r => r.id)
+                    // Add LLM
+                    const sources = await ContentModel.find({
+                        _id: { $in: sourceIds }
+                    });
+                    // Build context dynamically based on available sources
+                    const context = sources.map((s, i) =>
+                        `Source ${i + 1}: "${s.title}"
+                        Description: ${s.description}
+                        Type: ${s.type}
+                        Tags: ${s.tags}`
+                    ).join('\n\n');
+                    const completion = await groq.chat.completions.create({
+                        messages: [
+                            {
+                                role: "system",
+                                content: `You are a concise assistant.
+                                STRICT RULES:
+                                - 2-4 sentence overview only
+                                - Then bullet points for key concepts
+                                - Tag bullets with (Source 1) or (Source 2) at end
+                                - DO NOT add any "Note:" or disclaimer at end
+                                - DO NOT say "based on provided context"
+                                - DO NOT mention YouTube or video descriptions
+                                - Sound natural and direct`
+                            },
+                            {
+                                role: "user",
+                                content: `Context:\n${context}\n\nQuestion: "${content}"\n\nAnswer honestly based on available context.`
+                            }
+
+                        ],
+                        model: "llama-3.1-8b-instant",
+                        temperature: 0.4,
+                        max_tokens: 200
+                    })
+
+                    let answer = completion.choices[0].message.content;
                     AIResponse = {
                         role: "asstistant", timeStamp: new Date().toLocaleString(),
-                        content: `Based on your content, I found following **${strongMatches.length} item${strongMatches.length > 1 ? 's' : ''}** related to **${content}**.`,
-                        sourceIds: strongMatches.map(r => r.id)
+                        content: `${answer}`,
+                        sourceIds: sourceIds
                     } as any
                     existingChat.messages.push(
                         AIResponse
                     )
                 } else {
-                    AIResponse = {
-                        role: "assistant", timeStamp: new Date().toLocaleString(),
-                        content: `I couldn't find anything about **${content}** in your saved content. Try adding more content or rephrasing your question.`,
-                        sourceIds: []
-                    } as any
+                    const recentContent = await ContentModel
+                        .find({ userId: req.userId })
+                        .sort({ createdAt: -1 })
+                        .limit(3);
+                    if (recentContent.length > 0) {
+                        const topics = recentContent.map(c => c.title).join(', ');
+                        AIResponse = {
+                            role: "assistant", timeStamp: new Date().toLocaleString(),
+                            content: `I couldn't find anything about **${content}** in your saved content. You have content about: **${topics}**. Try adding **${content}**-related content first
+                                to build your second brain.`,
+                            sourceIds: []
+                        } as any
+                    } else {
+                        AIResponse = {
+                            role: "assistant", timeStamp: new Date().toLocaleString(),
+                            content: `I couldn't find anything about **${content}** in your saved content. Start by adding YouTube videos, tweets, or thoughts 
+                                    to build your second brain.`,
+                            sourceIds: []
+                        } as any
+                    }
                     existingChat.messages.push(
                         AIResponse
                     )
@@ -360,18 +416,59 @@ app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
                 })
 
                 if (strongMatches.length > 0) {
+                    let sourceIds = strongMatches.map(r => r.id)
+                    // Add LLM
+                    const sources = await ContentModel.find({
+                        _id: { $in: sourceIds }
+                    });
+                    const context = sources.map((s, i) =>
+                        `[${i + 1}] Title: ${s.title}\nDescription: ${s.description}\nType: ${s.type}\nTags:${JSON.stringify(s.tags)}`
+                    ).join('\n\n');
+                    const completion = await groq.chat.completions.create({
+                        messages: [
+                            {
+                                role: "system",
+                                content: `You are a helpful assistant that answers questions based on the user's saved content.
+                                    FORMATTING RULES:
+                                    - Keep answers concise (2-3 paragraphs maximum)
+                                    - Use line breaks between paragraphs
+                                    - Use bullet points for lists
+                                    - Cite sources as [Source 1], [Source 2], etc.
+                                    - Don't include references section at the end`
+                            },
+                            {
+                                role: "user",
+                                content: `Context from my saved content:
+                                    [Source 1] Title: ${sources[0].title}
+                                    Description: ${sources[0].description}
+
+                                    [Source 2] Title: ${sources[1]?.title || ''}
+                                    Description: ${sources[1]?.description || ''}
+
+                                    Question: ${content}
+
+                                    Provide a concise answer with proper formatting.`
+                            }
+                        ],
+                        model: "llama-3.1-8b-instant",
+                        temperature: 0.7,
+                        max_tokens: 500
+                    })
+                    console.log(completion, "RAG answer")
                     AIResponse = {
                         role: "asstistant", timeStamp: new Date().toLocaleString(),
-                        content: `Based on your content, I found following **${strongMatches.length} item${strongMatches.length > 1 ? 's' : ''}** related to **${content}**.`,
-                        sourceIds: strongMatches.map(r => r.id)
+                        content: `${completion.choices[0].message.content!}`,
+                        sourceIds: sourceIds
                     } as any
+                    // Add LLM
                     firstChat.messages.push(
                         AIResponse
                     )
                 } else {
                     AIResponse = {
                         role: "assistant", timeStamp: new Date().toLocaleString(),
-                        content: `I couldn't find anything about **${content}** in your saved content. Try adding more content or rephrasing your question.`,
+                        content: `I couldn't find anything about **${content}** in your saved content. Start by adding YouTube videos, tweets, or thoughts 
+                                to build your **Second Brain**.`,
                         sourceIds: []
                     } as any
                     firstChat.messages.push(
