@@ -13,13 +13,14 @@ export function SignIn() {
   const nav = useNavigate();
   const googleButtonRef = useRef<HTMLDivElement>(null);
   const [showAlert, setShowAlert] = useState(false);
+  const [disableBtn, setDisableBtn] = useState(false);
   const [errorGoogle, setErrorGoogle] = useState("");
 
   const {
     register,
     setError,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<SignInProps>();
 
   const handleGoogleSuccess = (user: Record<string, unknown>) => {
@@ -33,11 +34,13 @@ export function SignIn() {
   };
 
   const signin = async (data: SignInProps) => {
+    setDisableBtn(true);
     if (data.passwordInput !== data.confirmPasswordInput) {
       setError("confirmPasswordInput", {
         type: "Password Validations",
         message: "Password and Confirm Password doesn't match",
       });
+      setDisableBtn(false);
       return;
     }
     const res = await fetch(
@@ -67,8 +70,10 @@ export function SignIn() {
         type: "User Already Exist",
         message: "User with this email already exist, Please try login",
       });
+      setDisableBtn(false);
       return;
     }
+    setDisableBtn(false);
   };
 
   const handleCustomButtonClick = () => {
@@ -237,14 +242,21 @@ export function SignIn() {
             )}
           </div>
           <div className="flex justify-center mt-2">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              // onClick={() => signin()}
-              className="cursor-pointer rounded text-md w-sm justify-center bg-indigo-600 text-center text-white py-2 px-4 flex items-center gap-2"
-            >
-              Continue
-            </button>
+            {!disableBtn ? (
+              <button
+                type="submit"
+                className="cursor-pointer rounded text-md w-sm justify-center bg-indigo-600 text-center text-white py-2 px-4 flex items-center gap-2"
+              >
+                Continue
+              </button>
+            ) : (
+              <button
+                disabled={disableBtn}
+                className="cursor-pointer rounded text-md w-sm justify-center bg-indigo-900 text-center text-gray-400 py-2 px-4 flex items-center gap-2"
+              >
+                Processing
+              </button>
+            )}
           </div>
         </form>
         <div className="text-white">

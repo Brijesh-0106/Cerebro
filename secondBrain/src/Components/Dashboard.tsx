@@ -16,6 +16,7 @@ export const Dashboard = () => {
   // const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [alertMsg, setAlertMsg] = useState("");
   const nav = useNavigate();
+  const [disableBtn, setDisableBtn] = useState(false);
   const [alertType, setAlertType] = useState<alertType>("success");
   const [showAlert, setShowAlert] = useState(false);
   const {
@@ -25,7 +26,7 @@ export const Dashboard = () => {
     setError,
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<CardProps>({
     defaultValues: {
       tags: [],
@@ -37,6 +38,7 @@ export const Dashboard = () => {
   const setCards = useSetRecoilState(CardAtom);
   // ---------------------------------------------------------- ADD CONTENT CARD
   const createCard = async (formData: CardProps) => {
+    setDisableBtn(true);
     if (formData.type == "youtube") {
       if (formData.contentUrl?.includes("shorts")) {
         formData.contentUrl = formData.contentUrl.replace("shorts", "embed");
@@ -55,6 +57,7 @@ export const Dashboard = () => {
           type: "InValid URL",
           message: "Please enter a valid YouTube link",
         });
+        setDisableBtn(false);
         return;
       }
     } else if (formData.type == "tweet") {
@@ -73,6 +76,7 @@ export const Dashboard = () => {
           type: "InValid URL",
           message: "Please enter a valid Twitter link",
         });
+        setDisableBtn(false);
         return;
       }
     }
@@ -125,6 +129,7 @@ export const Dashboard = () => {
         setShowAlert(false);
       }, 2500);
     }
+    setDisableBtn(false);
   };
 
   // -------------------------------------------------------------------- JSX
@@ -333,13 +338,21 @@ export const Dashboard = () => {
                   </div>
                 </div>
                 <div className="footer flex flex-row-reverse border-t border-gray-400 p-2">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="cursor-pointer py-1 bg-indigo-600 w-28 text-white font-semibold rounded"
-                  >
-                    Add
-                  </button>
+                  {!disableBtn ? (
+                    <button
+                      type="submit"
+                      className="cursor-pointer py-1 bg-indigo-600 w-28 text-white font-semibold rounded"
+                    >
+                      Add
+                    </button>
+                  ) : (
+                    <button
+                      disabled={disableBtn}
+                      className="cursor-pointer rounded text-md w-sm justify-center bg-indigo-900 text-center text-gray-400 py-2 px-4 flex items-center gap-2"
+                    >
+                      Processing
+                    </button>
+                  )}
                 </div>
               </form>
             </div>

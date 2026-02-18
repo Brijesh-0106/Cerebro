@@ -54,12 +54,14 @@ export const ChatWithAI = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const sendChat = async () => {
-    if (!userChat || userChat.trim() === "") return; // Guard clause
+    const userText = userChat;
+    reset();
+    if (!userText || userText.trim() === "") return; // Guard clause
     setIsAIResReady(() => false);
     setIsLoading(() => true);
     const newMessage: ConversationProps = {
       role: "user", //assitant or user
-      content: userChat,
+      content: userText,
       timeStamp: new Date().toLocaleString(),
     };
     setMsgList((prevMsgList) => [...prevMsgList, newMessage]);
@@ -90,7 +92,6 @@ export const ChatWithAI = () => {
     // scrollToBottom();
     setIsAIResReady(() => true);
     setIsLoading(() => false);
-    reset();
   };
 
   useEffect(() => {
@@ -267,7 +268,7 @@ export const ChatWithAI = () => {
             <textarea
               {...register("userInput", {})}
               className="text-white w-full p-2 focus:outline-none movie-glow-text h-full resize-none"
-              placeholder="💬 Chat with Your Second Brain..."
+              placeholder={`${isLoading ? "Processing..." : "💬 Chat with Your Second Brain..."}`}
             />
           </div>
           <span>
