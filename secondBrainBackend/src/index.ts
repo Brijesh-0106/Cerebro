@@ -428,33 +428,26 @@ app.post('/v0/api/add-chat', middleAuth, async (req: Request, res: Response) => 
                         messages: [
                             {
                                 role: "system",
-                                content: `You are a helpful assistant that answers questions based on the user's saved content.
-                                    FORMATTING RULES:
-                                    - Keep answers concise (2-3 paragraphs maximum)
-                                    - Use line breaks between paragraphs
-                                    - Use bullet points for lists
-                                    - Cite sources as [Source 1], [Source 2], etc.
-                                    - Don't include references section at the end`
+                                content: `You are a concise assistant.
+                                STRICT RULES:
+                                - 2-4 sentence overview only
+                                - Then medium size bullet points for key concepts
+                                - Tag bullets with (Source 1) or (Source 2) at end
+                                - DO NOT add any "Note:" or disclaimer at end
+                                - DO NOT say "based on provided context"
+                                - DO NOT mention YouTube or video descriptions
+                                - Sound natural and direct`
                             },
                             {
                                 role: "user",
-                                content: `Context from my saved content:
-                                    [Source 1] Title: ${sources[0].title}
-                                    Description: ${sources[0].description}
-
-                                    [Source 2] Title: ${sources[1]?.title || ''}
-                                    Description: ${sources[1]?.description || ''}
-
-                                    Question: ${content}
-
-                                    Provide a concise answer with proper formatting.`
+                                content: `Context:\n${context}\n\nQuestion: "${content}"\n\nAnswer honestly based on available context.`
                             }
+
                         ],
                         model: "llama-3.1-8b-instant",
                         temperature: 0.7,
                         max_tokens: 500
                     })
-                    console.log(completion, "RAG answer")
                     AIResponse = {
                         role: "asstistant", timeStamp: new Date().toLocaleString(),
                         content: `${completion.choices[0].message.content!}`,
@@ -465,12 +458,26 @@ app.post('/v0/api/add-chat', middleAuth, async (req: Request, res: Response) => 
                         AIResponse
                     )
                 } else {
-                    AIResponse = {
-                        role: "assistant", timeStamp: new Date().toLocaleString(),
-                        content: `I couldn't find anything about **${content}** in your saved content. Start by adding YouTube videos, tweets, or thoughts 
-                                to build your **Second Brain**.`,
-                        sourceIds: []
-                    } as any
+                    const recentContent = await ContentModel
+                        .find({ userId: req.userId })
+                        .sort({ createdAt: -1 })
+                        .limit(3);
+                    if (recentContent.length > 0) {
+                        const topics = recentContent.map(c => c.title).join(', ');
+                        AIResponse = {
+                            role: "assistant", timeStamp: new Date().toLocaleString(),
+                            content: `I couldn't find anything about **${content}** in your saved content. You have content about: **${topics}**. Try adding **${content}**-related content first
+                                to build your second brain.`,
+                            sourceIds: []
+                        } as any
+                    } else {
+                        AIResponse = {
+                            role: "assistant", timeStamp: new Date().toLocaleString(),
+                            content: `I couldn't find anything about **${content}** in your saved content. Start by adding YouTube videos, tweets, or thoughts 
+                                    to build your second brain.`,
+                            sourceIds: []
+                        } as any
+                    }
                     firstChat.messages.push(
                         AIResponse
                     )
