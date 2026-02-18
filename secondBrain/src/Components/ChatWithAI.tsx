@@ -61,7 +61,7 @@ export const ChatWithAI = () => {
     setIsLoading(() => true);
     const newMessage: ConversationProps = {
       role: "user", //assitant or user
-      content: userText,
+      content: userText.trim(),
       timeStamp: new Date().toLocaleString(),
     };
     setMsgList((prevMsgList) => [...prevMsgList, newMessage]);
