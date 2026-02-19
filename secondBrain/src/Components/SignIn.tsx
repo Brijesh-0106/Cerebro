@@ -189,6 +189,9 @@ export function SignIn() {
               </div>
               <input
                 type="password"
+                onPaste={(e) => e.preventDefault()}
+                onCopy={(e) => e.preventDefault()}
+                onCut={(e) => e.preventDefault()}
                 {...register("passwordInput", {
                   required: {
                     value: true,
@@ -221,6 +224,9 @@ export function SignIn() {
               </div>
               <input
                 type="text"
+                onPaste={(e) => e.preventDefault()}
+                onCopy={(e) => e.preventDefault()}
+                onCut={(e) => e.preventDefault()}
                 placeholder="Confirm Password..."
                 className="focus:outline-none rounded text-white w-sm login-inputs  py-2 px-2"
                 {...register("confirmPasswordInput", {

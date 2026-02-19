@@ -137,6 +137,9 @@ export function Login() {
                 <CiLock size={20} color="#a9a9a9" />
               </div>
               <input
+                onPaste={(e) => e.preventDefault()}
+                onCopy={(e) => e.preventDefault()}
+                onCut={(e) => e.preventDefault()}
                 {...register("passwordInput", {
                   required: {
                     value: true,
