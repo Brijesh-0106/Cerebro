@@ -513,12 +513,14 @@ app.post('/v0/api/add-content', middleAuth, upload.single("imageUrl"), async (re
             const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
             if (!allowedTypes.includes(req.file.mimetype)) {
                 return res.status(400).json({
-                    error: 'Invalid file type. Only JPEG, PNG, and WebP allowed.'
+                    type: "imageUrl",
+                    error: 'Only JPEG, PNG, and WebP allowed.'
                 });
             }
             if (req.file.size > 5 * 1024 * 1024) {
                 return res.status(400).json({
-                    error: 'File too large. Maximum size is 5MB.'
+                    type: "imageUrl",
+                    error: 'File too Big. Maximum size is 5MB.'
                 });
             }
             imageUrl = await uploadImage(req.file.buffer);

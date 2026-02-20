@@ -223,7 +223,7 @@ export function SignIn() {
                 <CiLock size={20} color="#a9a9a9" />
               </div>
               <input
-                type="text"
+                type="password"
                 onPaste={(e) => e.preventDefault()}
                 onCopy={(e) => e.preventDefault()}
                 onCut={(e) => e.preventDefault()}

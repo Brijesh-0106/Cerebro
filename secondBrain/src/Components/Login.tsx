@@ -150,9 +150,10 @@ export function Login() {
                     message: "Password must be at least 8 characters",
                   },
                 })}
-                type="text"
+                type="password"
                 placeholder="Password..."
-                className="focus:outline-none rounded text-white w-sm login-inputs  py-2 px-2"
+                className="focus:outline-none rounded text-white w-sm login-inputs  py-2 px-2 
+                "
               />
             </div>
             {errors.passwordInput?.message && (

@@ -100,7 +100,25 @@ export const Dashboard = () => {
         body: Data,
       },
     );
-    if (contentRes.status == 201) {
+    if (contentRes.status == 400) {
+      // setError("contentUrl", {
+      //   type: "InValid URL",
+      //   message: "Please enter a valid YouTube link",
+      // });
+      const res = await contentRes.json();
+      console.log(res);
+      setError(res.type, { type: "IDK", message: res.error });
+      setAlertType("error");
+      setAlertMsg("Sorry, Content is not saved!");
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 2500);
+      setDisableBtn(false);
+      return;
+      // console.log(contentRes);
+      // console.log(contentRes);
+    } else if (contentRes.status == 201) {
       reset();
       const data = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/v0/api/get-all-content`,
@@ -180,8 +198,8 @@ export const Dashboard = () => {
                     <div
                       className={
                         errors.type
-                          ? "border border-gray-400 flex items-stretch rounded"
-                          : "border mb-2 border-gray-400 flex items-stretch rounded"
+                          ? "border border-indigo-600 flex items-stretch rounded"
+                          : "border mb-2 border-indigo-600 flex items-stretch rounded"
                       }
                     >
                       <select
@@ -189,28 +207,28 @@ export const Dashboard = () => {
                           required: "Type is Required",
                         })}
                         name="type"
-                        className="w-full py-2 focus:outline-none px-2 text-indigo-600"
+                        className="w-full py-2 focus:outline-none px-2 text-black"
                       >
                         <option
                           value={""}
-                          className="w-full text-indigo-600 py-2 px-2"
+                          className="w-full text-black py-2 px-2"
                         >
                           Select type...
                         </option>
                         <option
-                          className="w-full text-indigo-600 py-2 px-2"
+                          className="w-full text-black py-2 px-2"
                           value={"thought"}
                         >
                           Thought
                         </option>
                         <option
-                          className="w-full text-indigo-600 py-2 px-2"
+                          className="w-full text-black py-2 px-2"
                           value={"youtube"}
                         >
                           Youtube
                         </option>
                         <option
-                          className="w-full text-indigo-600 py-2 px-2"
+                          className="w-full text-black py-2 px-2"
                           value={"tweet"}
                         >
                           Tweeter
@@ -225,8 +243,8 @@ export const Dashboard = () => {
                     <div
                       className={
                         errors.title
-                          ? "border border-gray-400 flex items-stretch rounded"
-                          : "border mb-2 border-gray-400 flex items-stretch rounded"
+                          ? "border border-indigo-600 flex items-stretch rounded"
+                          : "border mb-2 border-indigo-600 flex items-stretch rounded"
                       }
                     >
                       <input
@@ -240,7 +258,7 @@ export const Dashboard = () => {
                             message: "Title must be at least 3 characters",
                           },
                         })}
-                        className="w-full focus:outline-none text-indigo-600 login-inputs rounded py-2 px-2"
+                        className="w-full focus:outline-none text-black login-inputs rounded py-2 px-2"
                         type="text"
                         placeholder="Title..."
                       />
@@ -253,8 +271,8 @@ export const Dashboard = () => {
                     <div
                       className={
                         errors.description
-                          ? "border border-gray-400 flex items-stretch rounded"
-                          : "border mb-2 border-gray-400 flex items-stretch rounded"
+                          ? "border border-indigo-600  flex items-stretch rounded"
+                          : "border mb-2 border-indigo-600 flex items-stretch rounded"
                       }
                     >
                       <textarea
@@ -269,8 +287,8 @@ export const Dashboard = () => {
                               "Description must be at least 5 characters",
                           },
                         })}
-                        placeholder="Why did you save this?..."
-                        className="text-indigo-600 add-textArea focus:outline-none rounded w-full py-2 px-2"
+                        placeholder="Why do you want save this?..."
+                        className="text-black add-textArea focus:outline-none rounded w-full py-2 px-2"
                         rows={2}
                       ></textarea>
                     </div>
@@ -280,27 +298,34 @@ export const Dashboard = () => {
                       </p>
                     )}
                     {contentType === "thought" ? (
-                      <div
-                        className={
-                          errors.imageUrl
-                            ? "border border-gray-400 flex items-stretch rounded"
-                            : "border mb-2 border-gray-400 flex items-stretch rounded"
-                        }
-                      >
-                        <input
-                          type="file"
-                          accept="image/*"
-                          {...register("imageUrl")}
-                          className="file:bg-indigo-600 w-full file:text-white file:px-4 file:py-1 file:rounded file:border-0 text-indigo-600"
-                        />
-                      </div>
+                      <>
+                        <div
+                          className={
+                            errors.imageUrl
+                              ? "border border-indigo-600 flex items-stretch rounded"
+                              : "border mb-2 border-indigo-600 flex items-stretch rounded"
+                          }
+                        >
+                          <input
+                            type="file"
+                            accept="image/*"
+                            {...register("imageUrl")}
+                            className="file:bg-indigo-600 w-full file:text-white file:px-4 file:py-1 file:rounded file:border-0 text-black"
+                          />
+                        </div>
+                        {errors.imageUrl?.message && (
+                          <p className="text-red-600 mb-1 pl-1">
+                            {errors.imageUrl.message.toString()}
+                          </p>
+                        )}
+                      </>
                     ) : (
                       <>
                         <div
                           className={
                             errors.contentUrl
-                              ? "border border-gray-400 flex items-stretch rounded"
-                              : "border mb-2 border-gray-400 flex items-stretch rounded"
+                              ? "border border-indigo-600 flex items-stretch rounded"
+                              : "border mb-2 border-indigo-600 flex items-stretch rounded"
                           }
                         >
                           <input
@@ -317,9 +342,10 @@ export const Dashboard = () => {
                             })}
                             type="text"
                             placeholder="Content link..."
-                            className="w-full focus:outline-none rounded text-indigo-600 login-inputs  py-2 px-2"
+                            className="w-full focus:outline-none rounded text-black login-inputs  py-2 px-2"
                           />
                         </div>
+
                         {errors.contentUrl?.message && (
                           <p className="text-red-600 mb-1 pl-1">
                             {errors.contentUrl.message.toString()}
@@ -327,7 +353,7 @@ export const Dashboard = () => {
                         )}
                       </>
                     )}
-                    <div className="border  border-gray-400 flex items-stretch rounded">
+                    <div className="border  border-indigo-600 flex items-stretch rounded">
                       <MultiTagSelect
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-expect-error
@@ -337,7 +363,7 @@ export const Dashboard = () => {
                     </div>
                   </div>
                 </div>
-                <div className="footer flex flex-row-reverse border-t border-gray-400 p-2">
+                <div className="footer flex flex-row-reverse border-t border-indigo-600 p-2">
                   {!disableBtn ? (
                     <button
                       type="submit"
