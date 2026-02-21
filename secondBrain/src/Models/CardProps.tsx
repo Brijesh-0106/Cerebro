@@ -20,7 +20,7 @@ export interface ThoughtProps {
   _id?: string;
   type: "thought";
   createdAt: string;
-  title: string;
+  title?: string;
   imageUrl?: FileList;
   description: string;
   tags?: Array<Option>;
