@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { AiOutlineYoutube } from "react-icons/ai";
 import { CiTwitter } from "react-icons/ci";
 import { GiNotebook } from "react-icons/gi";
+import { PiArticleNyTimesDuotone } from "react-icons/pi";
+import { RiArrowRightUpFill } from "react-icons/ri";
 import type { CardProps } from "../Models/CardProps";
 // Add at top of file or in a types.d.ts
 declare global {
@@ -18,6 +20,7 @@ export const Card = ({
   contentUrl,
   description,
   _id,
+  author,
   imageUrl,
   title,
   type,
@@ -80,15 +83,21 @@ export const Card = ({
             <AiOutlineYoutube color="red" size={24} />
           ) : type === "tweet" ? (
             <CiTwitter color="#1DA1F2" size={24} />
+          ) : type === "article" ? (
+            <PiArticleNyTimesDuotone size={24} color="#F59E0B" />
           ) : (
             <GiNotebook size={24} color="#E6D8F2" />
           )}
         </span>
+
         <span className="text-[#a9a9a9] text-sm">{createdAt}</span>
       </div>
 
       {/* Title */}
-      <div className="text-white font-semibold text-xl">{title}</div>
+      <div className="text-white font-semibold text-xl">
+        {/* {title?.length} */}
+        {title!.length > 30 ? title?.trim().substring(0, 30) + "..." : title}
+      </div>
       {type === "youtube" ? (
         <div className="relative h-65 overflow-hidden rounded-lg">
           {!imgLoaded && (
@@ -161,6 +170,19 @@ export const Card = ({
       <div />
       {/* Description */}
       <div className="text-[#a9a9a9] text-sm">{description}</div>
+      <div className="flex justify-between items-center">
+        {author && <span className="text-[#F59E0B] text-md">{author}</span>}
+        {type === "article" && (
+          <a
+            href={contentUrl}
+            target="_blank"
+            className="text-blue-500 flex ml-auto items-center text-md"
+          >
+            Take Me
+            <RiArrowRightUpFill size={16} color="text-blue-500" />
+          </a>
+        )}
+      </div>
     </span>
   );
 };

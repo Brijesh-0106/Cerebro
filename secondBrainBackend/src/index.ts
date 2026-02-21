@@ -1,5 +1,6 @@
 // ----------------------------------------- Imports
 import { Pinecone } from '@pinecone-database/pinecone';
+import * as cheer from 'cheerio';
 import cors from 'cors';
 import dotenv from "dotenv";
 import express, { NextFunction, Request, Response } from 'express';
@@ -27,7 +28,7 @@ interface GoogleTokenPayload {
     picture?: string;
     sub?: string;
 }
-// -------------------------------------------
+// -------------------------------------------p
 
 
 // --------------------------------------------VECTOR EMBEDDING CONFIG
@@ -56,10 +57,21 @@ const LogIn = z.object({
 });
 const Content = z.object({
     title: z.string().min(3),
-    type: z.enum(['youtube', 'tweet', 'thought']),
+    type: z.enum(['youtube', 'tweet', 'thought', 'article']),
     tags: z.string(),
     url: z.string(),
     imageUrl: z.string(),
+    desc: z.string().min(5),
+})
+const TagSchema = z.object({
+    label: z.string(),
+    value: z.string(),
+    color: z.string()
+})
+const Article = z.object({
+    type: z.enum(['article']),
+    tags: z.array(TagSchema),
+    url: z.string(),
     desc: z.string().min(5),
 })
 const Conversation = z.object({
@@ -133,13 +145,14 @@ interface IUser extends Document {
     password: String
 }
 interface IContent extends Document {
-    title: String,
-    type: "youtube" | "tweet" | "thought",
+    title?: String,
+    type: "youtube" | "tweet" | "thought" | "article",
     tags: String,
     contentUrl?: String,
     description: String,
     imageUrl?: String,
     createdAt: Date,
+    author?: String
     userId: Types.ObjectId;
 }
 interface IMessage extends Document {
@@ -164,12 +177,13 @@ const UserSchema = new Schema<IUser>({
 const UserModel = mongoose.model<IUser>('user', UserSchema);
 const ContentSchema = new Schema<IContent>({
     title: { type: String, required: true },
-    type: { type: String, required: true, enum: ["youtube", 'thought', "tweet"], },
+    type: { type: String, required: true, enum: ["youtube", 'thought', "tweet", "article"], },
     tags: { type: String, required: false },
     contentUrl: { type: String, required: false },
     description: { type: String, required: true },
     imageUrl: { type: String, required: false },
     createdAt: { type: Date, required: true },
+    author: { type: String, required: false },
     userId: { type: Schema.Types.ObjectId, ref: UserModel, required: true },
 })
 const ContentModel = mongoose.model<IContent>('content', ContentSchema);
@@ -504,7 +518,98 @@ app.post('/v0/api/add-chat', middleAuth, async (req: Request, res: Response) => 
         })
     }
 })
+const getArticleImage = ($: any) => {
+    let image = null;
+    // For OG image, just trust it's high quality and use it as priority
+    image = $('meta[property="og:image"]').attr('content');
+    if (image) {
+        return image; // OG image is explicitly set by the site owner, trust it
+    }
+
+    let largestImage = null;
+    let maxSize = 0;
+
+    $('img').toArray().forEach((img: any) => {
+        const width = parseInt($(img).attr('width') || '0');
+        const height = parseInt($(img).attr('height') || '0');
+        const size = width * height;
+        if (size > maxSize) {
+            maxSize = size;
+            largestImage = $(img).attr('src');
+        }
+    });
+
+    return largestImage;
+};
 // ----------------------------------------------CONTENT ROUTES
+app.post('/v0/api/add-web-article', middleAuth, async (req, res) => {
+    console.log(req.body, " body")
+    let vectorInput = "";
+    let { tags, desc, type, url } = req.body;
+    try {
+        const result = Article.safeParse({ type, tags, url, desc });
+        const tagValues = tags.map((tag: any) => tag.value).join(', ');
+        if (result.success) {
+            let apiRes = await fetch(url);
+            const html = await apiRes.text()
+            const $ = cheer.load(html)
+            const title = $('title').text();
+            const image = getArticleImage($);
+            const author = $('meta[name="author"]').attr('content')
+                || $('.author').text();
+            const excerpt = ($('meta[name="description"]').attr('content')
+                || $('article p').first().text()).trim()
+                .substring(0, 200);   //only for RAG perpose
+            const content = await ContentModel.create(
+                {
+                    imageUrl: image, title: title,
+                    type: type, tags: tagValues,
+                    contentUrl: url, description: desc,
+                    author: author,
+                    userId: new mongoose.Types.ObjectId(req.userId as string),
+                    createdAt: new Date().toISOString()
+                });
+            if (content) {
+                vectorInput += `User context:\n${desc} \nTitle:\n${title} \nType:\n${type} \nTags:\n${tagValues} \nexcerpt:\n${excerpt}`;
+                console.log(vectorInput);
+                getEmbedding(vectorInput).then((vector) => {
+                    pcIndex.upsert({
+                        records: [
+                            {
+                                id: content._id.toString(),
+                                values: vector,
+                                metadata: {
+                                    userId: req.userId as string,
+                                    type: type,
+                                    tags: JSON.stringify(tags)
+                                },
+                            }
+                        ],
+                        namespace: req.userId as string
+                    });
+                })
+                    .catch(err => console.error('Background embedding error:', err));
+                res.status(201).json({
+                    message: 'Article added Successfully',
+                })
+            } else {
+                res.status(500).json({
+                    message: 'Failed to add article'
+                })
+            }
+        } else {
+            res.status(400).json({
+                error: result.error
+            })
+        }
+    } catch (err) {
+        console.error('Add article error:', err);
+
+        res.status(500).json({
+            error: 'Failed to add article'
+        });
+    }
+})
 app.post('/v0/api/add-content', middleAuth, upload.single("imageUrl"), async (req, res) => {
     let imageUrl = ''
     let vectorInput = "";
@@ -524,8 +629,6 @@ app.post('/v0/api/add-content', middleAuth, upload.single("imageUrl"), async (re
                 });
             }
             imageUrl = await uploadImage(req.file.buffer);
-            // const image = req.file;
-            // imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
         }
         let { title, desc, type, tags, url } = req.body;
 
@@ -558,7 +661,7 @@ app.post('/v0/api/add-content', middleAuth, upload.single("imageUrl"), async (re
                 })
             } else {
                 res.status(500).json({
-                    message: 'Incorrect credentials'
+                    message: 'Failed to add content'
                 })
             }
         } else {

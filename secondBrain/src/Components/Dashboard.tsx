@@ -36,6 +36,69 @@ export const Dashboard = () => {
   const tags = watch("tags");
   const contentType = watch("type");
   const setCards = useSetRecoilState(CardAtom);
+  // Add article
+  const createArticle = async (formData: CardProps) => {
+    setDisableBtn(true);
+    const contentRes = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v0/api/add-web-article`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          token: localStorage.getItem("token") as string,
+        },
+
+        body: JSON.stringify({
+          tags: formData.tags,
+          desc: formData.description,
+          type: formData.type,
+          url: formData.contentUrl as string,
+        }),
+      },
+    );
+    if (contentRes.status == 400) {
+      const res = await contentRes.json();
+      console.log(res);
+      setError(res.type, { type: "IDK", message: res.error });
+      setAlertType("error");
+      setAlertMsg("Sorry, Article is not saved!");
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 2500);
+      setDisableBtn(false);
+      return;
+    } else if (contentRes.status == 201) {
+      reset();
+      const data = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/v0/api/get-all-content`,
+        {
+          method: "GET",
+          headers: {
+            token: localStorage.getItem("token") as string,
+          },
+        },
+      );
+      const res = await data.json();
+      setCards([...res["AllUserContent"]]);
+      setOpenAddContentModal(false);
+      setAlertMsg("Successfully saved!");
+      setAlertType("success");
+      setShowAlert(true);
+      nav("/dashboard/all-content");
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 2500);
+    } else {
+      setAlertType("error");
+      setAlertMsg("Sorry, Article is not saved!");
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 2500);
+    }
+    setDisableBtn(false);
+  };
   // ---------------------------------------------------------- ADD CONTENT CARD
   const createCard = async (formData: CardProps) => {
     setDisableBtn(true);
@@ -86,7 +149,9 @@ export const Dashboard = () => {
     }
     Data.append("tags", JSON.stringify(formData.tags));
     Data.append("desc", formData.description);
-    Data.append("title", formData.title);
+    if (formData.title) {
+      Data.append("title", formData.title);
+    }
     Data.append("type", formData.type);
     Data.append("url", formData.contentUrl as string);
     const contentRes = await fetch(
@@ -101,10 +166,6 @@ export const Dashboard = () => {
       },
     );
     if (contentRes.status == 400) {
-      // setError("contentUrl", {
-      //   type: "InValid URL",
-      //   message: "Please enter a valid YouTube link",
-      // });
       const res = await contentRes.json();
       console.log(res);
       setError(res.type, { type: "IDK", message: res.error });
@@ -192,7 +253,13 @@ export const Dashboard = () => {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit(createCard)}>
+              <form
+                onSubmit={
+                  contentType === "article"
+                    ? handleSubmit(createArticle)
+                    : handleSubmit(createCard)
+                }
+              >
                 <div className="body py-2 px-4">
                   <div className="flex flex-col">
                     <div
@@ -229,9 +296,15 @@ export const Dashboard = () => {
                         </option>
                         <option
                           className="w-full text-black py-2 px-2"
+                          value={"article"}
+                        >
+                          Article
+                        </option>
+                        <option
+                          className="w-full text-black py-2 px-2"
                           value={"tweet"}
                         >
-                          Tweeter
+                          Twitter
                         </option>
                       </select>
                     </div>
@@ -240,33 +313,37 @@ export const Dashboard = () => {
                         {errors.type.message.toString()}
                       </p>
                     )}
-                    <div
-                      className={
-                        errors.title
-                          ? "border border-indigo-600 flex items-stretch rounded"
-                          : "border mb-2 border-indigo-600 flex items-stretch rounded"
-                      }
-                    >
-                      <input
-                        {...register("title", {
-                          required: {
-                            value: true,
-                            message: "Title is Required",
-                          },
-                          minLength: {
-                            value: 3,
-                            message: "Title must be at least 3 characters",
-                          },
-                        })}
-                        className="w-full focus:outline-none text-black login-inputs rounded py-2 px-2"
-                        type="text"
-                        placeholder="Title..."
-                      />
-                    </div>
-                    {errors.title?.message && (
-                      <p className="text-red-600 mb-1 pl-1">
-                        {errors.title.message.toString()}
-                      </p>
+                    {contentType != "article" && (
+                      <>
+                        <div
+                          className={
+                            errors.title
+                              ? "border border-indigo-600 flex items-stretch rounded"
+                              : "border mb-2 border-indigo-600 flex items-stretch rounded"
+                          }
+                        >
+                          <input
+                            {...register("title", {
+                              required: {
+                                value: true,
+                                message: "Title is Required",
+                              },
+                              minLength: {
+                                value: 3,
+                                message: "Title must be at least 3 characters",
+                              },
+                            })}
+                            className="w-full focus:outline-none text-black login-inputs rounded py-2 px-2"
+                            type="text"
+                            placeholder="Title..."
+                          />
+                        </div>
+                        {errors.title?.message && (
+                          <p className="text-red-600 mb-1 pl-1">
+                            {errors.title.message.toString()}
+                          </p>
+                        )}
+                      </>
                     )}
                     <div
                       className={
@@ -341,7 +418,7 @@ export const Dashboard = () => {
                               },
                             })}
                             type="text"
-                            placeholder="Content link..."
+                            placeholder={`${contentType === "youtube" ? "Youtube link..." : contentType === "article" ? "Article link..." : "Tweet link..."}`}
                             className="w-full focus:outline-none rounded text-black login-inputs  py-2 px-2"
                           />
                         </div>

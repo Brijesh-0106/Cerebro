@@ -1,11 +1,13 @@
 export interface CardProps {
   _id?: string;
-  type: "youtube" | "tweet" | "thought";
+  type: "youtube" | "tweet" | "thought" | "article";
   createdAt: string;
-  title: string;
+  title?: string;
   contentUrl?: string;
   description: string;
   imageUrl?: FileList;
+  courceNo?: number;
+  author?: string;
   tags?: Array<Option>;
   userId?: string;
 }

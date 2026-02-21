@@ -1,11 +1,13 @@
 import { AiOutlineYoutube } from "react-icons/ai";
 import { CiTwitter } from "react-icons/ci";
 import { GiNotebook } from "react-icons/gi";
+import { PiArticleNyTimesDuotone } from "react-icons/pi";
 import { RiArrowRightUpFill } from "react-icons/ri";
 import { NavLink } from "react-router-dom";
 import type { CardProps } from "../Models/CardProps";
 
 export const CompactCard = ({
+  courceNo,
   createdAt,
   description,
   _id,
@@ -24,6 +26,8 @@ export const CompactCard = ({
               <AiOutlineYoutube color="red" size={16} />
             ) : type === "tweet" ? (
               <CiTwitter color="#1DA1F2" size={16} />
+            ) : type === "article" ? (
+              <PiArticleNyTimesDuotone size={24} color="#F59E0B" />
             ) : (
               <GiNotebook size={16} color="#E6D8F2" />
             )}
@@ -33,7 +37,7 @@ export const CompactCard = ({
 
         {/* Title */}
         <div className="text-white font-semibold text-sm">
-          {title.length > 18 ? title.slice(0, 18) + "..." : title}
+          {title && (title.length > 18 ? title.slice(0, 18) + "..." : title)}
         </div>
 
         {/* Media */}
@@ -102,15 +106,18 @@ export const CompactCard = ({
             ? description.slice(0, 42) + "..."
             : description}
         </div>
-        <NavLink
-          to={`/dashboard/all-content?highlight=${_id}`}
-          title="Take Me to Origin"
-          className={
-            "text-right flex items-center justify-end text-sm cursor-pointer text-blue-500"
-          }
-        >
-          Take Me <RiArrowRightUpFill size={16} />
-        </NavLink>
+        <div className="flex justify-between">
+          <span className="text-white">Source {courceNo}</span>
+          <NavLink
+            to={`/dashboard/all-content?highlight=${_id}`}
+            title="Take Me to Origin"
+            className={
+              "text-right flex items-center justify-end text-sm cursor-pointer text-blue-500"
+            }
+          >
+            Take Me <RiArrowRightUpFill size={16} />
+          </NavLink>
+        </div>
       </span>
     </>
   );

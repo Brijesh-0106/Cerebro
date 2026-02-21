@@ -224,8 +224,9 @@ export const ChatWithAI = () => {
                         className="flex px-5 pt-4 gap-4"
                         columnClassName="masonry-column"
                       >
-                        {msg.sourceIds.map((elem: CardProps) => (
+                        {msg.sourceIds.map((elem: CardProps, index: number) => (
                           <CompactCard
+                            courceNo={index}
                             title={elem.title}
                             _id={elem._id}
                             createdAt={elem.createdAt.split("T")[0]}

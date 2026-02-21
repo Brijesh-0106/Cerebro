@@ -101,6 +101,7 @@ export const Cards = () => {
               _id={elem._id}
               imageUrl={elem.imageUrl}
               userId={elem.userId}
+              author={elem.author}
               createdAt={elem.createdAt.split("T")[0]}
               contentUrl={elem.contentUrl}
               type={elem.type}
