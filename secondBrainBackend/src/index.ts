@@ -709,6 +709,21 @@ app.get('/v0/api/get-all-youtube-content', middleAuth, async (req, res) => {
         })
     }
 })
+app.get('/v0/api/get-all-article-content', middleAuth, async (req, res) => {
+    const ObjtId = new mongoose.Types.ObjectId(req.userId as string)
+    let AllUserContent = await ContentModel
+        .find({ userId: ObjtId, type: "article" })
+        .sort({ createdAt: -1 });
+    if (AllUserContent) {
+        res.status(200).json({
+            AllUserContent
+        })
+    } else {
+        res.status(500).json({
+            message: null
+        })
+    }
+})
 
 app.get('/v0/api/get-all-tweet-content', middleAuth, async (req, res) => {
     const ObjtId = new mongoose.Types.ObjectId(req.userId as string)

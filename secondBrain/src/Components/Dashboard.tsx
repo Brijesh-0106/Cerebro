@@ -36,9 +36,37 @@ export const Dashboard = () => {
   const tags = watch("tags");
   const contentType = watch("type");
   const setCards = useSetRecoilState(CardAtom);
+  function isValidArticleUrl(url: string): boolean {
+    try {
+      const parsedUrl = new URL(url);
+
+      // Must be http/https
+      if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+        return false;
+      }
+
+      // Block obvious non-articles
+      const blocked = [".pdf", ".jpg", ".png", ".mp4", ".zip", ".exe"];
+      if (blocked.some((ext) => url.toLowerCase().endsWith(ext))) {
+        return false;
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
   // Add article
   const createArticle = async (formData: CardProps) => {
     setDisableBtn(true);
+    if (!isValidArticleUrl(formData.contentUrl!)) {
+      setError("contentUrl", {
+        type: "IDK",
+        message: "Invalid URL",
+      });
+      setDisableBtn(false);
+      return;
+    }
     const contentRes = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v0/api/add-web-article`,
       {
@@ -61,7 +89,7 @@ export const Dashboard = () => {
       console.log(res);
       setError(res.type, { type: "IDK", message: res.error });
       setAlertType("error");
-      setAlertMsg("Sorry, Article is not saved!");
+      setAlertMsg("Wrong content, Article is not saved!");
       setShowAlert(true);
       setTimeout(() => {
         setShowAlert(false);
@@ -91,7 +119,7 @@ export const Dashboard = () => {
       }, 2500);
     } else {
       setAlertType("error");
-      setAlertMsg("Sorry, Article is not saved!");
+      setAlertMsg("Wrong Content, Article is not saved!");
       setShowAlert(true);
       setTimeout(() => {
         setShowAlert(false);

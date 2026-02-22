@@ -226,7 +226,7 @@ export const ChatWithAI = () => {
                       >
                         {msg.sourceIds.map((elem: CardProps, index: number) => (
                           <CompactCard
-                            courceNo={index}
+                            courceNo={index + 1}
                             title={elem.title}
                             _id={elem._id}
                             createdAt={elem.createdAt.split("T")[0]}
