@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AiOutlineYoutube } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
-import { CiLogout, CiSettings, CiTwitter } from "react-icons/ci";
+import { CiLogout, CiTwitter } from "react-icons/ci";
 import { GiBrain, GiNotebook } from "react-icons/gi";
 import { IoChatboxEllipsesOutline } from "react-icons/io5";
 import { PiArticleNyTimesDuotone } from "react-icons/pi";
@@ -176,10 +176,10 @@ export const Leftbar = () => {
             )}
             <span> {!isCollapsed && (userName ? userName : "Guest User")}</span>
           </div>
-          <div className="flex items-center gap-2 mb-4" title="Settings">
+          {/* <div className="flex items-center gap-2 mb-4" title="Settings">
             <CiSettings size={24} />
             {!isCollapsed && "Settings"}
-          </div>
+          </div> */}
           <button
             onClick={() => logout()}
             className="flex cursor-pointer items-center gap-2 mb-4"
