@@ -261,26 +261,18 @@ export const Dashboard = () => {
         {openAddContentModal && (
           <div className="fixed  inset-0 flex items-center justify-center z-50">
             <div className="bg-white text-black rounded-xl w-96">
-              {contentType === "thought" ? (
-                <div className="header border-b border-gray-400 p-2 text-lg font-semibold text-indigo-600 flex justify-between items-center">
-                  Capture a thought for your future self
-                  <IoMdClose
-                    size={20}
-                    className="cursor-pointer"
-                    onClick={() => setOpenAddContentModal(false)}
-                  />
-                </div>
-              ) : (
-                <div className="header border-b border-gray-400 p-2 text-lg font-semibold text-indigo-600 flex justify-between items-center">
-                  Capture a content for your future self
-                  <IoMdClose
-                    size={20}
-                    className="cursor-pointer"
-                    onClick={() => setOpenAddContentModal(false)}
-                  />
-                </div>
-              )}
-
+              <div className="header border-b border-gray-400 p-2 text-lg font-semibold text-indigo-600 flex justify-between items-center">
+                {contentType === "thought"
+                  ? "Capture a thought for your future self"
+                  : contentType === "article"
+                    ? "Capture a article for your future self"
+                    : "Capture a content for your future self"}
+                <IoMdClose
+                  size={20}
+                  className="cursor-pointer"
+                  onClick={() => setOpenAddContentModal(false)}
+                />
+              </div>
               <form
                 onSubmit={
                   contentType === "article"
