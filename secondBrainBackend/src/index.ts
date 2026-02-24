@@ -339,7 +339,6 @@ app.post('/v0/api/add-chat', middleAuth, async (req: Request, res: Response) => 
                 includeMetadata: true,  // ✅ Add this
                 includeValues: false     // Don't need the vectors back
             })
-            console.log(vectorResult, "All vector results")
             const strongMatches = vectorResult.matches.filter((elem) =>
                 elem.score && elem.score > 0.25
             )
@@ -355,8 +354,11 @@ app.post('/v0/api/add-chat', middleAuth, async (req: Request, res: Response) => 
                     const sources = await ContentModel.find({
                         _id: { $in: sourceIds }
                     });
+                    const sortedSources = sourceIds
+                        .map(id => sources.find(s => s._id.toString() === id))
+                        .filter(Boolean);
                     // Build context dynamically based on available sources
-                    const context = sources.map((s, i) =>
+                    const context = sortedSources.map((s: any, i) =>
                         `Source ${i + 1}: "${s.title}"
                         Description: ${s.description}
                         Type: ${s.type}
@@ -368,13 +370,18 @@ app.post('/v0/api/add-chat', middleAuth, async (req: Request, res: Response) => 
                                 role: "system",
                                 content: `You are a concise assistant.
                                 STRICT RULES:
-                                - 2-4 sentence overview only
+                                - 3-5 sentence overview only
                                 - Then medium size bullet points for key concepts
-                                - Tag bullets with (Source 1) or (Source 2) at end
+                                - If a bullet point comes from Source 1, add (Source 1) at the end
+                                - If a bullet point comes from Source 2, add (Source 2) at the end
+                                - If a bullet is general knowledge or you're unsure, don't add a source tag
                                 - DO NOT add any "Note:" or disclaimer at end
                                 - DO NOT say "based on provided context"
                                 - DO NOT mention YouTube or video descriptions
-                                - Sound natural and direct`
+                                - Sound natural and direct
+
+                            You SHOULD cite sources when information clearly comes from them.
+                            You should NOT cite sources when you're guessing or unsure.`
                             },
                             {
                                 role: "user",
@@ -391,7 +398,7 @@ app.post('/v0/api/add-chat', middleAuth, async (req: Request, res: Response) => 
                     AIResponse = {
                         role: "asstistant", timeStamp: new Date().toLocaleString(),
                         content: `${answer}`,
-                        sourceIds: sourceIds
+                        sourceIds: sortedSources.map((s: any) => s._id)
                     } as any
                     existingChat.messages.push(
                         AIResponse
@@ -435,8 +442,14 @@ app.post('/v0/api/add-chat', middleAuth, async (req: Request, res: Response) => 
                     const sources = await ContentModel.find({
                         _id: { $in: sourceIds }
                     });
-                    const context = sources.map((s, i) =>
-                        `[${i + 1}] Title: ${s.title}\nDescription: ${s.description}\nType: ${s.type}\nTags:${JSON.stringify(s.tags)}`
+                    const sortedSources = sourceIds
+                        .map(id => sources.find(s => s._id.toString() === id))
+                        .filter(Boolean);
+                    const context = sortedSources.map((s: any, i) =>
+                        `Source ${i + 1}: "${s.title}"
+                        Description: ${s.description}
+                        Type: ${s.type}
+                        Tags: ${s.tags}`
                     ).join('\n\n');
                     const completion = await groq.chat.completions.create({
                         messages: [
@@ -444,13 +457,18 @@ app.post('/v0/api/add-chat', middleAuth, async (req: Request, res: Response) => 
                                 role: "system",
                                 content: `You are a concise assistant.
                                 STRICT RULES:
-                                - 2-4 sentence overview only
+                                - 3-5 sentence overview only
                                 - Then medium size bullet points for key concepts
-                                - Tag bullets with (Source 1) or (Source 2) at end
+                                - If a bullet point comes from Source 1, add (Source 1) at the end
+                                - If a bullet point comes from Source 2, add (Source 2) at the end
+                                - If a bullet is general knowledge or you're unsure, don't add a source tag
                                 - DO NOT add any "Note:" or disclaimer at end
                                 - DO NOT say "based on provided context"
                                 - DO NOT mention YouTube or video descriptions
-                                - Sound natural and direct`
+                                - Sound natural and direct
+
+                            You SHOULD cite sources when information clearly comes from them.
+                            You should NOT cite sources when you're guessing or unsure.`
                             },
                             {
                                 role: "user",
@@ -465,7 +483,7 @@ app.post('/v0/api/add-chat', middleAuth, async (req: Request, res: Response) => 
                     AIResponse = {
                         role: "asstistant", timeStamp: new Date().toLocaleString(),
                         content: `${completion.choices[0].message.content!}`,
-                        sourceIds: sourceIds
+                        sourceIds: sortedSources.map((s: any) => s._id)
                     } as any
                     // Add LLM
                     firstChat.messages.push(

@@ -40,66 +40,6 @@ export const CompactCard = ({
           {title && (title.length > 18 ? title.slice(0, 18) + "..." : title)}
         </div>
 
-        {/* Media */}
-        {/* {type === "youtube" ? (
-          <div className="relative h-30 overflow-hidden rounded-lg">
-            {!imgLoaded && (
-              <div className="absolute inset-0 bg-gray-800 overflow-hidden">
-                <div
-                  className="absolute inset-0 
-                bg-[linear-gradient(110deg,#1f2937,45%,#374151,55%,#1f2937)] 
-               bg-size-[200%_100%]
-                animate-shimmer"
-                />
-              </div>
-            )}
-            <iframe
-              className="w-full h-full rounded-lg"
-              frameBorder="0"
-              allow="encrypted-media;"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-              onLoad={() => setImgLoaded(true)}
-              src={contentUrl}
-            />
-          </div>
-        ) : type == "tweet" ? (
-          <div className="h-45 flex items-center justify-center overflow-hidden">
-            <div className="h-45 overflow-hidden flex justify-center items-start">
-              <div className="w-45">
-                <div className="scale-50 origin-top-left w-130">
-                  <blockquote className="twitter-tweet">
-                    <a href={contentUrl}></a>
-                  </blockquote>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          imageUrl && (
-            <div className="relative h-45 overflow-hidden rounded-lg">
-              {!imgLoaded && (
-                <div className="absolute inset-0 bg-gray-800 overflow-hidden">
-                  <div
-                    className="absolute inset-0 
-                bg-[linear-gradient(110deg,#1f2937,45%,#374151,55%,#1f2937)] 
-                bg-bg-size-[200%_100%]
-                animate-shimmer"
-                  />
-                </div>
-              )}
-              <img
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-expect-error
-                src={imageUrl}
-                className={`h-full w-full object-cover ${
-                  imgLoaded ? "opacity-100" : "opacity-0"
-                }`}
-                onLoad={() => setImgLoaded(true)}
-              />
-            </div>
-          )
-        )} */}
         {/* Description */}
         <div className="text-[#a9a9a9] text-sm">
           {description.length > 42
@@ -107,7 +47,7 @@ export const CompactCard = ({
             : description}
         </div>
         <div className="flex justify-between">
-          <span className="text-white">Source {courceNo}</span>
+          <span className="text-white text-sm">Source {courceNo}</span>
           <NavLink
             to={`/dashboard/all-content?highlight=${_id}`}
             title="Take Me to Origin"
