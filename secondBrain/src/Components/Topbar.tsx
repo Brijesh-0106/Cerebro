@@ -16,7 +16,7 @@ export const Topbar = ({
         className={`text-white ${isSideBarCollapsed ? "ml-13.75" : "ml-60"} text-xl flex justify-center`}
       >
         <span
-          className="font-bold text-indigo-600"
+          className="font-bold text-[24px] text-indigo-600"
           style={{
             fontFamily: "'Lobster Two', cursive",
             fontStyle: "italic",
