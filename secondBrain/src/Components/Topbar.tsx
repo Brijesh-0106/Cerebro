@@ -15,14 +15,18 @@ export const Topbar = ({
       <div
         className={`text-white ${isSideBarCollapsed ? "ml-13.75" : "ml-60"} text-xl flex justify-center`}
       >
-        {" "}
-        Cerebro
+        <span
+          className="font-bold"
+          style={{
+            fontFamily: "'Lobster Two', cursive",
+            fontStyle: "italic",
+            letterSpacing: "0.08em",
+          }}
+        >
+          Cerebro{" "}
+        </span>
       </div>
       <div className="flex justify-center gap-4">
-        {/* <button className="cursor-pointer px-3 py-1 hover:#D9C7EE  bg-[#E6D8F2] rounded flex items-center gap-1">
-          <HiOutlineShare size={20} />
-          Share Content
-        </button> */}
         <button
           className="cursor-pointer px-3 py-1 bg-indigo-600 text-white rounded flex items-center gap-1"
           onClick={() => {
