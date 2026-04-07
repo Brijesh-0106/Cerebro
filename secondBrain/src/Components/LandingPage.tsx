@@ -14,14 +14,31 @@ const PAIRS = [
   ["Collect knowledge,", "Chat with it"],
   ["Your second brain,", "Powered by AI"],
 ];
+const AIAnswers = [
+  [
+    "What is CereBro?",
+    "CereBro is your AI-powered second brain that organizes and retrieves your saved content with ease.",
+  ],
+  [
+    "How does it help?",
+    "It helps you save everything in one place and find anything you need, making your life more efficient and organized.",
+  ],
+];
 export default function LandingPage() {
+  const [aiLine0, setAiLine0] = useState(""); // Q1
+  const [aiLine1, setAiLine1] = useState(""); // A1
+  const [aiLine2, setAiLine2] = useState(""); // Q2
+  const [aiLine3, setAiLine3] = useState(""); // A2
   const [line1, setLine1] = useState("");
   const [line2, setLine2] = useState("");
   const googleButtonRef = useRef<HTMLDivElement>(null);
   const [pairIndex, setPairIndex] = useState(0);
   const [landEmail, setLandEmail] = useState("");
   const [showCursor, setShowCursor] = useState(true);
+  const [showsecondQ, setShowsecondQ] = useState(false);
+  const [showFirstQ, setShowFirstQ] = useState(false);
 
+  // Typewriter effect for landing page headline
   useEffect(() => {
     let cancelled = false;
     const pair = PAIRS[pairIndex];
@@ -71,6 +88,54 @@ export default function LandingPage() {
       cancelled = true;
     };
   }, [pairIndex]);
+
+  // Punch Lines for AI answers
+  useEffect(() => {
+    let cancelled = false;
+
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    const typeText = async (text: string, setter: (v: string) => void) => {
+      for (let i = 0; i <= text.length; i++) {
+        if (cancelled) return;
+        setter(text.slice(0, i));
+        await sleep(20 + Math.random() * 40);
+      }
+    };
+
+    const run = async () => {
+      // RESET
+      setAiLine0("");
+      setAiLine1("");
+      setAiLine2("");
+      setAiLine3("");
+
+      setShowFirstQ(false);
+      setShowsecondQ(false);
+      // -------- FIRST Q&A --------
+
+      await sleep(1200);
+      setAiLine0(AIAnswers[0][0]); // Q1
+      setShowFirstQ(true);
+      await sleep(600);
+
+      await typeText(AIAnswers[0][1], setAiLine1); // A1
+
+      await sleep(1200);
+      setAiLine2(AIAnswers[1][0]); // Q2
+      setShowsecondQ(true);
+      // -------- SECOND Q&A --------
+      await sleep(600);
+
+      await typeText(AIAnswers[1][1], setAiLine3); // A2
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [errorGoogle, setErrorGoogle] = useState("");
   const nav = useNavigate();
   // Blinking cursor
@@ -162,11 +227,76 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-        <div className="rightVideoSection pr-2 ml-20 py-14 h-full w-1/2">
-          <div className="w-full h-full bg-zinc-900 border-zinc-500 border flex flex-col rounded-2xl">
-            <span className="text-white text-center text-md py-2 px-3  mx-auto mt-8 rounded-2xl  border border-zinc-500">
+        <div className="rightVideoSection pr-2 ml-20 py-18 h-full w-1/2">
+          <div className="w-full h-full bg-zinc-900 border-zinc-500 border p-8 flex flex-col rounded-2xl">
+            <span className="text-white text-center text-md py-2 px-3  mx-auto mt-2 rounded-2xl  border border-zinc-500">
               How to Use?
             </span>
+            <div className="mt-8">
+              {showFirstQ && (
+                <>
+                  <div
+                    className={`ml-auto rounded-xl max-w-lg p-3 w-fit mb-4 text-white bg-indigo-600 
+                    transition-all duration-700 ease-out 
+                    ${
+                      showFirstQ
+                        ? "opacity-100 translate-y-0 scale-100"
+                        : "opacity-0 translate-y-6 scale-90"
+                    }`}
+                  >
+                    {aiLine0}
+                  </div>
+                  {!aiLine1 && showFirstQ && (
+                    <div className="text-gray-500 text-sm animate-pulse">
+                      Thinking...
+                    </div>
+                  )}
+                  {aiLine1 && (
+                    <div className="text-gray-500 text-sm">
+                      Searched 3 sources &gt;
+                    </div>
+                  )}
+                  <div className="text-zinc-300 min-h-16">
+                    {aiLine1}
+                    {!showsecondQ && (
+                      <span
+                        className={showCursor ? "opacity-100" : "opacity-0"}
+                      >
+                        |
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
+              {showsecondQ && (
+                <>
+                  {showsecondQ && (
+                    <div
+                      className={`ml-auto rounded-xl max-w-lg p-3 mt-4 mb-4 w-fit text-white bg-indigo-600 
+                      transition-all duration-700 ease-out 
+                      ${
+                        showFirstQ
+                          ? "opacity-100 translate-y-0 scale-100"
+                          : "opacity-0 translate-y-6 scale-90"
+                      }`}
+                    >
+                      {aiLine2}
+                    </div>
+                  )}
+                  {!aiLine3 && showsecondQ && (
+                    <div className="text-gray-500 text-sm animate-pulse">
+                      Thinking...
+                    </div>
+                  )}{" "}
+                  {aiLine3 && (
+                    <div className="text-gray-500 text-sm">
+                      Searched 3 sources &gt;
+                    </div>
+                  )}
+                  <div className="text-zinc-300 min-h-16">{aiLine3}</div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
