@@ -4,21 +4,28 @@ import { CiLock } from "react-icons/ci";
 import { FaGoogle } from "react-icons/fa";
 import { GiBrain } from "react-icons/gi";
 import { MdOutlineAttachEmail } from "react-icons/md";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { LoginProps } from "../Models/SignInProps";
 import GoogleSignIn from "./GoogleSignIn";
 
 export function Login() {
-  const googleButtonRef = useRef<HTMLDivElement>(null);
-  const nav = useNavigate();
-  const [disableBtn, setDisableBtn] = useState(false);
-  const [errorGoogle, setErrorGoogle] = useState("");
-
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginProps>();
+
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+  const nav = useNavigate();
+  const loc = useLocation();
+  const [disableBtn, setDisableBtn] = useState(false);
+  const [errorGoogle, setErrorGoogle] = useState("");
+  if (loc.state) {
+    const landEmail = (loc.state as { landEmail: string }).landEmail;
+    setValue("emailInput", landEmail); // Pre-fill the email input with the value from LandingPage
+    window.history.replaceState({}, "");
+  }
 
   const handleGoogleSuccess = (user: Record<string, unknown>) => {
     console.log("Signed in successfully:", user);
@@ -71,10 +78,22 @@ export function Login() {
   return (
     <div className="bg-custom-gradient w-full h-screen bg-[rgb(18,18,18,1)] flex justify-center items-center">
       <span className="max-w-sm flex flex-col gap-4">
-        <div className="text-white text-2xl justify-center items-center gap-3 title flex mb-8">
+        <Link
+          to="/"
+          className="text-white text-3xl justify-center items-center gap-1 title flex mb-8"
+        >
           <GiBrain size={48} color="#4f39f6" />
-          Cerebro
-        </div>
+          <span
+            className="text-4xl font-bold text-indigo-600"
+            style={{
+              fontFamily: "'Lobster Two', cursive",
+              fontStyle: "italic",
+              letterSpacing: "0.08em",
+            }}
+          >
+            CereBro
+          </span>
+        </Link>
         {errorGoogle && <div className="error-message">{errorGoogle}</div>}
         <div className="flex justify-center">
           <button

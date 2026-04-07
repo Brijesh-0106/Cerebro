@@ -88,13 +88,25 @@ export function SignIn() {
   return (
     <div className="bg-custom-gradient w-full h-screen bg-[rgb(18,18,18,1)] flex justify-center items-center">
       <span className="max-w-sm flex flex-col gap-4">
-        <div className="text-white text-2xl justify-center items-center gap-3 title flex mb-8">
+        <Link
+          to="/"
+          className="text-white text-2xl justify-center items-center gap-1 title flex mb-8"
+        >
           {showAlert && (
             <Alert title="User Created Successfully" type="success" />
           )}
           <GiBrain size={48} color="#4f39f6" />
-          Cerebro
-        </div>
+          <span
+            className="text-4xl font-bold text-indigo-600"
+            style={{
+              fontFamily: "'Lobster Two', cursive",
+              fontStyle: "italic",
+              letterSpacing: "0.08em",
+            }}
+          >
+            CereBro
+          </span>
+        </Link>
         {errorGoogle && <div className="error-message">{errorGoogle}</div>}
         <div className="flex justify-center">
           <button

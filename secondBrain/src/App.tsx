@@ -8,6 +8,7 @@ import Thoughts from "./Components/Thoughts";
 
 import Articles from "./Components/Articles";
 import { ChatWithAI } from "./Components/ChatWithAI";
+import LandingPage from "./Components/LandingPage";
 import Tweets from "./Components/Tweets";
 import Youtube from "./Components/Youtube";
 
@@ -15,7 +16,8 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="*" element={<SignIn />}></Route>
+        <Route path="*" element={<LandingPage />}></Route>
+        <Route path="/signin" element={<SignIn />}></Route>
         <Route path="/login" element={<Login />}></Route>
         <Route path="/dashboard/*" element={<Dashboard />}>
           <Route path="all-content" index element={<Cards />} />
