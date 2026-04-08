@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FaGoogle } from "react-icons/fa";
+import { GiBrain } from "react-icons/gi";
 import { useNavigate } from "react-router-dom";
 import GoogleSignIn from "./GoogleSignIn";
 import Navbar from "./Navbar/Navbar";
@@ -17,11 +18,11 @@ const PAIRS = [
 const AIAnswers = [
   [
     "What is CereBro?",
-    "CereBro is your AI-powered second brain that organizes and retrieves your saved content with ease.",
+    "CereBro is your AI-powered second brain that organizes and retrieves your saved content with ease✨.",
   ],
   [
     "How does it help?",
-    "It helps you save everything in one place and find anything you need, making your life more efficient and organized.",
+    "It helps you save everything in one place and find anything you need, making your life more efficient and organized✨.",
   ],
 ];
 export default function LandingPage() {
@@ -37,6 +38,7 @@ export default function LandingPage() {
   const [showCursor, setShowCursor] = useState(true);
   const [showsecondQ, setShowsecondQ] = useState(false);
   const [showFirstQ, setShowFirstQ] = useState(false);
+  const [isHoveringDemo, setIsHoveringDemo] = useState(false);
 
   // Typewriter effect for landing page headline
   useEffect(() => {
@@ -227,8 +229,29 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-        <div className="rightVideoSection pr-2 ml-20 py-18 h-full w-1/2">
-          <div className="w-full h-full bg-zinc-900 border-zinc-500 border p-8 flex flex-col rounded-2xl">
+        <div className="rightVideoSection pr-2 ml-20 py-18 h-full  px-16 w-1/2">
+          <div
+            className="relative w-full h-full bg-zinc-900 border-zinc-600 border p-8 px-10 flex flex-col rounded-2xl overflow-hidden transition-all duration-300 hover:border-indigo-500 cursor-pointer group"
+            onMouseEnter={() => setIsHoveringDemo(true)}
+            onMouseLeave={() => setIsHoveringDemo(false)}
+          >
+            {/* Hover Overlay */}
+            <div
+              className={`absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-10 transition-opacity duration-300 ${
+                isHoveringDemo ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+            >
+              <div className="text-center">
+                <GiBrain size={64} className="text-indigo-500 mx-auto mb-4" />
+                <h3 className="text-3xl font-bold text-white mb-2">
+                  Try CereBro for Free
+                </h3>
+                <p className="text-gray-400 text-lg">
+                  Start organizing your knowledge today
+                </p>
+              </div>
+            </div>
+            {/* <div className="w-full h-full bg-zinc-900 border-zinc-500 border p-8 px-10 flex flex-col rounded-2xl"> */}
             <span className="text-white text-center text-md py-2 px-3  mx-auto mt-2 rounded-2xl  border border-zinc-500">
               How to Use?
             </span>
