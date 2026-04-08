@@ -119,7 +119,7 @@ export default function LandingPage() {
       await sleep(1200);
       setAiLine0(AIAnswers[0][0]); // Q1
       setShowFirstQ(true);
-      await sleep(600);
+      await sleep(800);
 
       await typeText(AIAnswers[0][1], setAiLine1); // A1
 
@@ -127,7 +127,7 @@ export default function LandingPage() {
       setAiLine2(AIAnswers[1][0]); // Q2
       setShowsecondQ(true);
       // -------- SECOND Q&A --------
-      await sleep(600);
+      await sleep(800);
 
       await typeText(AIAnswers[1][1], setAiLine3); // A2
     };
@@ -253,9 +253,9 @@ export default function LandingPage() {
             </div>
             {/* <div className="w-full h-full bg-zinc-900 border-zinc-500 border p-8 px-10 flex flex-col rounded-2xl"> */}
             <span className="text-white text-center text-md py-2 px-3  mx-auto mt-2 rounded-2xl  border border-zinc-500">
-              How to Use?
+              Chat with your Knowledge
             </span>
-            <div className="mt-8">
+            <div className="mt-12">
               {showFirstQ && (
                 <>
                   <div
