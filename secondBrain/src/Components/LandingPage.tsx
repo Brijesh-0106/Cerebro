@@ -37,7 +37,6 @@ export default function LandingPage() {
   const [showCursor, setShowCursor] = useState(true);
   const [showsecondQ, setShowsecondQ] = useState(false);
   const [showFirstQ, setShowFirstQ] = useState(false);
-  const [isHoveringDemo, setIsHoveringDemo] = useState(false);
 
   // Typewriter effect for landing page headline
   useEffect(() => {
@@ -229,20 +228,8 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="rightVideoSection pr-2 ml-20 py-18 h-full  px-16 w-1/2">
-          <div
-            className="relative w-full h-full bg-zinc-900 border-zinc-600 border p-8 px-10 flex flex-col rounded-2xl overflow-hidden transition-all duration-300 hover:border-indigo-500 cursor-pointer group"
-            onMouseEnter={() => setIsHoveringDemo(true)}
-            onMouseLeave={() => setIsHoveringDemo(false)}
-          >
-            {/* Hover Overlay */}
-            {/* <div
-              className={`absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-10 transition-opacity duration-300 ${
-                isHoveringDemo ? "opacity-100" : "opacity-0 pointer-events-none"
-              }`}
-            >
-             
-            </div> */}
-            {/* <div className="w-full h-full bg-zinc-900 border-zinc-500 border p-8 px-10 flex flex-col rounded-2xl"> */}
+          <div 
+          className="relative w-full h-full bg-zinc-900 border-zinc-600 border p-8 px-10 flex flex-col rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer group">
             <span className="text-white text-center text-md py-2 px-3  mx-auto mt-2 rounded-2xl  border border-zinc-500">
               Chat with your Knowledge
             </span>
