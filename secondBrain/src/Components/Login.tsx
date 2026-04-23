@@ -80,14 +80,10 @@ export function Login() {
       <span className="max-w-sm flex flex-col gap-4">
         <Link
           to="/"
-          className="text-white justify-center items-center gap-6 title flex mb-8"
+          className="text-white justify-center items-center gap-1 title flex mb-8"
         >
           <GiBrain size={48} color="#4f39f6" />
-          <span
-            className="great-vibes font-semibold font-[Great_Vibes,cursive] text-[38px] text-indigo-600
-           scale-x-[1.3]  
-           tracking-[0.05em]"
-          >
+          <span className="great-vibes font-semibold font-[Courgette] text-[38px] text-indigo-600">
             CereBro
           </span>
         </Link>

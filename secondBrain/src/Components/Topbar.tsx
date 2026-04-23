@@ -15,11 +15,7 @@ export const Topbar = ({
       <div
         className={`text-white ${isSideBarCollapsed ? "ml-13.75" : "ml-60"} text-xl flex justify-center`}
       >
-        <span
-          className="great-vibes font-semibold font-[Great_Vibes,cursive] text-[24px] text-indigo-600
-           scale-x-[1.3]  
-           tracking-[0.05em]"
-        >
+        <span className="great-vibes font-semibold font-[Courgette] text-[24px] text-indigo-600">
           Cerebro{" "}
         </span>
       </div>
