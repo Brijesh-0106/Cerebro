@@ -245,8 +245,8 @@ export const Dashboard = () => {
       <div
         className={
           openAddContentModal
-            ? "w-screen h-screen bg-black max-w-screen "
-            : "min-w-screen min-h-screen max-w-screen bg-[radial-gradient(1200px_600px_at_top_left,rgba(112,59,247,0.65)_0%,rgba(112,59,247,0.25)_35%,rgba(18,18,18,0)_60%),radial-gradient(1200px_600px_at_bottom_right,rgba(112,59,247,0.65)_0%,rgba(112,59,247,0.25)_35%,rgba(18,18,18,0)_60%),linear-gradient(135deg,#121212_45%,#000_75%)]"
+            ? "w-screen h-screen bg-slate-50 dark:bg-[#09090b] max-w-screen "
+            : "min-w-screen min-h-screen max-w-screen bg-slate-50 dark:bg-[radial-gradient(1200px_600px_at_top_left,rgba(204,123,244,0.35)_0%,rgba(204,123,244,0.15)_35%,rgba(18,18,18,0)_60%),radial-gradient(1200px_600px_at_bottom_right,rgba(204,123,244,0.35)_0%,rgba(204,123,244,0.15)_35%,rgba(18,18,18,0)_60%),linear-gradient(135deg,#09090b_45%,#000_75%)]"
         }
       >
         {showAlert && <Alert type={alertType} title={alertMsg} />}
@@ -256,12 +256,12 @@ export const Dashboard = () => {
         <UserArea />
         {/* -------------------------------------- ADD CONTENT MODAL -------------------------------------- */}
         {openAddContentModal && (
-          <div className="fixed inset-0 bg-custom-gradient bg-black/90 z-40" />
+          <div className="fixed inset-0 bg-white/50 dark:bg-black/90 z-40 backdrop-blur-sm" />
         )}
         {openAddContentModal && (
           <div className="fixed  inset-0 flex items-center justify-center z-50">
-            <div className="bg-white text-black rounded-xl w-96">
-              <div className="header border-b border-gray-400 p-2 text-lg font-semibold text-indigo-600 flex justify-between items-center">
+            <div className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white rounded-xl w-96 max-md:w-[90%] max-md:max-w-md shadow-2xl">
+              <div className="header border-b border-zinc-300 dark:border-zinc-700 p-2 text-lg font-semibold text-primary flex justify-between items-center">
                 {contentType === "thought"
                   ? "Capture a thought for your future self"
                   : contentType === "article"
@@ -285,8 +285,8 @@ export const Dashboard = () => {
                     <div
                       className={
                         errors.type
-                          ? "border border-indigo-600 flex items-stretch rounded"
-                          : "border mb-2 border-indigo-600 flex items-stretch rounded"
+                          ? "border border-primary flex items-stretch rounded"
+                          : "border mb-2 border-primary flex items-stretch rounded"
                       }
                     >
                       <select
@@ -294,34 +294,34 @@ export const Dashboard = () => {
                           required: "Type is Required",
                         })}
                         name="type"
-                        className="w-full py-2 focus:outline-none px-2 text-black"
+                        className="w-full py-2 focus:outline-none px-2 text-zinc-900 dark:text-white"
                       >
                         <option
                           value={""}
-                          className="w-full text-black py-2 px-2"
+                          className="w-full text-zinc-900 dark:text-white py-2 px-2"
                         >
                           Select type...
                         </option>
                         <option
-                          className="w-full text-black py-2 px-2"
+                          className="w-full text-zinc-900 dark:text-white py-2 px-2"
                           value={"thought"}
                         >
                           Thought
                         </option>
                         <option
-                          className="w-full text-black py-2 px-2"
+                          className="w-full text-zinc-900 dark:text-white py-2 px-2"
                           value={"youtube"}
                         >
                           Youtube
                         </option>
                         <option
-                          className="w-full text-black py-2 px-2"
+                          className="w-full text-zinc-900 dark:text-white py-2 px-2"
                           value={"article"}
                         >
                           Article
                         </option>
                         <option
-                          className="w-full text-black py-2 px-2"
+                          className="w-full text-zinc-900 dark:text-white py-2 px-2"
                           value={"tweet"}
                         >
                           Twitter
@@ -338,8 +338,8 @@ export const Dashboard = () => {
                         <div
                           className={
                             errors.title
-                              ? "border border-indigo-600 flex items-stretch rounded"
-                              : "border mb-2 border-indigo-600 flex items-stretch rounded"
+                              ? "border border-primary flex items-stretch rounded"
+                              : "border mb-2 border-primary flex items-stretch rounded"
                           }
                         >
                           <input
@@ -353,7 +353,7 @@ export const Dashboard = () => {
                                 message: "Title must be at least 3 characters",
                               },
                             })}
-                            className="w-full focus:outline-none text-black login-inputs rounded py-2 px-2"
+                            className="w-full focus:outline-none text-zinc-900 dark:text-white login-inputs rounded py-2 px-2"
                             type="text"
                             placeholder="Title..."
                           />
@@ -368,8 +368,8 @@ export const Dashboard = () => {
                     <div
                       className={
                         errors.description
-                          ? "border border-indigo-600  flex items-stretch rounded"
-                          : "border mb-2 border-indigo-600 flex items-stretch rounded"
+                          ? "border border-primary  flex items-stretch rounded"
+                          : "border mb-2 border-primary flex items-stretch rounded"
                       }
                     >
                       <textarea
@@ -385,7 +385,7 @@ export const Dashboard = () => {
                           },
                         })}
                         placeholder="Why do you want save this?..."
-                        className="text-black add-textArea focus:outline-none rounded w-full py-2 px-2"
+                        className="text-zinc-900 dark:text-white add-textArea focus:outline-none rounded w-full py-2 px-2"
                         rows={2}
                       ></textarea>
                     </div>
@@ -399,15 +399,15 @@ export const Dashboard = () => {
                         <div
                           className={
                             errors.imageUrl
-                              ? "border border-indigo-600 flex items-stretch rounded"
-                              : "border mb-2 border-indigo-600 flex items-stretch rounded"
+                              ? "border border-primary flex items-stretch rounded"
+                              : "border mb-2 border-primary flex items-stretch rounded"
                           }
                         >
                           <input
                             type="file"
                             accept="image/*"
                             {...register("imageUrl")}
-                            className="file:bg-indigo-600 w-full file:text-white file:px-4 file:py-1 file:rounded file:border-0 text-black"
+                            className="file:bg-indigo-600 w-full file:text-white file:px-4 file:py-1 file:rounded file:border-0 text-zinc-900 dark:text-white"
                           />
                         </div>
                         {errors.imageUrl?.message && (
@@ -421,8 +421,8 @@ export const Dashboard = () => {
                         <div
                           className={
                             errors.contentUrl
-                              ? "border border-indigo-600 flex items-stretch rounded"
-                              : "border mb-2 border-indigo-600 flex items-stretch rounded"
+                              ? "border border-primary flex items-stretch rounded"
+                              : "border mb-2 border-primary flex items-stretch rounded"
                           }
                         >
                           <input
@@ -439,7 +439,7 @@ export const Dashboard = () => {
                             })}
                             type="text"
                             placeholder={`${contentType === "youtube" ? "Youtube link..." : contentType === "article" ? "Article link..." : "Tweet link..."}`}
-                            className="w-full focus:outline-none rounded text-black login-inputs  py-2 px-2"
+                            className="w-full focus:outline-none rounded text-zinc-900 dark:text-white login-inputs  py-2 px-2"
                           />
                         </div>
 
@@ -450,7 +450,7 @@ export const Dashboard = () => {
                         )}
                       </>
                     )}
-                    <div className="border  border-indigo-600 flex items-stretch rounded">
+                    <div className="border  border-primary flex items-stretch rounded">
                       <MultiTagSelect
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-expect-error
@@ -460,18 +460,18 @@ export const Dashboard = () => {
                     </div>
                   </div>
                 </div>
-                <div className="footer flex flex-row-reverse border-t border-indigo-600 p-2">
+                <div className="footer flex flex-row-reverse border-t border-primary p-2">
                   {!disableBtn ? (
                     <button
                       type="submit"
-                      className="cursor-pointer py-1 bg-indigo-600 w-28 text-white font-semibold rounded"
+                      className="cursor-pointer py-1 bg-primary w-28 text-white font-semibold rounded hover:bg-opacity-90 transition-colors"
                     >
                       Add
                     </button>
                   ) : (
                     <button
                       disabled={disableBtn}
-                      className="cursor-pointer rounded text-md w-sm justify-center bg-indigo-900 text-center text-gray-400 py-2 px-4 flex items-center gap-2"
+                      className="cursor-pointer rounded text-md w-sm justify-center bg-primary/50 text-center text-white py-2 px-4 flex items-center gap-2"
                     >
                       Processing
                     </button>

@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CiLock } from "react-icons/ci";
 import { FaGoogle } from "react-icons/fa";
-import { GiBrain } from "react-icons/gi";
+
 import { MdOutlineAttachEmail, MdOutlinePerson } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
 import type { SignInProps } from "../Models/SignInProps";
@@ -86,17 +86,17 @@ export function SignIn() {
   };
 
   return (
-    <div className="bg-custom-gradient w-full h-screen bg-[rgb(18,18,18,1)] flex justify-center items-center">
-      <span className="max-w-sm flex flex-col gap-4">
+    <div className="w-full h-screen bg-slate-50 dark:bg-custom-gradient dark:bg-[rgb(18,18,18,1)] flex justify-center items-center">
+      <span className="max-w-sm max-md:w-full max-md:px-4 flex flex-col gap-4">
         <Link
           to="/"
-          className="text-white justify-center items-center gap-1 title flex mb-8"
+          className="text-zinc-900 dark:text-white justify-center items-center gap-1 title flex mb-8"
         >
           {showAlert && (
             <Alert title="User Created Successfully" type="success" />
           )}
-          <GiBrain size={48} color="#4f39f6" />
-          <span className="great-vibes font-semibold font-[Courgette] text-[38px] text-indigo-600">
+          <img src="/Assets/isolated_brain.png" className="w-16 h-16 object-contain" alt="CereBro Logo" />
+          <span className="great-vibes font-semibold font-[Courgette] max-md:text-[32px] text-[38px] text-primary">
             CereBro
           </span>
         </Link>
@@ -104,7 +104,7 @@ export function SignIn() {
         <div className="flex justify-center">
           <button
             onClick={handleCustomButtonClick}
-            className="cursor-pointer rounded justify-center bg-indigo-600 text-center text-white flex py-4 px-4 items-center gap-2"
+            className="cursor-pointer rounded justify-center bg-primary text-center text-white flex py-4 px-4 items-center gap-2 hover:opacity-90 transition-opacity"
           >
             <FaGoogle size={24} /> Sign up with Google
           </button>
@@ -115,7 +115,7 @@ export function SignIn() {
             />
           </div>
         </div>
-        <div className="text-white text-center">
+        <div className="text-zinc-600 dark:text-zinc-300 max-md:text-sm text-center">
           or, sign up with your email
         </div>
         <form onSubmit={handleSubmit(signin)}>
@@ -123,8 +123,8 @@ export function SignIn() {
             <div
               className={
                 errors.userNameInput
-                  ? "w-sm login-Input-Wrapper flex items-stretch rounded"
-                  : "mb-2 w-sm login-Input-Wrapper flex items-stretch rounded"
+                  ? "w-sm max-md:w-full login-Input-Wrapper flex items-stretch rounded"
+                  : "mb-2 w-sm max-md:w-full login-Input-Wrapper flex items-stretch rounded"
               }
             >
               <div className="pl-2 flex items-center">
@@ -142,7 +142,7 @@ export function SignIn() {
                   },
                 })}
                 placeholder="UserName..."
-                className="focus:outline-none text-white login-inputs w-sm rounded py-2 px-2"
+                className="focus:outline-none text-zinc-900 dark:text-white login-inputs w-sm max-md:w-full rounded py-2 px-2"
                 type="text"
               />
             </div>
@@ -154,8 +154,8 @@ export function SignIn() {
             <div
               className={
                 errors.emailInput
-                  ? "w-sm login-Input-Wrapper flex items-stretch rounded"
-                  : "mb-2 w-sm login-Input-Wrapper flex items-stretch rounded"
+                  ? "w-sm max-md:w-full login-Input-Wrapper flex items-stretch rounded"
+                  : "mb-2 w-sm max-md:w-full login-Input-Wrapper flex items-stretch rounded"
               }
             >
               <div className="pl-2 flex items-center">
@@ -174,7 +174,7 @@ export function SignIn() {
                     message: "Email is not valid",
                   },
                 })}
-                className="focus:outline-none text-white rounded w-sm login-inputs  py-2 px-2"
+                className="focus:outline-none text-zinc-900 dark:text-white rounded w-sm max-md:w-full login-inputs  py-2 px-2"
               />
             </div>
             {errors.emailInput?.message && (
@@ -185,8 +185,8 @@ export function SignIn() {
             <div
               className={
                 errors.passwordInput
-                  ? "w-sm login-Input-Wrapper flex items-stretch rounded"
-                  : "mb-2 w-sm login-Input-Wrapper flex items-stretch rounded"
+                  ? "w-sm max-md:w-full login-Input-Wrapper flex items-stretch rounded"
+                  : "mb-2 w-sm max-md:w-full login-Input-Wrapper flex items-stretch rounded"
               }
             >
               <div className="pl-2 flex items-center">
@@ -208,7 +208,7 @@ export function SignIn() {
                   },
                 })}
                 placeholder="Password..."
-                className="focus:outline-none rounded text-white w-sm login-inputs  py-2 px-2"
+                className="focus:outline-none rounded text-zinc-900 dark:text-white w-sm max-md:w-full login-inputs  py-2 px-2"
               />
             </div>
             {errors.passwordInput?.message && (
@@ -220,8 +220,8 @@ export function SignIn() {
             <div
               className={
                 errors.confirmPasswordInput
-                  ? "w-sm login-Input-Wrapper flex items-stretch rounded"
-                  : "mb-2 w-sm login-Input-Wrapper flex items-stretch rounded"
+                  ? "w-sm max-md:w-full login-Input-Wrapper flex items-stretch rounded"
+                  : "mb-2 w-sm max-md:w-full login-Input-Wrapper flex items-stretch rounded"
               }
             >
               <div className="pl-2 flex items-center">
@@ -233,7 +233,7 @@ export function SignIn() {
                 onCopy={(e) => e.preventDefault()}
                 onCut={(e) => e.preventDefault()}
                 placeholder="Confirm Password..."
-                className="focus:outline-none rounded text-white w-sm login-inputs  py-2 px-2"
+                className="focus:outline-none rounded text-zinc-900 dark:text-white w-sm max-md:w-full login-inputs  py-2 px-2"
                 {...register("confirmPasswordInput", {
                   required: {
                     value: true,
@@ -256,23 +256,23 @@ export function SignIn() {
             {!disableBtn ? (
               <button
                 type="submit"
-                className="cursor-pointer rounded text-md w-sm justify-center bg-indigo-600 text-center text-white py-2 px-4 flex items-center gap-2"
+                className="cursor-pointer rounded max-md:text-sm text-base w-sm max-md:w-full justify-center bg-primary text-center text-white py-2 px-4 flex items-center gap-2 hover:opacity-90 transition-opacity"
               >
                 Continue
               </button>
             ) : (
               <button
                 disabled={disableBtn}
-                className="cursor-pointer rounded text-md w-sm justify-center bg-indigo-900 text-center text-gray-400 py-2 px-4 flex items-center gap-2"
+                className="cursor-pointer rounded max-md:text-sm text-base w-sm max-md:w-full justify-center bg-primary/50 text-center text-white/70 py-2 px-4 flex items-center gap-2"
               >
                 Processing
               </button>
             )}
           </div>
         </form>
-        <div className="text-white">
+        <div className="text-zinc-900 dark:text-white max-md:text-sm">
           Already have an account?{" "}
-          <Link to={"/login"} className="text-blue-500">
+          <Link to={"/login"} className="text-primary hover:underline">
             Login
           </Link>
         </div>

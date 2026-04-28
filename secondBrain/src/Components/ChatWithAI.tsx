@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { GiBrain } from "react-icons/gi";
 import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import { IoMdArrowUp } from "react-icons/io";
 import ReactMarkdown from "react-markdown";
 import Masonry from "react-masonry-css";
 import { useRecoilValue } from "recoil";
-import imgSrc from "../../public/Assets/Gemini_Generated_Image_7667fc7667fc7667.png";
 import type { CardProps, chatProps } from "../Models/CardProps";
 import type { ConversationProps } from "../Models/ConversationProps";
 import { SideBarAtom } from "../Recoil/SideBarAtom";
@@ -124,29 +122,29 @@ export const ChatWithAI = () => {
   // HTML
   return (
     <div
-      className={`${isSideBarCollapsed ? "ml-13.75" : "ml-72"} mt-6 p-5 flex flex-col items-center`}
+      className={`${isSideBarCollapsed ? "ml-13.75" : "ml-72"} max-md:ml-0 mt-6 p-5 flex flex-col items-center max-md:p-2`}
     >
-      <div id="message-container" className="w-205 mb-28">
+      <div id="message-container" className="w-full max-w-[820px] max-md:px-2 mb-28">
         {!msgList.length && nochat && (
           <div className="flex mt-20 gap-4 flex-col justify-center items-center">
-            <div className="empty-cards-Image h-60">
+            <div className="empty-cards-Image h-40 w-40">
               <img
-                src={imgSrc}
-                className="rounded-3xl h-full w-full border border-[#a9a9a9] object-cover"
+                src="/Assets/isolated_brain.png"
+                className="h-full w-full object-contain p-2"
               />
             </div>
-            <div className="empty-cards-desc text-white">
-              <div className="text-white text-xl text-center">
+            <div className="empty-cards-desc text-zinc-900 dark:text-white">
+              <div className="text-zinc-900 dark:text-white max-md:text-lg text-xl text-center">
                 Welcome to your second brain
               </div>
-              <div className="text-center mt-3 text-[#a9a9a9]">
+              <div className="text-center mt-3 text-zinc-600 dark:text-[#a9a9a9] max-md:text-sm">
                 Chat with Your Second Brain and see how it can assist you with
                 your thoughts, tweets, youtube videos and more! Start by asking
                 a question or sharing a thought.
               </div>
             </div>
             <div className="empty-cards-boxes">
-              <button className="px-3 py-1 bg-[#E6D8F2]  rounded flex items-center gap-1">
+              <button className="px-3 py-1 bg-primary/20 text-primary dark:bg-[#E6D8F2] dark:text-zinc-900 rounded flex items-center gap-1 hover:bg-primary/30 dark:hover:bg-purple-200 transition-colors">
                 <HiOutlineChatBubbleLeftRight size={20} />
                 Start Chatting
               </button>
@@ -163,10 +161,10 @@ export const ChatWithAI = () => {
                     key={ind}
                     className="mt-6 w-fit flex items-center ml-auto"
                   >
-                    <div className="rounded-lg max-w-lg p-2 w-fit text-white bg-indigo-600">
+                    <div className="rounded-lg max-w-lg p-2 w-fit text-white bg-primary shadow-md">
                       {msg.content}
                     </div>
-                    <div className="text-white ml-2">
+                    <div className="text-zinc-900 dark:text-white ml-2">
                       {/* <CgProfile size={28} /> */}
                       <img
                         src={userPicture}
@@ -175,7 +173,7 @@ export const ChatWithAI = () => {
                       />
                     </div>
                   </div>
-                  <div className="text-[#a9a9a9] ml-auto  text-xs mb-6 text-right">
+                  <div className="text-zinc-500 dark:text-[#a9a9a9] ml-auto  text-xs mb-6 text-right">
                     {msg.timeStamp}
                   </div>
                 </>
@@ -184,18 +182,18 @@ export const ChatWithAI = () => {
                 <>
                   <div className="my-12">
                     <div className="flex items-center ">
-                      <div className="text-white mr-2">
-                        <GiBrain size={28} color="#4f39f6" />
+                      <div className="mr-2 flex items-center justify-center">
+                        <img src="/Assets/isolated_brain.png" className="w-9 h-9 object-contain" alt="AI Icon" />
                       </div>
                       <div
                         key={ind}
-                        className="rounded-lg text-white w-fit max-w-full bg-[#000000] p-2"
+                        className="rounded-lg text-zinc-900 dark:text-white w-fit max-w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm p-3"
                       >
                         <ReactMarkdown
                           components={{
                             p: ({ children, ...props }) => {
                               return (
-                                <p className="text-gray-200 mb-2" {...props}>
+                                <p className="text-zinc-700 dark:text-gray-200 mb-2" {...props}>
                                   {children}
                                 </p>
                               );
@@ -205,7 +203,7 @@ export const ChatWithAI = () => {
                               return (
                                 <li
                                   style={{ listStyle: "inside" }}
-                                  className="text-gray-200 ml-5 mb-1"
+                                  className="text-zinc-700 dark:text-gray-200 ml-5 mb-1"
                                   {...props}
                                 >
                                   {children}
@@ -245,7 +243,7 @@ export const ChatWithAI = () => {
           ))}
         {!isAIResReady && (
           <>
-            <div className="flex gap-1 px-3 py-1 bg-[#30302E] rounded-lg w-fit items-center">
+            <div className="flex gap-1 px-3 py-1 bg-white dark:bg-[#30302E] border border-zinc-200 dark:border-transparent rounded-lg w-fit items-center shadow-sm">
               <div
                 className="w-1.5 h-1.5 mt-1 bg-gray-400 rounded-full animate-bounce"
                 style={{ animationDelay: "0ms" }}
@@ -263,12 +261,14 @@ export const ChatWithAI = () => {
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="w-205 min-h-20 z-10 bg-[#30302E] rounded-3xl mb-2 border border-[#a9a9a9] p-3 fixed gap-2 bottom-0">
-        <form onSubmit={handleSubmit(sendChat)} className="flex">
+      <div 
+        className={`w-[95%] max-w-[820px] min-h-20 z-10 bg-white dark:bg-[#30302E] rounded-3xl mb-2 border border-zinc-300 dark:border-zinc-700 shadow-xl dark:shadow-none p-3 fixed gap-2 bottom-0 flex transform -translate-x-1/2 ${isSideBarCollapsed ? "left-[calc(50vw+27.5px)] max-md:left-1/2" : "left-[calc(50vw+144px)] max-md:left-1/2"}`}
+      >
+        <form onSubmit={handleSubmit(sendChat)} className="flex w-full">
           <div className="w-full">
             <textarea
               {...register("userInput", {})}
-              className="text-white w-full p-2 focus:outline-none movie-glow-text h-full resize-none"
+              className="text-zinc-900 dark:text-white w-full p-2 focus:outline-none movie-glow-text h-full resize-none bg-transparent"
               placeholder={`${isLoading ? "Processing..." : "💬 Chat with Your Second Brain..."}`}
             />
           </div>
@@ -277,26 +277,26 @@ export const ChatWithAI = () => {
               <button
                 type="submit"
                 disabled={true}
-                className="cursor-pointer mt-2 bg-[#a9a9a9] right-4 top-2 rounded-lg p-1"
+                className="cursor-pointer mt-2 bg-zinc-200 dark:bg-zinc-700 right-4 top-2 rounded-lg p-1"
               >
-                <AiOutlineLoading3Quarters size={20} color="#000" />
+                <AiOutlineLoading3Quarters size={20} className="text-zinc-400 dark:text-zinc-500 animate-spin" />
               </button>
             )}
             {!isLoading &&
               (userChat !== "" ? (
                 <button
                   type="submit"
-                  className="cursor-pointer mt-2 bg-[#ffffff] right-4 top-2 rounded-lg p-1"
+                  className="cursor-pointer mt-2 bg-primary right-4 top-2 rounded-lg p-1 hover:opacity-90 transition-opacity"
                 >
-                  <IoMdArrowUp size={20} color="#4f39f6" />
+                  <IoMdArrowUp size={20} className="text-white" />
                 </button>
               ) : (
                 <button
                   type="submit"
                   disabled={true}
-                  className="cursor-pointer mt-2 bg-[#a9a9a9] right-4 top-2 rounded-lg p-1"
+                  className="cursor-pointer mt-2 bg-zinc-200 dark:bg-zinc-700 right-4 top-2 rounded-lg p-1"
                 >
-                  <IoMdArrowUp size={20} color="#000" />
+                  <IoMdArrowUp size={20} className="text-zinc-400 dark:text-zinc-500" />
                 </button>
               ))}
           </span>

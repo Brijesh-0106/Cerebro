@@ -168,11 +168,11 @@ export default function LandingPage() {
   return (
     <>
       <Navbar />
-      <div className="hero-section flex h-[calc(100vh-7vh)] px-18 bg-black">
-        <div className="leftSignInPart h-full w-1/2 flex justify-center items-center">
-          <div className="flex  w-96.25  flex-col items-center justify-center">
+      <div className="hero-section flex h-[calc(100vh-7vh)] max-md:h-auto max-md:flex-col max-md:px-4 max-md:py-8 px-18 bg-slate-50 dark:bg-black">
+        <div className="leftSignInPart h-full w-1/2 max-md:w-full max-md:h-auto flex justify-center items-center">
+          <div className="flex w-96.25 max-md:w-full flex-col items-center justify-center">
             <div className="text-center">
-              <h1 className="text-4xl h-20 text-[#4f39f6] font-bold">
+              <h1 className="text-4xl h-20 text-primary font-bold">
                 {/* Line 1 */}
                 <span>{line1}</span>
                 {/* Cursor only on line 1 if line 2 is empty */}
@@ -191,7 +191,7 @@ export default function LandingPage() {
                   </span>
                 )}
               </h1>
-              <h2 className="text-[#faf9f5] text-xl mt-4">
+              <h2 className="text-zinc-600 dark:text-[#faf9f5] text-xl mt-4">
                 Your future self will thank you for this
               </h2>
             </div>
@@ -199,7 +199,7 @@ export default function LandingPage() {
             <div className="not-odd mt-4 px-4 py-8 border w-full flex flex-col rounded-4xl justify-center items-center border-zinc-700 dummyButton">
               <button
                 onClick={handleCustomButtonClick}
-                className="cursor-pointer text-lg rounded-lg justify-center w-80 bg-indigo-600 text-center text-white flex py-2 px-3 items-center gap-2"
+                className="cursor-pointer text-lg rounded-lg justify-center w-80 bg-primary text-center text-white flex py-2 px-3 items-center gap-2 hover:bg-opacity-90 transition-colors"
               >
                 <FaGoogle size={24} /> Login with Google
               </button>
@@ -209,16 +209,16 @@ export default function LandingPage() {
                   onError={handleGoogleError}
                 />
               </div>
-              <h4 className="text-zinc-400 text-center my-4">OR</h4>
+              <h4 className="text-zinc-500 dark:text-zinc-400 text-center my-4">OR</h4>
               <div>
                 <input
                   type="text"
                   onChange={(e) => setLandEmail(e.target.value)}
-                  className="bg-zinc-900 mb-4 border border-zinc-500 placeholder-gray-300::placeholder text-zinc-100 text-lg px-4 py-3 w-80 rounded-lg"
+                  className="bg-white dark:bg-zinc-900 mb-4 border border-zinc-300 dark:border-zinc-500 placeholder-zinc-400 dark:placeholder-gray-300 text-zinc-900 dark:text-zinc-100 text-lg px-4 py-3 w-80 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
                   placeholder="Enter your email"
                 />
                 <button
-                  className="bg-[#faf9f5] w-80 text-center justify-center cursor-pointer flex py-2 px-3 gap-1 text-lg items-center rounded-lg"
+                  className="bg-zinc-900 dark:bg-[#faf9f5] w-80 text-center justify-center cursor-pointer flex py-2 px-3 gap-1 text-lg items-center rounded-lg text-white dark:text-zinc-900 hover:opacity-90 transition-opacity"
                   onClick={() => navWithEmail()}
                 >
                   Continue with Email
@@ -227,17 +227,17 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-        <div className="rightVideoSection pr-2 ml-20 py-18 h-full  px-16 w-1/2">
+        <div className="rightVideoSection pr-2 ml-20 py-18 h-full px-16 w-1/2 max-md:w-full max-md:ml-0 max-md:px-0 max-md:py-8 max-md:h-[500px]">
           <div 
-          className="relative w-full h-full bg-zinc-900 border-zinc-600 border p-8 px-10 flex flex-col rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer group">
-            <span className="text-white text-center text-md py-2 px-3  mx-auto mt-2 rounded-2xl  border border-zinc-500">
+          className="relative w-full h-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-600 border p-8 px-10 max-md:p-4 flex flex-col rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer group shadow-xl">
+            <span className="text-zinc-900 dark:text-white text-center text-md py-2 px-3  mx-auto mt-2 rounded-2xl  border border-zinc-300 dark:border-zinc-500">
               Chat with your Knowledge
             </span>
             <div className="mt-12">
               {showFirstQ && (
                 <>
                   <div
-                    className={`ml-auto rounded-xl max-w-lg p-3 w-fit mb-4 text-white bg-indigo-600 
+                    className={`ml-auto rounded-xl max-w-lg p-3 w-fit mb-4 text-white bg-primary 
                     transition-all duration-700 ease-out 
                     ${
                       showFirstQ
@@ -257,7 +257,7 @@ export default function LandingPage() {
                       Searched 3 sources &gt;
                     </div>
                   )}
-                  <div className="text-zinc-300 min-h-16">
+                  <div className="text-zinc-700 dark:text-zinc-300 min-h-16">
                     {aiLine1}
                     {!showsecondQ && (
                       <span
@@ -273,7 +273,7 @@ export default function LandingPage() {
                 <>
                   {showsecondQ && (
                     <div
-                      className={`ml-auto rounded-xl max-w-lg p-3 mt-4 mb-4 w-fit text-white bg-indigo-600 
+                      className={`ml-auto rounded-xl max-w-lg p-3 mt-4 mb-4 w-fit text-white bg-primary 
                       transition-all duration-700 ease-out 
                       ${
                         showFirstQ
@@ -294,7 +294,7 @@ export default function LandingPage() {
                       Searched 3 sources &gt;
                     </div>
                   )}
-                  <div className="text-zinc-300 min-h-16">{aiLine3}</div>
+                  <div className="text-zinc-700 dark:text-zinc-300 min-h-16">{aiLine3}</div>
                 </>
               )}
             </div>

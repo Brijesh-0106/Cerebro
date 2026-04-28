@@ -1,49 +1,70 @@
 @import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --color-primary-base: #2563eb;
+}
+
+.dark {
+  --color-primary-base: #1e90ff;
+}
+
+@theme {
+  --color-primary: var(--color-primary-base);
+}
 
 :root {
   --color-black-1: #000000;
 }
 
 .bg-custom-gradient {
-  background-image: radial-gradient(
-    circle,
-    #703bf7a0 0%,
-    #703bf700 45%,
-    var(--color-black-1) 80%,
-    var(--color-black-1) 100%
-  );
+  background-image: radial-gradient(circle,
+      #703bf7a0 0%,
+      #703bf700 45%,
+      var(--color-black-1) 80%,
+      var(--color-black-1) 100%);
 }
+
 .login-inputs::placeholder {
   color: #a9a9a9;
   opacity: 1;
 }
+
 .add-textArea::placeholder {
   color: #a9a9a9;
 }
+
 .login-Input-Wrapper {
   border: 2px solid rgba(255, 255, 255, 0.1);
 }
+
 .login-inputs {
   border: none;
 }
+
 .add-Input-Wrapper {
   border: 2px solid rgb(129, 42, 191);
 }
+
 .masonry-column {
-  padding-left: 16px; /* gap-4 = 16px */
+  padding-left: 16px;
+  /* gap-4 = 16px */
   background-clip: padding-box;
 }
 
 .masonry-column:first-child {
   padding-left: 0;
 }
+
 .movie-glow-text {
   animation: 3s linear infinite shine;
 }
+
 @keyframes shine {
   0% {
     background-position: 100% 0;
   }
+
   100% {
     background-position: -100% 0;
   }
@@ -55,6 +76,7 @@
     0 0 30px rgba(99, 102, 241, 0.6),
     0 0 50px rgba(99, 102, 241, 0.9);
 }
+
 .google-signin-container {
   display: flex;
   justify-content: center;
@@ -67,6 +89,7 @@
   border-radius: 4px;
   margin-bottom: 15px;
 }
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,

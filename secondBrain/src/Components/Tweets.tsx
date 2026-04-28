@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import Masonry from "react-masonry-css";
 import { useRecoilState, useRecoilValue } from "recoil";
-import imgSrc from "../assets/Gemini_Generated_Image_r70ze4r70ze4r70z.png";
 import type { CardProps } from "../Models/CardProps";
 import { CardAtom } from "../Recoil/CardAtom";
 import { SideBarAtom } from "../Recoil/SideBarAtom";
@@ -17,16 +16,18 @@ export default function Tweets() {
   let breakpointColumns;
   if (isSideBarCollapsed) {
     breakpointColumns = {
-      default: 4,
-      1400: 3,
-      1100: 2,
-      700: 1,
+      default: 5,
+      1800: 4,
+      1447: 3,
+      1095: 2,
+      743: 1,
     };
   } else {
     breakpointColumns = {
-      default: 3,
-      1100: 2,
-      700: 1,
+      default: 4,
+      1680: 3,
+      1328: 2,
+      976: 1,
     };
   }
 
@@ -53,24 +54,24 @@ export default function Tweets() {
       {loading && <SkeletonGrid />}
       {!cards.length && (
         <div
-          className={`flex ${isSideBarCollapsed ? "ml-13.75" : "ml-65"} mt-13 px-5 pt-4 h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center`}
+          className={`flex ${isSideBarCollapsed ? "ml-13.75" : "ml-65"} max-md:ml-0 mt-13 px-5 pt-4 h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center`}
         >
-          <div className="empty-cards-Image h-60 w-60">
+          <div className="empty-cards-Image h-40 w-40 mt-10">
             <img
-              src={imgSrc}
-              className="rounded-3xl h-full w-full object-cover"
+              src="/Assets/isolated_brain.png"
+              className="h-full w-full object-contain p-2"
             />
           </div>
-          <div className="empty-cards-desc text-white">
-            <div className="text-white text-xl text-center">
+          <div className="empty-cards-desc text-zinc-900 dark:text-white">
+            <div className="text-zinc-900 dark:text-white max-md:text-lg text-xl text-center">
               Welcome to your second brain
             </div>
-            <div className="text-center mt-3 text-[#a9a9a9]">
+            <div className="text-center mt-3 text-zinc-600 dark:text-[#a9a9a9] max-md:text-sm">
               Start by adding your first Item
             </div>
           </div>
           <div className="empty-cards-boxes">
-            <button className="px-3 py-1 bg-[#E6D8F2]  rounded flex items-center gap-1">
+            <button className="px-3 py-1 bg-primary/20 text-primary dark:bg-[#E6D8F2] dark:text-zinc-900 rounded flex items-center gap-1 hover:bg-primary/30 dark:hover:bg-purple-200 transition-colors">
               <HiOutlineChatBubbleLeftRight size={20} />
               Add Tweet
             </button>
@@ -80,7 +81,7 @@ export default function Tweets() {
       {cards.length > 0 && (
         <Masonry
           breakpointCols={breakpointColumns}
-          className={`flex ${isSideBarCollapsed ? "ml-13.75" : "ml-72"} mt-13 px-5 pt-4 gap-4`}
+          className={`flex ${isSideBarCollapsed ? "ml-13.75" : "ml-72"} max-md:ml-0 mt-13 px-5 pt-4 gap-4`}
           columnClassName="masonry-column"
         >
           {cards.map((elem: CardProps) => (
