@@ -1,290 +1,706 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
-    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (g && (g = 0, op[0] && (_ = 0)), _) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
 // ----------------------------------------- Imports
-var cors_1 = __importDefault(require("cors"));
-var express_1 = __importDefault(require("express"));
-var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-var mongoose_1 = __importStar(require("mongoose"));
-var z = __importStar(require("zod"));
+import { Pinecone } from '@pinecone-database/pinecone';
+import * as cheer from 'cheerio';
+import cors from 'cors';
+import dotenv from "dotenv";
+import express from 'express';
+import { OAuth2Client } from 'google-auth-library';
+import Groq from "groq-sdk";
+import jwt from 'jsonwebtoken';
+import mongoose, { Schema } from 'mongoose';
+import * as z from "zod";
+import { getEmbedding } from './hfEmbedding.js';
+import { upload, uploadImage } from "./storage.js"; // Note: add .js extension   
+import dns from 'dns';
 // -------------------------------------------
-// --------------------------------------------JWT config
-var SECRET_KEY = 'IncreaseEfforts';
+// --------------------------------------------DOTENV CONFIG
+dotenv.config();
 // -------------------------------------------
-// -------------------------------------------ZOD validations
-var SignIn = z.object({
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+// --------------------------------------------OAUTH2 CONFIG
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+// -------------------------------------------p
+// --------------------------------------------VECTOR EMBEDDING CONFIG
+let pcIndex;
+try {
+    const pc = new Pinecone({
+        apiKey: process.env.PINECONE_API_KEY,
+    });
+    pcIndex = pc.index({ name: "cerebro-embeddings" }); //NEED TO CREATE INDEX IN PINECONE FIRST
+}
+catch (error) {
+    console.error('❌ Pinecone initialization failed:', error);
+    process.exit(1);
+}
+// -------------------------------------------
+// -------------------------------------------ZOD VALIDATIONS
+const SignIn = z.object({
     name: z.string().min(3),
     email: z.email(),
     password: z.string().min(8),
 });
-var LogIn = z.object({
+const LogIn = z.object({
     password: z.string().min(8),
     email: z.email(),
 });
-var Content = z.object({
-    title: z.string().max(3),
-    type: z.enum(['youtube', 'tweet']),
-    tags: z.array(z.object(z.string())),
+const Content = z.object({
+    title: z.string().min(3),
+    type: z.enum(['youtube', 'tweet', 'thought', 'article']),
+    tags: z.string(),
     url: z.string(),
-    desc: z.string().max(5),
+    imageUrl: z.string(),
+    desc: z.string().min(5),
+});
+const TagSchema = z.object({
+    label: z.string(),
+    value: z.string(),
+    color: z.string()
+});
+const Article = z.object({
+    type: z.enum(['article']),
+    tags: z.array(TagSchema),
+    url: z.string(),
+    desc: z.string().min(5),
+});
+const Conversation = z.object({
+    content: z.string(),
+    role: z.enum(['assistant', 'user']),
+    timeStamp: z.string(),
 });
 // ---------------------------------------------------------
-// ----------------------------------------- Express Basics
-var port = 3000;
-var app = (0, express_1.default)();
+// ----------------------------------------- EXPRESS BASICS
+const port = 3000;
+const app = express();
 // ----------------------------------------- 
-// ----------------------------------------- Middleware => (CORS, Body Parse)
-app.use((0, cors_1.default)());
-app.use(express_1.default.json());
+// ----------------------------------------- MIDDLEWARES => (CORS, BODY PARSE)
+app.use(cors());
+app.use("/uploads", express.static("uploads"));
+app.use(express.json());
 // AUTH Middleware
-var middleAuth = function (req, res, next) {
+const middleAuth = (req, res, next) => {
     try {
-        var token = req.header('Token');
-        console.log(req.header('Token'));
+        let token = req.header('Token');
         if (!token) {
-            res.status(403).json({ error: "You don't access for this" });
+            res.status(403).json({ error: "Authentication token required" });
             return;
         }
-        var payload = jsonwebtoken_1.default.verify(token, SECRET_KEY);
+        console.log("SECRET_KEY", process.env.SECRET_KEY);
+        let payload = jwt.verify(token, process.env.SECRET_KEY);
+        console.log("req.userId", payload);
         req.userId = payload;
         next();
     }
     catch (error) {
-        res.status(401).json({ message: "Invalid or expired token" });
+        if (error instanceof jwt.JsonWebTokenError) {
+            res.status(401).json({ error: "Invalid token" });
+        }
+        else if (error instanceof jwt.TokenExpiredError) {
+            res.status(401).json({ error: "Token expired" });
+        }
+        else {
+            res.status(500).json({ error: "Authentication failed" });
+        }
     }
 };
 // ----------------------------------------- 
-// ----------------------------------------- DB Condig + Connnect
-function DbConnect() {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, mongoose_1.default.connect('mongodb+srv://phenomenal:Phenomenal@cluster0.9ubnr8w.mongodb.net/NeuralNetwork')];
-                case 1:
-                    _a.sent();
-                    console.log("DB is connected");
-                    return [2 /*return*/];
-            }
-        });
-    });
+// ----------------------------------------- DB CONFIG + CONNECT
+async function DbConnect() {
+    try {
+        dns.setServers(['8.8.8.8', '1.1.1.1']);
+        await mongoose.connect('mongodb+srv://phenomenal:Phenomenal@cluster0.9ubnr8w.mongodb.net/NeuralNetwork');
+    }
+    catch (err) {
+        console.error('❌ Database connection failed:', err);
+        process.exit(1); // Exit if DB fails
+    }
+    console.log("CONNECTED to DB");
 }
 DbConnect();
 // -----------------------------------------
-// ----------------------------------------- Models & Schema
-var UserSchema = new mongoose_1.Schema({
+// ----------------------------------------- mODELS & SCHEMA
+const UserSchema = new Schema({
     name: { type: String, required: true },
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true }
 });
-var UserModel = mongoose_1.default.model('user', UserSchema);
-var ContentSchema = new mongoose_1.Schema({
+const UserModel = mongoose.model('user', UserSchema);
+const ContentSchema = new Schema({
     title: { type: String, required: true },
-    type: { type: String, required: true, enum: ["youtube", "tweet"], },
-    tags: Array,
-    contentUrl: { type: String, required: true },
+    type: { type: String, required: true, enum: ["youtube", 'thought', "tweet", "article"], },
+    tags: { type: String, required: false },
+    contentUrl: { type: String, required: false },
     description: { type: String, required: true },
+    imageUrl: { type: String, required: false },
     createdAt: { type: Date, required: true },
-    userId: { type: mongoose_1.Schema.Types.ObjectId, ref: UserModel, required: true },
+    author: { type: String, required: false },
+    userId: { type: Schema.Types.ObjectId, ref: UserModel, required: true },
 });
-var ContentModel = mongoose_1.default.model('content', ContentSchema);
+const ContentModel = mongoose.model('content', ContentSchema);
+const ConversationSchema = new Schema({
+    messages: {
+        type: [{
+                content: { type: String, required: true },
+                role: { type: String, required: true },
+                timeStamp: { type: String, required: true },
+                sourceIds: [{ type: Schema.Types.ObjectId, ref: ContentModel, required: false }]
+            }], required: true
+    },
+    userId: { type: Schema.Types.ObjectId, ref: UserModel, required: true },
+});
+const ConversationModel = mongoose.model('chat', ConversationSchema);
 // ----------------------------------------- 
-// ----------------------------------------------Signin & Login Routes
-app.post('/v0/api/signin', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, name, email, password, result;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                console.log("reached here", req.body);
-                _a = req.body, name = _a.name, email = _a.email, password = _a.password;
-                console.log(name, email, password);
-                debugger;
-                result = SignIn.safeParse({ name: name, email: email, password: password });
-                if (!result.success) return [3 /*break*/, 2];
-                return [4 /*yield*/, UserModel.create({ name: name, email: email, password: password })];
-            case 1:
-                _b.sent();
+// ----------------------------------------------SIGNIN & LOGIN ROUTES
+app.post("/v0/api/google", async (req, res) => {
+    try {
+        const { token } = req.body;
+        if (!token) {
+            return res.status(400).json({ error: 'Token is required' });
+        }
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        if (!payload || !payload.email) {
+            return res.status(400).json({ error: 'Invalid token' });
+        }
+        const { email, name, picture, sub: googleId } = payload;
+        console.log("Google auth picture:", picture);
+        let User = await UserModel.findOne({ email });
+        const user = {
+            id: googleId,
+            email,
+            name,
+            picture,
+        };
+        if (User) {
+        }
+        else {
+            User = await UserModel.create({ name: name || "Google User", email, password: googleId });
+        }
+        const jwtToken = jwt.sign(User._id.toString(), process.env.SECRET_KEY);
+        return res.status(200).json({
+            success: true,
+            token: jwtToken,
+            user,
+        });
+    }
+    catch (error) {
+        console.error('Google auth error:', error);
+        res.status(401).json({ error: 'Invalid token' });
+    }
+});
+app.post('/v0/api/signin', async (req, res) => {
+    let { name, email, password } = req.body;
+    const result = SignIn.safeParse({ name, email, password });
+    if (result.success) {
+        try {
+            const existingUser = await UserModel.findOne({ email });
+            if (existingUser) {
+                return res.status(409).json({
+                    error: 'User already exists'
+                });
+            }
+            await UserModel.create({ name, email, password });
+            res.status(200).json({
+                message: 'Sign in Successfully'
+            });
+        }
+        catch (err) {
+            console.error('SignIn error:', err);
+            res.status(500).json({
+                error: 'Failed to create user'
+            });
+        }
+    }
+    else {
+        res.status(400).json({
+            error: result.error
+        });
+    }
+});
+app.post('/v0/api/login', async (req, res) => {
+    let { email, password } = req.body;
+    const result = LogIn.safeParse({ password, email });
+    if (result.success) {
+        try {
+            let user = await UserModel.findOne({ email, password });
+            if (user) {
+                console.log("SECRET_KEY", process.env.SECRET_KEY);
+                let token = jwt.sign(user._id.toString(), process.env.SECRET_KEY);
                 res.status(200).json({
-                    message: 'Sign in Successfully'
+                    message: 'Login in Successfully',
+                    token: token,
+                    name: user.name
                 });
-                return [3 /*break*/, 3];
-            case 2:
-                res.status(400).json({
-                    error: result.error
+            }
+            else {
+                res.status(500).json({
+                    error: 'Incorrect credentials'
                 });
-                _b.label = 3;
-            case 3: return [2 /*return*/];
+            }
         }
-    });
-}); });
-app.post('/v0/api/login', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, email, password, result, user, token;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                _a = req.body, email = _a.email, password = _a.password;
-                console.log(email, password);
-                result = LogIn.safeParse({ password: password, email: email });
-                if (!result.success) return [3 /*break*/, 2];
-                return [4 /*yield*/, UserModel.findOne({ email: email, password: password })];
-            case 1:
-                user = _b.sent();
-                console.log(user);
-                if (user) {
-                    token = jsonwebtoken_1.default.sign(user._id.toString(), SECRET_KEY);
-                    res.status(200).json({
-                        message: 'Login in Successfully',
-                        token: token
-                    });
-                }
-                else {
-                    res.status(500).json({
-                        error: 'Incorrect credentials'
-                    });
-                }
-                return [3 /*break*/, 3];
-            case 2:
-                res.status(400).json({
-                    message: result.error
-                });
-                _b.label = 3;
-            case 3: return [2 /*return*/];
+        catch (error) {
+            console.error('Login error:', error);
+            res.status(500).json({
+                error: 'Login failed'
+            });
         }
-    });
-}); });
+    }
+    else {
+        res.status(400).json({
+            message: result.error
+        });
+    }
+});
 // ----------------------------------------------
-// ----------------------------------------------Content Routes
-app.post('/v0/api/add-content', middleAuth, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, title, desc, type, tags, url, result, user;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                console.log("-----------add-content API");
-                _a = req.body, title = _a.title, desc = _a.desc, type = _a.type, tags = _a.tags, url = _a.url;
-                console.log(title, type, tags, url, desc);
-                console.log(req.userId);
-                result = Content.safeParse({ title: title, type: type, tags: tags, url: url, desc: desc });
-                if (!result.success) return [3 /*break*/, 2];
-                return [4 /*yield*/, ContentModel.create({ title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose_1.default.Types.ObjectId(req.userId), createdAt: new Date().toDateString() })];
-            case 1:
-                user = _b.sent();
-                if (user) {
-                    res.status(201).json({
-                        message: 'Content added Succes mongoose.Schema.Types.ObjectIdsfully',
+// --------------------------------------------- CONVERSATION ROUTES
+app.get('/v0/api/load-chat', middleAuth, async (req, res) => {
+    try {
+        const existingChat = await ConversationModel.findOne({ userId: req.userId }, { messages: 1, _id: 0 }).populate('messages.sourceIds');
+        res.json({
+            "messages": existingChat?.messages || []
+        });
+    }
+    catch (err) {
+        res.status(500).json({ err });
+    }
+});
+app.post('/v0/api/add-chat', middleAuth, async (req, res) => {
+    let { content, role, timeStamp } = req.body;
+    let vectorInput = "";
+    const result = Conversation.safeParse({ content, role, timeStamp });
+    if (result.success) {
+        try {
+            vectorInput += `${content}`;
+            const vector = await getEmbedding(vectorInput);
+            const vectorResult = await pcIndex.namespace(req.userId).query({
+                vector: vector,
+                topK: 2,
+                includeMetadata: true, // ✅ Add this
+                includeValues: false // Don't need the vectors back
+            });
+            const strongMatches = vectorResult.matches.filter((elem) => elem.score && elem.score > 0.25);
+            const existingChat = await ConversationModel.findOne({
+                userId: req.userId
+            });
+            let AIResponse;
+            if (existingChat) {
+                existingChat.messages.push({ content, role: "user", timeStamp });
+                if (strongMatches.length > 0) {
+                    let sourceIds = strongMatches.map(r => r.id);
+                    // Add LLM
+                    const sources = await ContentModel.find({
+                        _id: { $in: sourceIds }
                     });
+                    const sortedSources = sourceIds
+                        .map(id => sources.find(s => s._id.toString() === id))
+                        .filter(Boolean);
+                    // Build context dynamically based on available sources
+                    const context = sortedSources.map((s, i) => `Source ${i + 1}: "${s.title}"
+                        Description: ${s.description}
+                        Type: ${s.type}
+                        Tags: ${s.tags}`).join('\n\n');
+                    const completion = await groq.chat.completions.create({
+                        messages: [
+                            {
+                                role: "system",
+                                content: `You are a concise assistant.
+                                STRICT RULES:
+                                - 3-5 sentence overview only
+                                - Then medium size bullet points for key concepts
+                                - If a bullet point comes from Source 1, add (Source 1) at the end
+                                - If a bullet point comes from Source 2, add (Source 2) at the end
+                                - If a bullet is general knowledge or you're unsure, don't add a source tag
+                                - DO NOT add any "Note:" or disclaimer at end
+                                - DO NOT say "based on provided context"
+                                - DO NOT mention YouTube or video descriptions
+                                - Sound natural and direct
+
+                            You SHOULD cite sources when information clearly comes from them.
+                            You should NOT cite sources when you're guessing or unsure.`
+                            },
+                            {
+                                role: "user",
+                                content: `Context:\n${context}\n\nQuestion: "${content}"\n\nAnswer honestly based on available context.`
+                            }
+                        ],
+                        model: "llama-3.1-8b-instant",
+                        temperature: 0.4,
+                        max_tokens: 200
+                    });
+                    let answer = completion.choices[0].message.content;
+                    AIResponse = {
+                        role: "asstistant", timeStamp: new Date().toLocaleString(),
+                        content: `${answer}`,
+                        sourceIds: sortedSources.map((s) => s._id)
+                    };
+                    existingChat.messages.push(AIResponse);
                 }
                 else {
-                    res.status(500).json({
-                        message: 'Incorrect credentials'
-                    });
+                    const recentContent = await ContentModel
+                        .find({ userId: req.userId })
+                        .sort({ createdAt: -1 })
+                        .limit(3);
+                    if (recentContent.length > 0) {
+                        const topics = recentContent.map(c => c.title).join(', ');
+                        AIResponse = {
+                            role: "assistant", timeStamp: new Date().toLocaleString(),
+                            content: `I couldn't find anything about **${content}** in your saved content. You have content about: **${topics}**. Try adding **${content}**-related content first
+                                to build your second brain.`,
+                            sourceIds: []
+                        };
+                    }
+                    else {
+                        AIResponse = {
+                            role: "assistant", timeStamp: new Date().toLocaleString(),
+                            content: `I couldn't find anything about **${content}** in your saved content. Start by adding YouTube videos, tweets, or thoughts 
+                                    to build your second brain.`,
+                            sourceIds: []
+                        };
+                    }
+                    existingChat.messages.push(AIResponse);
                 }
-                return [3 /*break*/, 3];
-            case 2:
-                res.status(400).json({
-                    error: result.error
+                await existingChat?.save();
+            }
+            else {
+                const firstChat = await ConversationModel.create({
+                    messages: [{ content, role: "user", timeStamp }],
+                    userId: req.userId
                 });
-                _b.label = 3;
-            case 3: return [2 /*return*/];
-        }
-    });
-}); });
-app.get('/v0/api/get-all-content', middleAuth, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var ObjtId, AllUserContent;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                console.log("-----------add-content API");
-                ObjtId = new mongoose_1.default.Types.ObjectId(req.userId);
-                return [4 /*yield*/, ContentModel.find({ userId: ObjtId })];
-            case 1:
-                AllUserContent = _a.sent();
-                if (AllUserContent) {
-                    res.status(200).json({
-                        AllUserContent: AllUserContent
+                if (strongMatches.length > 0) {
+                    let sourceIds = strongMatches.map(r => r.id);
+                    // Add LLM
+                    const sources = await ContentModel.find({
+                        _id: { $in: sourceIds }
                     });
+                    const sortedSources = sourceIds
+                        .map(id => sources.find(s => s._id.toString() === id))
+                        .filter(Boolean);
+                    const context = sortedSources.map((s, i) => `Source ${i + 1}: "${s.title}"
+                        Description: ${s.description}
+                        Type: ${s.type}
+                        Tags: ${s.tags}`).join('\n\n');
+                    const completion = await groq.chat.completions.create({
+                        messages: [
+                            {
+                                role: "system",
+                                content: `You are a concise assistant.
+                                STRICT RULES:
+                                - 3-5 sentence overview only
+                                - Then medium size bullet points for key concepts
+                                - If a bullet point comes from Source 1, add (Source 1) at the end
+                                - If a bullet point comes from Source 2, add (Source 2) at the end
+                                - If a bullet is general knowledge or you're unsure, don't add a source tag
+                                - DO NOT add any "Note:" or disclaimer at end
+                                - DO NOT say "based on provided context"
+                                - DO NOT mention YouTube or video descriptions
+                                - Sound natural and direct
+
+                            You SHOULD cite sources when information clearly comes from them.
+                            You should NOT cite sources when you're guessing or unsure.`
+                            },
+                            {
+                                role: "user",
+                                content: `Context:\n${context}\n\nQuestion: "${content}"\n\nAnswer honestly based on available context.`
+                            }
+                        ],
+                        model: "llama-3.1-8b-instant",
+                        temperature: 0.7,
+                        max_tokens: 500
+                    });
+                    AIResponse = {
+                        role: "asstistant", timeStamp: new Date().toLocaleString(),
+                        content: `${completion.choices[0].message.content}`,
+                        sourceIds: sortedSources.map((s) => s._id)
+                    };
+                    // Add LLM
+                    firstChat.messages.push(AIResponse);
                 }
                 else {
-                    res.status(500).json({
-                        message: null
-                    });
+                    const recentContent = await ContentModel
+                        .find({ userId: req.userId })
+                        .sort({ createdAt: -1 })
+                        .limit(3);
+                    if (recentContent.length > 0) {
+                        const topics = recentContent.map(c => c.title).join(', ');
+                        AIResponse = {
+                            role: "assistant", timeStamp: new Date().toLocaleString(),
+                            content: `I couldn't find anything about **${content}** in your saved content. You have content about: **${topics}**. Try adding **${content}**-related content first
+                                to build your second brain.`,
+                            sourceIds: []
+                        };
+                    }
+                    else {
+                        AIResponse = {
+                            role: "assistant", timeStamp: new Date().toLocaleString(),
+                            content: `I couldn't find anything about **${content}** in your saved content. Start by adding YouTube videos, tweets, or thoughts 
+                                    to build your second brain.`,
+                            sourceIds: []
+                        };
+                    }
+                    firstChat.messages.push(AIResponse);
                 }
-                return [2 /*return*/];
+                await firstChat?.save();
+            }
+            AIResponse = await ConversationModel.findOne({ userId: req.userId }, { messages: { $slice: -1 }, _id: 0 }).populate('messages.sourceIds');
+            res.status(200).json({
+                AIResponse
+            });
+        }
+        catch (err) {
+            console.error('Chat error:', err);
+            return res.status(500).json({
+                error: 'Search failed. Please try again.'
+            });
+        }
+    }
+    else {
+        res.status(400).json({
+            error: result.error
+        });
+    }
+});
+const getArticleImage = ($) => {
+    let image = null;
+    // For OG image, just trust it's high quality and use it as priority
+    image = $('meta[property="og:image"]').attr('content');
+    if (image) {
+        return image; // OG image is explicitly set by the site owner, trust it
+    }
+    let largestImage = null;
+    let maxSize = 0;
+    $('img').toArray().forEach((img) => {
+        const width = parseInt($(img).attr('width') || '0');
+        const height = parseInt($(img).attr('height') || '0');
+        const size = width * height;
+        if (size > maxSize) {
+            maxSize = size;
+            largestImage = $(img).attr('src');
         }
     });
-}); });
+    return largestImage;
+};
+// ----------------------------------------------CONTENT ROUTES
+app.post('/v0/api/add-web-article', middleAuth, async (req, res) => {
+    console.log(req.body, " body");
+    let vectorInput = "";
+    let { tags, desc, type, url } = req.body;
+    try {
+        const result = Article.safeParse({ type, tags, url, desc });
+        const tagValues = tags.map((tag) => tag.value).join(', ');
+        if (result.success) {
+            let apiRes = await fetch(url);
+            const html = await apiRes.text();
+            const $ = cheer.load(html);
+            const title = $('title').text();
+            const image = getArticleImage($);
+            const author = $('meta[name="author"]').attr('content')
+                || $('.author').text();
+            const excerpt = ($('meta[name="description"]').attr('content')
+                || $('article p').first().text()).trim()
+                .substring(0, 200); //only for RAG perpose
+            const content = await ContentModel.create({
+                imageUrl: image, title: title,
+                type: type, tags: tagValues,
+                contentUrl: url, description: desc,
+                author: author,
+                userId: new mongoose.Types.ObjectId(req.userId),
+                createdAt: new Date().toISOString()
+            });
+            if (content) {
+                vectorInput += `User context:\n${desc} \nTitle:\n${title} \nType:\n${type} \nTags:\n${tagValues} \nexcerpt:\n${excerpt}`;
+                console.log(vectorInput);
+                getEmbedding(vectorInput).then((vector) => {
+                    pcIndex.upsert({
+                        records: [
+                            {
+                                id: content._id.toString(),
+                                values: vector,
+                                metadata: {
+                                    userId: req.userId,
+                                    type: type,
+                                    tags: JSON.stringify(tags)
+                                },
+                            }
+                        ],
+                        namespace: req.userId
+                    });
+                })
+                    .catch(err => console.error('Background embedding error:', err));
+                res.status(201).json({
+                    message: 'Article added Successfully',
+                });
+            }
+            else {
+                res.status(500).json({
+                    message: 'Failed to add article'
+                });
+            }
+        }
+        else {
+            res.status(400).json({
+                error: result.error
+            });
+        }
+    }
+    catch (err) {
+        console.error('Add article error:', err);
+        res.status(500).json({
+            error: 'Failed to add article'
+        });
+    }
+});
+app.post('/v0/api/add-content', middleAuth, upload.single("imageUrl"), async (req, res) => {
+    let imageUrl = '';
+    let vectorInput = "";
+    try {
+        if (req.file) {
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(req.file.mimetype)) {
+                return res.status(400).json({
+                    type: "imageUrl",
+                    error: 'Only JPEG, PNG, and WebP allowed.'
+                });
+            }
+            if (req.file.size > 5 * 1024 * 1024) {
+                return res.status(400).json({
+                    type: "imageUrl",
+                    error: 'File too Big. Maximum size is 5MB.'
+                });
+            }
+            imageUrl = await uploadImage(req.file.buffer);
+        }
+        let { title, desc, type, tags, url } = req.body;
+        const result = Content.safeParse({ title, type, tags, url, desc, imageUrl });
+        if (result.success) {
+            const content = await ContentModel.create({ imageUrl: imageUrl, title: title, type: type, tags: tags, contentUrl: url, description: desc, userId: new mongoose.Types.ObjectId(req.userId), createdAt: new Date().toISOString() });
+            if (content) {
+                vectorInput += `User context:\n${desc} \nTitle:\n${title} \nType:\n${type} \nTags:\n${JSON.stringify(tags)}`;
+                console.log(vectorInput);
+                getEmbedding(vectorInput).then((vector) => {
+                    pcIndex.upsert({
+                        records: [
+                            {
+                                id: content._id.toString(),
+                                values: vector,
+                                metadata: {
+                                    userId: req.userId,
+                                    type: type,
+                                    tags: JSON.stringify(tags)
+                                },
+                            }
+                        ],
+                        namespace: req.userId
+                    });
+                })
+                    .catch(err => console.error('Background embedding error:', err));
+                res.status(201).json({
+                    message: 'Content added Successfully',
+                });
+            }
+            else {
+                res.status(500).json({
+                    message: 'Failed to add content'
+                });
+            }
+        }
+        else {
+            res.status(400).json({
+                error: result.error
+            });
+        }
+    }
+    catch (err) {
+        console.error('Add content error:', err);
+        res.status(500).json({
+            error: 'Failed to add content'
+        });
+    }
+});
+app.get('/v0/api/get-all-content', middleAuth, async (req, res) => {
+    const ObjtId = new mongoose.Types.ObjectId(req.userId);
+    let AllUserContent = await ContentModel
+        .find({ userId: ObjtId })
+        .sort({ createdAt: -1 });
+    if (AllUserContent) {
+        res.status(200).json({
+            AllUserContent
+        });
+    }
+    else {
+        res.status(500).json({
+            message: null
+        });
+    }
+});
+app.get('/v0/api/get-all-youtube-content', middleAuth, async (req, res) => {
+    const ObjtId = new mongoose.Types.ObjectId(req.userId);
+    let AllUserContent = await ContentModel
+        .find({ userId: ObjtId, type: "youtube" })
+        .sort({ createdAt: -1 });
+    if (AllUserContent) {
+        res.status(200).json({
+            AllUserContent
+        });
+    }
+    else {
+        res.status(500).json({
+            message: null
+        });
+    }
+});
+app.get('/v0/api/get-all-article-content', middleAuth, async (req, res) => {
+    const ObjtId = new mongoose.Types.ObjectId(req.userId);
+    let AllUserContent = await ContentModel
+        .find({ userId: ObjtId, type: "article" })
+        .sort({ createdAt: -1 });
+    if (AllUserContent) {
+        res.status(200).json({
+            AllUserContent
+        });
+    }
+    else {
+        res.status(500).json({
+            message: null
+        });
+    }
+});
+app.get('/v0/api/get-all-tweet-content', middleAuth, async (req, res) => {
+    const ObjtId = new mongoose.Types.ObjectId(req.userId);
+    let AllUserContent = await ContentModel
+        .find({ userId: ObjtId, type: "tweet" })
+        .sort({ createdAt: -1 });
+    if (AllUserContent) {
+        res.status(200).json({
+            AllUserContent
+        });
+    }
+    else {
+        res.status(500).json({
+            message: null
+        });
+    }
+});
 // -----------------------------------------------------
-// ----------------------------------------------------Server start
-app.listen(port, function () {
+app.get('/v0/api/get-all-thoughts', middleAuth, async (req, res) => {
+    const ObjtId = new mongoose.Types.ObjectId(req.userId);
+    let AllUserThoughs = await ContentModel
+        .find({ userId: ObjtId, type: "thought" })
+        .sort({ createdAt: -1 });
+    if (AllUserThoughs) {
+        res.status(200).json({
+            AllUserThoughs
+        });
+    }
+    else {
+        res.status(500).json({
+            message: null
+        });
+    }
+});
+// ----------------------------------------------------SERVER START
+app.listen(port, () => {
     console.log('Server is running on port ' + port);
 });
-// ----------------------------------------------------App end
+// --------------------------------------------------------------------------------END----------------------------------------------------------------------------------

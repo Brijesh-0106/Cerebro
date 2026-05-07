@@ -12,10 +12,11 @@ import path from 'path/win32';
 import * as z from "zod";
 import { getEmbedding } from './hfEmbedding.js';
 import { upload, uploadImage } from "./storage.js"; // Note: add .js extension   
+import dns from 'dns';
 // -------------------------------------------
 
 // --------------------------------------------DOTENV CONFIG
-dotenv.config({ path: path.join(process.cwd(), '../.env') });
+dotenv.config();
 // -------------------------------------------
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -128,6 +129,7 @@ const middleAuth = (req: Request, res: Response, next: NextFunction): void => {
 // ----------------------------------------- DB CONFIG + CONNECT
 async function DbConnect() {
     try {
+        dns.setServers(['8.8.8.8', '1.1.1.1']);
         await mongoose.connect('mongodb+srv://phenomenal:Phenomenal@cluster0.9ubnr8w.mongodb.net/NeuralNetwork')
     } catch (err) {
         console.error('❌ Database connection failed:', err);
