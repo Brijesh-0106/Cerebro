@@ -130,7 +130,7 @@ const middleAuth = (req: Request, res: Response, next: NextFunction): void => {
 async function DbConnect() {
     try {
         dns.setServers(['8.8.8.8', '1.1.1.1']);
-        await mongoose.connect('mongodb+srv://phenomenal:Phenomenal@cluster0.9ubnr8w.mongodb.net/NeuralNetwork')
+        await mongoose.connect(process.env.MONGO_URI as string)
     } catch (err) {
         console.error('❌ Database connection failed:', err);
         process.exit(1); // Exit if DB fails
@@ -202,6 +202,12 @@ const ConversationSchema = new Schema<IConversation>({
 })
 const ConversationModel = mongoose.model<IConversation>('chat', ConversationSchema);
 // ----------------------------------------- 
+
+// Testing purpose
+
+app.get("/test", (req: Request, res: Response) => {
+    res.send("Testing...");
+})
 
 
 // ----------------------------------------------SIGNIN & LOGIN ROUTES

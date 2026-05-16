@@ -1,0 +1,18 @@
+FROM node:20.20.0-alpine
+
+WORKDIR /app
+ARG VITE_GOOGLE_CLIENT_ID
+ARG VITE_BACKEND_URL
+
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
+COPY ./package.json ./package.json
+COPY ./package-lock.json ./package-lock.json
+
+RUN npm install
+COPY . .
+
+
+RUN npm run build
+EXPOSE 5173
+CMD ["npm","run","start"]

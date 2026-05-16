@@ -1,0 +1,23 @@
+services:
+  cerebro_backend:
+    build:
+      context: ./secondBrainBackend
+      args:
+        - GROQ_API_KEY=${GROQ_API_KEY}
+        - PINECONE_API_KEY=${PINECONE_API_KEY}
+        - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+        - SECRET_KEY=${SECRET_KEY}
+        - MONGO_URI=${MONGO_URI}
+    ports:
+      - "3000:3000"
+
+  cerebro_frontend:
+    build:
+      context: ./secondBrain
+      args:
+        - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+        - VITE_BACKEND_URL=${VITE_BACKEND_URL}
+    ports:
+      - "5173:5173"
+    depends_on:
+      - cerebro_backend
