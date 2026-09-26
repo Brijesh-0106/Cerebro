@@ -40,9 +40,9 @@ jobs:
       - name: SSH & deploy
         uses: appleboy/ssh-action@v0.1.5
         with:
-          host: ${{github.SSH_HOST}}
-          key: ${{github.SSH_KEY}}
-          username: ${{github.SSH_USER}}
+          host: ${{secrets.SSH_HOST}}
+          key: ${{secrets.SSH_KEY}}
+          username: ${{secrets.SSH_USER}}
           script: |
             sudo docker pull brijesh408/cerebro-be:v${{github.run_number}}
             sudo docker pull brijesh408/cerebro-fe:v${{github.run_number}}
