@@ -2,17 +2,16 @@
 import { Pinecone } from '@pinecone-database/pinecone';
 import * as cheer from 'cheerio';
 import cors from 'cors';
+import dns from 'dns';
 import dotenv from "dotenv";
 import express, { NextFunction, Request, Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
 import Groq from "groq-sdk";
 import jwt from 'jsonwebtoken';
 import mongoose, { Document, Schema, Types } from 'mongoose';
-import path from 'path/win32';
 import * as z from "zod";
 import { getEmbedding } from './hfEmbedding.js';
 import { upload, uploadImage } from "./storage.js"; // Note: add .js extension   
-import dns from 'dns';
 // -------------------------------------------
 
 // --------------------------------------------DOTENV CONFIG
@@ -83,7 +82,7 @@ const Conversation = z.object({
 // ---------------------------------------------------------
 
 // ----------------------------------------- EXPRESS BASICS
-const port = 3000;
+const port = 8001;
 const app = express();
 
 declare global {
