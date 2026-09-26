@@ -14,7 +14,7 @@ jobs:
           nodeversion: 20
           cache: "cache"
       - name: Npm Install
-        runs: |
+        run: |
           cd /secondBrain
           npm ci
           cd ../secondBrainBackend
@@ -27,7 +27,7 @@ jobs:
           username: ${{secrets.DOCKER_USER}}
           password: ${{secrets.DOCKER_PASSWORD}}
       - name: Docker push
-        runs: |
+        run: |
           docker build -t brijesh408/cerebro-be:v${{github.run_number}} .
           cd ../secondBrain
           docker build -t brijesh408/cerebro-fe:v${{github.run_number}} .
