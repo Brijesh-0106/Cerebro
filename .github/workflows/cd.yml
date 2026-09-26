@@ -1,7 +1,7 @@
 name: CI/CD CEREBRO
 on:
   push:
-    branched: [main]
+    branches: [main]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,10 +14,8 @@ jobs:
           node-version: 22
       - name: Npm Install
         run: |
-          cd /secondBrain
-          npm ci
-          cd ../secondBrainBackend
-          npm ci
+          cd secondBrain && npm ci
+          cd secondBrainBackend && npm ci
       - name: Docker Setup
         uses: docker/setup-buildx-action@v3
       - name: Docker Login
