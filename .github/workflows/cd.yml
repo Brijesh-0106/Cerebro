@@ -25,6 +25,8 @@ jobs:
           password: ${{secrets.DOCKER_PASSWORD}}
       - name: Docker push
         run: |
+          ls
+          cd secondBrainBackend
           docker build -t brijesh408/cerebro-be:v${{github.run_number}} .
           cd ../secondBrain
           docker build -t brijesh408/cerebro-fe:v${{github.run_number}} .
