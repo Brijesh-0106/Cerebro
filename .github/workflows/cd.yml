@@ -29,7 +29,7 @@ jobs:
           cd secondBrainBackend
           docker build -t brijesh408/cerebro-be:v${{github.run_number}} .
           cd ../secondBrain
-          docker build -t brijesh408/cerebro-fe:v${{github.run_number}} .
+          docker build --build-arg VITE_GOOGLE_CLIENT_ID=${{secrets.VITE_GOOGLE_CLIENT_ID}} --build-arg VITE_BACKEND_URL=${{secrets.VITE_BACKEND_URL}} -t brijesh408/cerebro-fe:v${{github.run_number}} .
           docker push brijesh408/cerebro-be:v${{github.run_number}}
           docker push brijesh408/cerebro-fe:v${{github.run_number}}
 
@@ -50,7 +50,7 @@ jobs:
             sudo docker stop cerebro-be || true
             sudo docker rm cerebro-fe || true
             sudo docker rm cerebro-be || true
-            sudo docker run -d -p 5173:80 -e VITE_GOOGLE_CLIENT_ID=${{secrets.VITE_GOOGLE_CLIENT_ID}} -e VITE_BACKEND_URL=${{secrets.VITE_BACKEND_URL}} --restart unless-stopped --name cerebro-fe brijesh408/cerebro-fe:v${{github.run_number}}
+            sudo docker run -d -p 5173:80 --restart unless-stopped --name cerebro-fe brijesh408/cerebro-fe:v${{github.run_number}}
             sudo docker run -d -p 8001:8001 -e GROQ_API_KEY=${{secrets.GROQ_API_KEY}} -e PINECONE_API_KEY=${{secrets.PINECONE_API_KEY}} -e MONGO_URI=${{secrets.MONGO_URI}} -e SECRET_KEY=${{secrets.SECRET_KEY}} -e GOOGLE_CLIENT_ID=${{secrets.GOOGLE_CLIENT_ID}} --restart unless-stopped --name cerebro-be brijesh408/cerebro-be:v${{github.run_number}}
             sleep 5
             sudo docker ps
