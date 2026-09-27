@@ -1,24 +1,14 @@
 FROM node:20.20.0 as builder
 WORKDIR /app
-# ARG GROQ_API_KEY
-# ARG PINECONE_API_KEY
-# ARG GOOGLE_CLIENT_ID
-# ARG SECRET_KEY
-# ARG MONGO_URI
-
-# ENV GROQ_API_KEY=$GROQ_API_KEY
-# ENV PINECONE_API_KEY=$PINECONE_API_KEY
-# ENV GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
-# ENV SECRET_KEY=$SECRET_KEY
-# ENV MONGO_URI=$MONGO_URI
 COPY ./package*.json ./
 RUN npm install
 COPY . .
 RUN npm run build
+
 FROM node:20-alpine as production
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --only=production    # only prod dependencies
+RUN npm install 
 COPY --from=builder /app/dist ./dist
 EXPOSE 8001
 CMD ["npm", "run", "start"]
