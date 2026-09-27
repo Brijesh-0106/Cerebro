@@ -1,96 +1,101 @@
 import { useEffect, useState } from "react";
 import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import Masonry from "react-masonry-css";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState } from "recoil";
 import type { CardProps } from "../Models/CardProps";
 import { CardAtom } from "../Recoil/CardAtom";
-import { SideBarAtom } from "../Recoil/SideBarAtom";
 import { Card } from "./Card";
 import { SkeletonGrid } from "./SkeletonGrid";
 
 export default function Youtube() {
   const [cards, setCards] = useRecoilState(CardAtom);
   const [loading, setLoading] = useState(false);
-  const isSideBarCollapsed = useRecoilValue(SideBarAtom);
-  // In your component
-  let breakpointColumns;
 
-  if (isSideBarCollapsed) {
-    breakpointColumns = {
-      default: 5,
-      1800: 4,
-      1447: 3,
-      1095: 2,
-      743: 1,
-    };
-  } else {
-    breakpointColumns = {
-      default: 4,
-      1680: 3,
-      1328: 2,
-      976: 1,
-    };
-  }
+  const breakpointColumns = {
+    default: 4,
+    1536: 4,
+    1280: 3,
+    768: 2,
+    500: 1,
+  };
 
   useEffect(() => {
     async function asyncDataFetch() {
       setLoading(true);
-      const data = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/v0/api/get-all-youtube-content/`,
-        {
-          method: "GET",
-          headers: {
-            token: localStorage.getItem("token") as string,
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+        const data = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/v0/api/get-all-youtube-content/`,
+          {
+            method: "GET",
+            headers: {
+              token: token as string,
+            },
           },
-        },
-      );
-      const res = await data.json();
-      setCards([...res["AllUserContent"]]);
-      setLoading(false);
+        );
+        if (data.ok) {
+          const res = await data.json();
+          setCards([...(res["AllUserContent"] || [])]);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
     asyncDataFetch();
   }, []);
   return (
-    <>
+    <div className="max-w-7xl mx-auto mt-20 px-6 pb-16">
+
       {loading && <SkeletonGrid />}
-      {!cards.length && (
-        <div
-          className={`flex ${isSideBarCollapsed ? "ml-13.75" : "ml-65"} max-md:ml-0 mt-13 px-5 pt-4 h-[calc(100vh-130px)] gap-4 flex-col justify-center items-center`}
-        >
-          <div className="empty-cards-Image h-40 w-40 mt-10">
-            <img
-              src="/Assets/isolated_brain.png"
-              className="h-full w-full object-contain p-2"
-            />
-          </div>
-          <div className="empty-cards-desc text-zinc-900 dark:text-white">
-            <div className="text-zinc-900 dark:text-white max-md:text-lg text-xl text-center">
-              Welcome to your second brain
+      {!loading && !cards.length && (
+        <div className="flex h-[calc(100vh-200px)] gap-4 flex-col justify-center items-center">
+          <div className="p-8 rounded-3xl bg-white/60 dark:bg-[#141620]/60 border border-zinc-200/80 dark:border-zinc-800/80 backdrop-blur-sm max-w-md w-full flex flex-col items-center text-center shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+            <div className="h-28 w-28 mb-4">
+              <img
+                src="/Assets/isolated_brain.png"
+                className="h-full w-full object-contain filter drop-shadow-md"
+                alt="Brain logo"
+              />
             </div>
-            <div className="text-center mt-3 text-zinc-600 dark:text-[#a9a9a9] max-md:text-sm">
-              Start by adding your first Item
+            <h3 className="text-zinc-900 dark:text-zinc-100 font-bold text-xl tracking-tight">
+              No YouTube videos saved yet
+            </h3>
+            <p className="mt-2 text-zinc-500 dark:text-zinc-400 text-sm max-w-xs leading-relaxed">
+              Save educational videos, tutorials, and podcasts to learn from and reference later.
+            </p>
+            <div className="mt-6">
+              <button
+                onClick={() => {
+                  const addBtn = document.querySelector('header button[class*="rounded-full"]') as HTMLElement;
+                  if (addBtn) addBtn.click();
+                }}
+                className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white rounded-full flex items-center gap-2 text-sm font-medium shadow-sm hover:shadow transition-all cursor-pointer"
+              >
+                <HiOutlineChatBubbleLeftRight size={18} />
+                Add YouTube Video
+              </button>
             </div>
-          </div>
-          <div className="empty-cards-boxes">
-            <button className="px-3 py-1 bg-primary/20 text-primary dark:bg-[#E6D8F2] dark:text-zinc-900 rounded flex items-center gap-1 hover:bg-primary/30 dark:hover:bg-purple-200 transition-colors">
-              <HiOutlineChatBubbleLeftRight size={20} />
-              Add Youtube
-            </button>
           </div>
         </div>
       )}
-      {cards.length > 0 && (
+      {!loading && cards.length > 0 && (
         <Masonry
           breakpointCols={breakpointColumns}
-          className={`flex ${isSideBarCollapsed ? "ml-13.75" : "ml-72"} max-md:ml-0 mt-13 px-5 pt-4 gap-4`}
-          columnClassName="masonry-column"
+          className="flex -ml-4 w-auto"
+          columnClassName="masonry-column pl-4"
         >
           {cards.map((elem: CardProps) => (
             <Card
               title={elem.title}
               _id={elem._id}
               userId={elem.userId}
-              createdAt={elem.createdAt.split("T")[0]}
+              createdAt={elem.createdAt ? elem.createdAt.split("T")[0] : ""}
               contentUrl={elem.contentUrl}
               type={elem.type}
               description={elem.description}
@@ -99,7 +104,7 @@ export default function Youtube() {
           ))}
         </Masonry>
       )}
-      {/* when no cards added */}
-    </>
+    </div>
   );
 }
+

@@ -6,15 +6,14 @@ import { useSetRecoilState } from "recoil";
 import type { alertType, CardProps } from "../Models/CardProps";
 import { CardAtom } from "../Recoil/CardAtom";
 import { Alert } from "./Alert";
-import { Leftbar } from "./Leftbar";
 import MultiTagSelect from "./MultiTagSelect";
 import { Topbar } from "./Topbar";
 import { UserArea } from "./UserArea";
 
 export const Dashboard = () => {
   const [openAddContentModal, setOpenAddContentModal] = useState(false);
-  // const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [alertMsg, setAlertMsg] = useState("");
+
   const nav = useNavigate();
   const [disableBtn, setDisableBtn] = useState(false);
   const [alertType, setAlertType] = useState<alertType>("success");
@@ -243,35 +242,38 @@ export const Dashboard = () => {
   return (
     <>
       <div
-        className={
-          openAddContentModal
-            ? "w-screen h-screen bg-slate-50 dark:bg-[#09090b] max-w-screen "
-            : "min-w-screen min-h-screen max-w-screen bg-slate-50 dark:bg-[radial-gradient(1200px_600px_at_top_left,rgba(204,123,244,0.35)_0%,rgba(204,123,244,0.15)_35%,rgba(18,18,18,0)_60%),radial-gradient(1200px_600px_at_bottom_right,rgba(204,123,244,0.35)_0%,rgba(204,123,244,0.15)_35%,rgba(18,18,18,0)_60%),linear-gradient(135deg,#09090b_45%,#000_75%)]"
-        }
+        className="min-w-screen min-h-screen pt-4 max-w-screen bg-canvas-grid transition-colors duration-200 text-zinc-900 dark:text-zinc-100"
       >
         {showAlert && <Alert type={alertType} title={alertMsg} />}
-        ;
-        <Leftbar />
         <Topbar curr={openAddContentModal} setCurr={setOpenAddContentModal} />
         <UserArea />
+
         {/* -------------------------------------- ADD CONTENT MODAL -------------------------------------- */}
         {openAddContentModal && (
-          <div className="fixed inset-0 bg-white/50 dark:bg-black/90 z-40 backdrop-blur-sm" />
+          <div
+            className="fixed inset-0 bg-black/40 dark:bg-black/70 z-40 backdrop-blur-sm transition-opacity"
+            onClick={() => setOpenAddContentModal(false)}
+          />
         )}
         {openAddContentModal && (
-          <div className="fixed  inset-0 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white rounded-xl w-96 max-md:w-[90%] max-md:max-w-md shadow-2xl">
-              <div className="header border-b border-zinc-300 dark:border-zinc-700 p-2 text-lg font-semibold text-primary flex justify-between items-center">
-                {contentType === "thought"
-                  ? "Capture a thought for your future self"
-                  : contentType === "article"
-                    ? "Capture a article for your future self"
-                    : "Capture a content for your future self"}
-                <IoMdClose
-                  size={20}
-                  className="cursor-pointer"
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-[#141620] text-zinc-900 dark:text-zinc-100 rounded-2xl w-full max-w-lg shadow-2xl border border-zinc-200/80 dark:border-zinc-800/90 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div className="header border-b border-zinc-200/80 dark:border-zinc-800/80 px-6 py-4 flex justify-between items-center bg-zinc-50/50 dark:bg-[#11131a]/50">
+                <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                  {contentType === "thought"
+                    ? "Capture a thought for your future self"
+                    : contentType === "article"
+                      ? "Capture an article for your future self"
+                      : "Capture content for your future self"}
+                </h3>
+                <button
+                  type="button"
                   onClick={() => setOpenAddContentModal(false)}
-                />
+                  className="p-1 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                  aria-label="Close modal"
+                >
+                  <IoMdClose size={20} />
+                </button>
               </div>
               <form
                 onSubmit={
@@ -280,98 +282,64 @@ export const Dashboard = () => {
                     : handleSubmit(createCard)
                 }
               >
-                <div className="body py-2 px-4">
-                  <div className="flex flex-col">
-                    <div
-                      className={
-                        errors.type
-                          ? "border border-primary flex items-stretch rounded"
-                          : "border mb-2 border-primary flex items-stretch rounded"
-                      }
-                    >
+                <div className="body p-6 space-y-4">
+                  <div className="flex flex-col gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+                        Type
+                      </label>
                       <select
                         {...register("type", {
                           required: "Type is Required",
                         })}
                         name="type"
-                        className="w-full py-2 focus:outline-none px-2 text-zinc-900 dark:text-white"
+                        className="w-full py-2.5 px-3 rounded-xl bg-zinc-50 dark:bg-[#0c0d14] border border-zinc-200 dark:border-zinc-700/80 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm transition-all"
                       >
-                        <option
-                          value={""}
-                          className="w-full text-zinc-900 dark:text-white py-2 px-2"
-                        >
-                          Select type...
-                        </option>
-                        <option
-                          className="w-full text-zinc-900 dark:text-white py-2 px-2"
-                          value={"thought"}
-                        >
-                          Thought
-                        </option>
-                        <option
-                          className="w-full text-zinc-900 dark:text-white py-2 px-2"
-                          value={"youtube"}
-                        >
-                          Youtube
-                        </option>
-                        <option
-                          className="w-full text-zinc-900 dark:text-white py-2 px-2"
-                          value={"article"}
-                        >
-                          Article
-                        </option>
-                        <option
-                          className="w-full text-zinc-900 dark:text-white py-2 px-2"
-                          value={"tweet"}
-                        >
-                          Twitter
-                        </option>
+                        <option value="">Select type...</option>
+                        <option value="thought">Thought</option>
+                        <option value="youtube">Youtube</option>
+                        <option value="article">Article</option>
+                        <option value="tweet">Twitter</option>
                       </select>
+                      {errors.type?.message && (
+                        <p className="text-red-500 text-xs mt-1 pl-1">
+                          {errors.type.message.toString()}
+                        </p>
+                      )}
                     </div>
-                    {errors.type?.message && (
-                      <p className="text-red-600 mb-1 pl-1">
-                        {errors.type.message.toString()}
-                      </p>
-                    )}
+
                     {contentType != "article" && (
-                      <>
-                        <div
-                          className={
-                            errors.title
-                              ? "border border-primary flex items-stretch rounded"
-                              : "border mb-2 border-primary flex items-stretch rounded"
-                          }
-                        >
-                          <input
-                            {...register("title", {
-                              required: {
-                                value: true,
-                                message: "Title is Required",
-                              },
-                              minLength: {
-                                value: 3,
-                                message: "Title must be at least 3 characters",
-                              },
-                            })}
-                            className="w-full focus:outline-none text-zinc-900 dark:text-white login-inputs rounded py-2 px-2"
-                            type="text"
-                            placeholder="Title..."
-                          />
-                        </div>
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+                          Title
+                        </label>
+                        <input
+                          {...register("title", {
+                            required: {
+                              value: true,
+                              message: "Title is Required",
+                            },
+                            minLength: {
+                              value: 3,
+                              message: "Title must be at least 3 characters",
+                            },
+                          })}
+                          className="w-full py-2.5 px-3 rounded-xl bg-zinc-50 dark:bg-[#0c0d14] border border-zinc-200 dark:border-zinc-700/80 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                          type="text"
+                          placeholder="Title..."
+                        />
                         {errors.title?.message && (
-                          <p className="text-red-600 mb-1 pl-1">
+                          <p className="text-red-500 text-xs mt-1 pl-1">
                             {errors.title.message.toString()}
                           </p>
                         )}
-                      </>
+                      </div>
                     )}
-                    <div
-                      className={
-                        errors.description
-                          ? "border border-primary  flex items-stretch rounded"
-                          : "border mb-2 border-primary flex items-stretch rounded"
-                      }
-                    >
+
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+                        Description
+                      </label>
                       <textarea
                         {...register("description", {
                           required: {
@@ -380,100 +348,101 @@ export const Dashboard = () => {
                           },
                           minLength: {
                             value: 5,
-                            message:
-                              "Description must be at least 5 characters",
+                            message: "Description must be at least 5 characters",
                           },
                         })}
-                        placeholder="Why do you want save this?..."
-                        className="text-zinc-900 dark:text-white add-textArea focus:outline-none rounded w-full py-2 px-2"
-                        rows={2}
-                      ></textarea>
+                        placeholder="Why do you want to save this?..."
+                        className="w-full py-2.5 px-3 rounded-xl bg-zinc-50 dark:bg-[#0c0d14] border border-zinc-200 dark:border-zinc-700/80 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm transition-all resize-none placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                        rows={3}
+                      />
+                      {errors.description?.message && (
+                        <p className="text-red-500 text-xs mt-1 pl-1">
+                          {errors.description.message.toString()}
+                        </p>
+                      )}
                     </div>
-                    {errors.description?.message && (
-                      <p className="text-red-600 mb-1 pl-1">
-                        {errors.description.message.toString()}
-                      </p>
-                    )}
+
                     {contentType === "thought" ? (
-                      <>
-                        <div
-                          className={
-                            errors.imageUrl
-                              ? "border border-primary flex items-stretch rounded"
-                              : "border mb-2 border-primary flex items-stretch rounded"
-                          }
-                        >
-                          <input
-                            type="file"
-                            accept="image/*"
-                            {...register("imageUrl")}
-                            className="file:bg-indigo-600 w-full file:text-white file:px-4 file:py-1 file:rounded file:border-0 text-zinc-900 dark:text-white"
-                          />
-                        </div>
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+                          Image (Optional)
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          {...register("imageUrl")}
+                          className="file:bg-zinc-900 dark:file:bg-indigo-600 w-full file:text-white file:px-4 file:py-1.5 file:rounded-lg file:border-0 text-zinc-700 dark:text-zinc-300 text-sm file:mr-3 file:cursor-pointer"
+                        />
                         {errors.imageUrl?.message && (
-                          <p className="text-red-600 mb-1 pl-1">
+                          <p className="text-red-500 text-xs mt-1 pl-1">
                             {errors.imageUrl.message.toString()}
                           </p>
                         )}
-                      </>
+                      </div>
                     ) : (
-                      <>
-                        <div
-                          className={
-                            errors.contentUrl
-                              ? "border border-primary flex items-stretch rounded"
-                              : "border mb-2 border-primary flex items-stretch rounded"
-                          }
-                        >
-                          <input
-                            {...register("contentUrl", {
-                              required: {
-                                value: true,
-                                message: "Content Link is Required",
-                              },
-                              minLength: {
-                                value: 8,
-                                message:
-                                  "Content link must be at least 8 characters",
-                              },
-                            })}
-                            type="text"
-                            placeholder={`${contentType === "youtube" ? "Youtube link..." : contentType === "article" ? "Article link..." : "Tweet link..."}`}
-                            className="w-full focus:outline-none rounded text-zinc-900 dark:text-white login-inputs  py-2 px-2"
-                          />
-                        </div>
-
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+                          Content Link
+                        </label>
+                        <input
+                          {...register("contentUrl", {
+                            required: {
+                              value: true,
+                              message: "Content Link is Required",
+                            },
+                            minLength: {
+                              value: 8,
+                              message: "Content link must be at least 8 characters",
+                            },
+                          })}
+                          type="text"
+                          placeholder={`${contentType === "youtube" ? "https://youtube.com/watch?v=..." : contentType === "article" ? "https://example.com/article" : "https://x.com/username/status/..."}`}
+                          className="w-full py-2.5 px-3 rounded-xl bg-zinc-50 dark:bg-[#0c0d14] border border-zinc-200 dark:border-zinc-700/80 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                        />
                         {errors.contentUrl?.message && (
-                          <p className="text-red-600 mb-1 pl-1">
+                          <p className="text-red-500 text-xs mt-1 pl-1">
                             {errors.contentUrl.message.toString()}
                           </p>
                         )}
-                      </>
+                      </div>
                     )}
-                    <div className="border  border-primary flex items-stretch rounded">
-                      <MultiTagSelect
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-expect-error
-                        value={tags}
-                        onChange={(val) => setValue("tags", val)}
-                      />
+
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+                        Tags
+                      </label>
+                      <div className="rounded-xl overflow-hidden">
+                        <MultiTagSelect
+                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                          // @ts-expect-error
+                          value={tags}
+                          onChange={(val) => setValue("tags", val)}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="footer flex flex-row-reverse border-t border-primary p-2">
+                <div className="footer flex justify-end gap-3 border-t border-zinc-200/80 dark:border-zinc-800/80 px-6 py-4 bg-zinc-50/50 dark:bg-[#11131a]/50">
+                  <button
+                    type="button"
+                    onClick={() => setOpenAddContentModal(false)}
+                    className="cursor-pointer px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  >
+                    Cancel
+                  </button>
                   {!disableBtn ? (
                     <button
                       type="submit"
-                      className="cursor-pointer py-1 bg-primary w-28 text-white font-semibold rounded hover:bg-opacity-90 transition-colors"
+                      className="cursor-pointer py-2 px-5 bg-zinc-900 hover:bg-zinc-800 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white text-sm font-medium rounded-xl shadow-sm transition-all hover:shadow"
                     >
-                      Add
+                      Add Content
                     </button>
                   ) : (
                     <button
                       disabled={disableBtn}
-                      className="cursor-pointer rounded text-md w-sm justify-center bg-primary/50 text-center text-white py-2 px-4 flex items-center gap-2"
+                      className="cursor-not-allowed rounded-xl text-sm bg-zinc-400 dark:bg-indigo-600/50 text-white py-2 px-5 flex items-center gap-2"
                     >
-                      Processing
+                      Processing...
                     </button>
                   )}
                 </div>

@@ -61,46 +61,54 @@ export const Leftbar = () => {
         className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-30 transition-opacity duration-300 md:hidden ${!isCollapsed ? "opacity-100 visible" : "opacity-0 invisible"}`}
         onClick={() => setIsCollapsed(true)}
       />
-      <span
-        className={`fixed z-40 top-0 left-0 ${isCollapsed ? "w-13.75 max-md:-translate-x-full" : "w-60 max-md:translate-x-0"} max-md:w-60 max-md:border-r-gray-200 dark:max-md:border-r-gray-800 p-2 h-screen bg-slate-50 dark:bg-black text-zinc-900 dark:text-white border-r-2 border-zinc-200 dark:border-black flex flex-col justify-between transition-transform duration-300 ease-in-out max-md:shadow-2xl`}
+      <aside
+        className={`fixed z-40 top-0 left-0 ${isCollapsed ? "w-13.75 max-md:-translate-x-full" : "w-60 max-md:translate-x-0"} max-md:w-60 p-3 h-screen bg-white/90 dark:bg-[#0c0d14]/90 backdrop-blur-md text-zinc-900 dark:text-zinc-100 border-r border-zinc-200/80 dark:border-zinc-800/80 flex flex-col justify-between transition-transform duration-300 ease-in-out max-md:shadow-2xl`}
       >
       <div className="upper-section">
-        <div className="top-logo-section flex justify-between">
+        <div className="top-logo-section flex justify-between items-center mb-6 pt-1">
           <div
-            className={`text-zinc-900 dark:text-white max-md:text-lg text-xl ${isCollapsed ? "" : "pl-4"} items-center gap-3 title flex mb-8`}
+            className={`text-zinc-900 dark:text-white ${isCollapsed ? "justify-center w-full" : "pl-2"} items-center gap-3 title flex`}
           >
-            <img src="/Assets/isolated_brain.png" className="w-10 h-10 object-contain" alt="CereBro Logo" />
+            <img src="/Assets/isolated_brain.png" className="w-9 h-9 object-contain drop-shadow-sm" alt="CereBro Logo" />
+            {!isCollapsed && (
+              <span className="font-semibold text-lg tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">
+                Cerebro
+              </span>
+            )}
           </div>
           <button
             onClick={() => {
               setIsCollapsed(true);
             }}
             style={isCollapsed ? { display: "none" } : {}}
-            className="cursor-pointer text-zinc-900 dark:text-white max-md:text-lg text-xl pl-4  gap-3 title mb-8 hover:text-primary transition-colors"
+            className="cursor-pointer text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            title="Collapse Sidebar"
           >
-            <TbLayoutSidebarLeftCollapse />
+            <TbLayoutSidebarLeftCollapse size={20} />
           </button>
         </div>
         <div
-          className={`mid-elems-section text-left flex flex-col ${isCollapsed ? "items-center" : ""} gap-2 mb-8`}
+          className={`mid-elems-section text-left flex flex-col ${isCollapsed ? "items-center" : ""} gap-1.5`}
         >
           <NavLink
             onClick={() => {
               uncollapseSideBar();
             }}
             className={({ isActive }) =>
-              `cursor-pointer text-left text-zinc-600 dark:text-[#a9a9a9] ${isCollapsed ? "flex w-full justify-center" : "pl-4"} flex 
-            items-center gap-2 py-2 focus:text-primary dark:focus:text-white hover:text-primary dark:hover:text-white
-             focus:bg-zinc-200 dark:focus:bg-[#30302E] hover:bg-zinc-200 dark:hover:bg-[#30302E] transition-colors ${isActive ? "text-primary dark:text-white bg-zinc-200 dark:bg-[#30302E] rounded-md" : ""}`
+              `cursor-pointer text-sm font-medium ${isCollapsed ? "flex w-10 h-10 justify-center items-center" : "px-3.5 py-2.5"} flex items-center gap-3 rounded-xl transition-all ${
+                isActive
+                  ? "bg-zinc-900 text-white dark:bg-white/10 dark:text-white dark:border dark:border-white/10 shadow-sm"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100/90 dark:hover:bg-white/5"
+              }`
             }
             to={"/dashboard/all-content"}
           >
             <IoChatboxEllipsesOutline
               title="All Content"
               size={20}
-              className={isCollapsed ? "text-zinc-500" : "text-zinc-500 dark:text-gray-400"}
+              className="shrink-0"
             />
-            {!isCollapsed && "All Content"}
+            {!isCollapsed && <span>All Content</span>}
           </NavLink>
           <NavLink
             to={"/dashboard/thoughts"}
@@ -108,11 +116,15 @@ export const Leftbar = () => {
               uncollapseSideBar();
             }}
             className={({ isActive }) =>
-              `cursor-pointer flex text-zinc-600 dark:text-[#a9a9a9] ${isCollapsed ? "flex w-full justify-center" : "pl-4"} items-center gap-2 py-2 focus:text-primary dark:focus:text-white hover:text-primary dark:hover:text-white focus:bg-zinc-200 dark:focus:bg-[#30302E] hover:bg-zinc-200 dark:hover:bg-[#30302E] transition-colors ${isActive ? "text-primary dark:text-white bg-zinc-200 dark:bg-[#30302E] rounded-md" : ""}`
+              `cursor-pointer text-sm font-medium ${isCollapsed ? "flex w-10 h-10 justify-center items-center" : "px-3.5 py-2.5"} flex items-center gap-3 rounded-xl transition-all ${
+                isActive
+                  ? "bg-zinc-900 text-white dark:bg-white/10 dark:text-white dark:border dark:border-white/10 shadow-sm"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100/90 dark:hover:bg-white/5"
+              }`
             }
           >
-            <GiNotebook title="Thoughts" size={20} className="text-purple-400" />
-            {!isCollapsed && "Thoughts"}
+            <GiNotebook title="Thoughts" size={20} className="shrink-0 text-violet-500" />
+            {!isCollapsed && <span>Thoughts</span>}
           </NavLink>
           <NavLink
             to={"/dashboard/tweeter-content"}
@@ -120,11 +132,15 @@ export const Leftbar = () => {
               uncollapseSideBar();
             }}
             className={({ isActive }) =>
-              `cursor-pointer flex text-zinc-600 dark:text-[#a9a9a9] ${isCollapsed ? "flex w-full justify-center" : "pl-4"} items-center gap-2 py-2 focus:text-primary dark:focus:text-white hover:text-primary dark:hover:text-white focus:bg-zinc-200 dark:focus:bg-[#30302E] hover:bg-zinc-200 dark:hover:bg-[#30302E] transition-colors ${isActive ? "text-primary dark:text-white bg-zinc-200 dark:bg-[#30302E] rounded-md" : ""}`
+              `cursor-pointer text-sm font-medium ${isCollapsed ? "flex w-10 h-10 justify-center items-center" : "px-3.5 py-2.5"} flex items-center gap-3 rounded-xl transition-all ${
+                isActive
+                  ? "bg-zinc-900 text-white dark:bg-white/10 dark:text-white dark:border dark:border-white/10 shadow-sm"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100/90 dark:hover:bg-white/5"
+              }`
             }
           >
-            <CiTwitter title="Twitter" size={20} className="text-[#1DA1F2]" />
-            {!isCollapsed && "Twitter"}
+            <CiTwitter title="Twitter" size={20} className="shrink-0 text-[#1DA1F2]" />
+            {!isCollapsed && <span>Twitter</span>}
           </NavLink>
           <NavLink
             onClick={() => {
@@ -132,11 +148,15 @@ export const Leftbar = () => {
             }}
             to={"/dashboard/youtube-content"}
             className={({ isActive }) =>
-              `cursor-pointer flex text-zinc-600 dark:text-[#a9a9a9] ${isCollapsed ? "flex w-full justify-center" : "pl-4"} items-center gap-2 py-2 focus:text-primary dark:focus:text-white hover:text-primary dark:hover:text-white focus:bg-zinc-200 dark:focus:bg-[#30302E] hover:bg-zinc-200 dark:hover:bg-[#30302E] transition-colors ${isActive ? "text-primary dark:text-white bg-zinc-200 dark:bg-[#30302E] rounded-md" : ""}`
+              `cursor-pointer text-sm font-medium ${isCollapsed ? "flex w-10 h-10 justify-center items-center" : "px-3.5 py-2.5"} flex items-center gap-3 rounded-xl transition-all ${
+                isActive
+                  ? "bg-zinc-900 text-white dark:bg-white/10 dark:text-white dark:border dark:border-white/10 shadow-sm"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100/90 dark:hover:bg-white/5"
+              }`
             }
           >
-            <AiOutlineYoutube title="Youtube" className="text-red-500" size={20} />
-            {!isCollapsed && "Youtube"}
+            <AiOutlineYoutube title="Youtube" className="shrink-0 text-red-500" size={20} />
+            {!isCollapsed && <span>Youtube</span>}
           </NavLink>
           <NavLink
             onClick={() => {
@@ -144,11 +164,15 @@ export const Leftbar = () => {
             }}
             to={"/dashboard/article-content"}
             className={({ isActive }) =>
-              `cursor-pointer flex text-zinc-600 dark:text-[#a9a9a9] ${isCollapsed ? "flex w-full justify-center" : "pl-4"} items-center gap-2 py-2 focus:text-primary dark:focus:text-white hover:text-primary dark:hover:text-white focus:bg-zinc-200 dark:focus:bg-[#30302E] hover:bg-zinc-200 dark:hover:bg-[#30302E] transition-colors ${isActive ? "text-primary dark:text-white bg-zinc-200 dark:bg-[#30302E] rounded-md" : ""}`
+              `cursor-pointer text-sm font-medium ${isCollapsed ? "flex w-10 h-10 justify-center items-center" : "px-3.5 py-2.5"} flex items-center gap-3 rounded-xl transition-all ${
+                isActive
+                  ? "bg-zinc-900 text-white dark:bg-white/10 dark:text-white dark:border dark:border-white/10 shadow-sm"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100/90 dark:hover:bg-white/5"
+              }`
             }
           >
-            <PiArticleNyTimesDuotone size={20} className="text-amber-500" />
-            {!isCollapsed && "Article"}
+            <PiArticleNyTimesDuotone size={20} className="shrink-0 text-amber-500" />
+            {!isCollapsed && <span>Article</span>}
           </NavLink>
 
           <NavLink
@@ -157,45 +181,47 @@ export const Leftbar = () => {
             }}
             to={"/dashboard/chat-with-ai"}
             className={({ isActive }) =>
-              `cursor-pointer flex text-zinc-600 dark:text-[#a9a9a9] ${isCollapsed ? "flex w-full justify-center" : "pl-4"} items-center gap-2 py-2 focus:text-primary dark:focus:text-white hover:text-primary dark:hover:text-white focus:bg-zinc-200 dark:focus:bg-[#30302E] hover:bg-zinc-200 dark:hover:bg-[#30302E] transition-colors ${isActive ? "text-primary dark:text-white bg-zinc-200 dark:bg-[#30302E] rounded-md" : ""}`
+              `cursor-pointer text-sm font-medium ${isCollapsed ? "flex w-10 h-10 justify-center items-center" : "px-3.5 py-2.5"} flex items-center gap-3 rounded-xl transition-all ${
+                isActive
+                  ? "bg-zinc-900 text-white dark:bg-white/10 dark:text-white dark:border dark:border-white/10 shadow-sm"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100/90 dark:hover:bg-white/5"
+              }`
             }
           >
-            <VscRobot title="Ask AI" size={20} className="text-cyan-400" />
-            {!isCollapsed && "Ask AI"}
+            <VscRobot title="Ask AI" size={20} className="shrink-0 text-cyan-500" />
+            {!isCollapsed && <span>Ask AI</span>}
           </NavLink>
         </div>
       </div>
       <div className="lower-section">
         <div
-          className={`bottom-profile-section ${isCollapsed ? "" : "p-2 bg-zinc-200 dark:bg-[#30302E] rounded"} `}
+          className={`bottom-profile-section ${isCollapsed ? "flex flex-col items-center gap-2 p-1" : "p-3 bg-zinc-100/80 dark:bg-[#14161f] border border-zinc-200/70 dark:border-zinc-800/80 rounded-xl"} `}
         >
           <div
-            className="profile+name flex items-center gap-2 mb-4"
+            className="profile+name flex items-center gap-2.5 mb-3"
             title="Profile"
           >
             {userPicture == "" ? (
-              <span className="rounded-full">
+              <span className="rounded-full text-zinc-600 dark:text-zinc-300">
                 <CgProfile size={24} />
               </span>
             ) : (
-              <img src={userPicture} className="rounded-full w-7 h-7" />
+              <img src={userPicture} className="rounded-full w-7 h-7 object-cover" />
             )}
-            <span className="max-md:text-sm"> {!isCollapsed && (userName ? userName : "Guest User")}</span>
+            <span className="text-sm font-medium truncate text-zinc-800 dark:text-zinc-200">
+              {!isCollapsed && (userName ? userName : "Guest User")}
+            </span>
           </div>
-          {/* <div className="flex items-center gap-2 mb-4" title="Settings">
-            <CiSettings size={24} />
-            {!isCollapsed && "Settings"}
-          </div> */}
           <button
             onClick={() => logout()}
-            className="flex cursor-pointer items-center gap-2 mb-4"
+            className="flex cursor-pointer items-center gap-2 text-sm text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400 transition-colors w-full"
           >
-            <CiLogout size={24} title="Logout" />
-            {!isCollapsed && "Logout"}
+            <CiLogout size={20} title="Logout" />
+            {!isCollapsed && <span>Logout</span>}
           </button>
         </div>
       </div>
-    </span>
+    </aside>
     </>
   );
 };

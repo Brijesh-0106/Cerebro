@@ -82,7 +82,11 @@ export function Login() {
           to="/"
           className="text-zinc-900 dark:text-white justify-center items-center gap-1 title flex mb-8"
         >
-          <img src="/Assets/isolated_brain.png" className="w-16 h-16 object-contain" alt="CereBro Logo" />
+          <img
+            src="/Assets/isolated_brain.png"
+            className="w-16 h-16 object-contain"
+            alt="CereBro Logo"
+          />
           <span className="great-vibes font-semibold font-[Courgette] max-md:text-[32px] text-[38px] text-primary">
             CereBro
           </span>

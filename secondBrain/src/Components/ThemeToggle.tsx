@@ -13,14 +13,16 @@ export const ThemeToggle = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 transition-colors duration-300 ease-in-out hover:bg-zinc-300 dark:hover:bg-zinc-700 flex items-center justify-center cursor-pointer shadow-sm"
+      className="p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/90 dark:hover:bg-zinc-700/90 text-zinc-700 dark:text-zinc-300 transition-colors flex items-center justify-center cursor-pointer shadow-sm border border-zinc-200/60 dark:border-zinc-700/60"
       aria-label="Toggle Theme"
+      title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
     >
       {theme === "light" ? (
-        <FiMoon size={20} className="text-zinc-800" />
+        <FiMoon size={18} className="text-zinc-700" />
       ) : (
-        <FiSun size={20} className="text-yellow-400" />
+        <FiSun size={18} className="text-amber-400" />
       )}
     </button>
   );
 };
+

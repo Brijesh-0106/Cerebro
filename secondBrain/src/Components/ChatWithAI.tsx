@@ -1,37 +1,26 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { CgProfile } from "react-icons/cg";
 import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import { IoMdArrowUp } from "react-icons/io";
 import ReactMarkdown from "react-markdown";
 import Masonry from "react-masonry-css";
-import { useRecoilValue } from "recoil";
 import type { CardProps, chatProps } from "../Models/CardProps";
 import type { ConversationProps } from "../Models/ConversationProps";
-import { SideBarAtom } from "../Recoil/SideBarAtom";
 import { CompactCard } from "./CompactCard";
 
 export const ChatWithAI = () => {
   const [msgList, setMsgList] = useState<ConversationProps[]>([]);
   const [isAIResReady, setIsAIResReady] = useState<boolean>(true);
   const [nochat, setNoChat] = useState<boolean>(false);
-  const isSideBarCollapsed = useRecoilValue(SideBarAtom);
 
-  let breakpointColumns;
-  if (isSideBarCollapsed) {
-    breakpointColumns = {
-      default: 4,
-      1400: 3,
-      1100: 2,
-      700: 1,
-    };
-  } else {
-    breakpointColumns = {
-      default: 3,
-      1100: 2,
-      700: 1,
-    };
-  }
+  const breakpointColumns = {
+    default: 3,
+    1100: 2,
+    700: 1,
+  };
+
 
   const [userPicture] = useState(() => {
     const storedUser = localStorage.getItem("user");
@@ -122,9 +111,12 @@ export const ChatWithAI = () => {
   // HTML
   return (
     <div
-      className={`${isSideBarCollapsed ? "ml-13.75" : "ml-72"} max-md:ml-0 mt-6 p-5 flex flex-col items-center max-md:p-2`}
+      className="w-full max-w-4xl mx-auto mt-14 md:mt-16 px-3 sm:px-5 py-3 flex flex-col items-center"
     >
-      <div id="message-container" className="w-full max-w-[820px] max-md:px-2 mb-28">
+      <div
+        id="message-container"
+        className="w-full max-w-[820px] px-1 sm:px-3 mb-32"
+      >
         {!msgList.length && nochat && (
           <div className="flex mt-20 gap-4 flex-col justify-center items-center">
             <div className="empty-cards-Image h-40 w-40">
@@ -165,11 +157,20 @@ export const ChatWithAI = () => {
                       {msg.content}
                     </div>
                     <div className="text-zinc-900 dark:text-white ml-2">
-                      {/* <CgProfile size={28} /> */}
-                      <img
-                        src={userPicture}
-                        alt="User Profile"
-                        className="w-8 h-8 rounded-full"
+                      {userPicture ? (
+                        <img
+                          src={userPicture}
+                          alt="User Profile"
+                          className="w-8 h-8 rounded-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            (e.currentTarget.nextSibling as HTMLElement)?.classList.remove("hidden");
+                          }}
+                        />
+                      ) : null}
+                      <CgProfile
+                        size={32}
+                        className={`text-zinc-500 dark:text-zinc-400 ${userPicture ? "hidden" : ""}`}
                       />
                     </div>
                   </div>
@@ -183,7 +184,11 @@ export const ChatWithAI = () => {
                   <div className="my-12">
                     <div className="flex items-center ">
                       <div className="mr-2 flex items-center justify-center">
-                        <img src="/Assets/isolated_brain.png" className="w-9 h-9 object-contain" alt="AI Icon" />
+                        <img
+                          src="/Assets/isolated_brain.png"
+                          className="w-9 h-9 object-contain"
+                          alt="AI Icon"
+                        />
                       </div>
                       <div
                         key={ind}
@@ -193,7 +198,10 @@ export const ChatWithAI = () => {
                           components={{
                             p: ({ children, ...props }) => {
                               return (
-                                <p className="text-zinc-700 dark:text-gray-200 mb-2" {...props}>
+                                <p
+                                  className="text-zinc-700 dark:text-gray-200 mb-2"
+                                  {...props}
+                                >
                                   {children}
                                 </p>
                               );
@@ -243,17 +251,17 @@ export const ChatWithAI = () => {
           ))}
         {!isAIResReady && (
           <>
-            <div className="flex gap-1 px-3 py-1 bg-white dark:bg-[#30302E] border border-zinc-200 dark:border-transparent rounded-lg w-fit items-center shadow-sm">
+            <div className="flex gap-1.5 px-3.5 py-2 bg-white dark:bg-[#141620] border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl w-fit items-center shadow-sm">
               <div
-                className="w-1.5 h-1.5 mt-1 bg-gray-400 rounded-full animate-bounce"
+                className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"
                 style={{ animationDelay: "0ms" }}
               ></div>
               <div
-                className="w-1.5 h-1.5 mt-1 bg-gray-400 rounded-full animate-bounce"
+                className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"
                 style={{ animationDelay: "150ms" }}
               ></div>
               <div
-                className="w-1.5 h-1.5 mt-1 bg-gray-400 rounded-full animate-bounce"
+                className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"
                 style={{ animationDelay: "300ms" }}
               ></div>
             </div>
@@ -261,8 +269,8 @@ export const ChatWithAI = () => {
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div 
-        className={`w-[95%] max-w-[820px] min-h-20 z-10 bg-white dark:bg-[#30302E] rounded-3xl mb-2 border border-zinc-300 dark:border-zinc-700 shadow-xl dark:shadow-none p-3 fixed gap-2 bottom-0 flex transform -translate-x-1/2 ${isSideBarCollapsed ? "left-[calc(50vw+27.5px)] max-md:left-1/2" : "left-[calc(50vw+144px)] max-md:left-1/2"}`}
+      <div
+        className="w-[95%] sm:w-[92%] max-w-[820px] min-h-16 sm:min-h-20 z-20 bg-white/95 dark:bg-[#141620]/95 backdrop-blur-md rounded-2xl sm:rounded-3xl mb-3 sm:mb-4 border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_12px_36px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.6)] p-2.5 sm:p-3 fixed gap-2 bottom-0 left-1/2 -translate-x-1/2 flex"
       >
         <form onSubmit={handleSubmit(sendChat)} className="flex w-full">
           <div className="w-full">
@@ -279,7 +287,10 @@ export const ChatWithAI = () => {
                 disabled={true}
                 className="cursor-pointer mt-2 bg-zinc-200 dark:bg-zinc-700 right-4 top-2 rounded-lg p-1"
               >
-                <AiOutlineLoading3Quarters size={20} className="text-zinc-400 dark:text-zinc-500 animate-spin" />
+                <AiOutlineLoading3Quarters
+                  size={20}
+                  className="text-zinc-400 dark:text-zinc-500 animate-spin"
+                />
               </button>
             )}
             {!isLoading &&
@@ -296,7 +307,10 @@ export const ChatWithAI = () => {
                   disabled={true}
                   className="cursor-pointer mt-2 bg-zinc-200 dark:bg-zinc-700 right-4 top-2 rounded-lg p-1"
                 >
-                  <IoMdArrowUp size={20} className="text-zinc-400 dark:text-zinc-500" />
+                  <IoMdArrowUp
+                    size={20}
+                    className="text-zinc-400 dark:text-zinc-500"
+                  />
                 </button>
               ))}
           </span>

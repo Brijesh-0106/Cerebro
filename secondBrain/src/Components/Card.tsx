@@ -72,46 +72,49 @@ export const Card = ({
   }, [type, contentUrl]);
 
   return (
-    <span
+    <div
       id={_id}
-      className="mb-6 mx-auto w-full break-inside-avoid flex max-w-84 flex-col rounded-xl border-2 gap-2 border-zinc-200 dark:border-[#a9a9a9] p-4 bg-white dark:bg-transparent shadow-sm dark:shadow-none"
+      className="group relative mb-5 mx-auto w-full break-inside-avoid flex flex-col rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 p-4.5 bg-white dark:bg-[#141620]/95 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.08)] dark:shadow-none dark:hover:shadow-[0_12px_32px_rgba(0,0,0,0.6)] hover:-translate-y-1 transition-all duration-200"
     >
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <span className="text-zinc-500 dark:text-[#a9a9a9]">
-          {type === "youtube" ? (
-            <AiOutlineYoutube color="red" size={24} />
-          ) : type === "tweet" ? (
-            <CiTwitter color="#1DA1F2" size={24} />
-          ) : type === "article" ? (
-            <PiArticleNyTimesDuotone size={24} color="#F59E0B" />
-          ) : (
-            <GiNotebook size={24} className="text-primary dark:text-[#E6D8F2]" />
-          )}
-        </span>
+      <div className="flex justify-between items-center mb-3">
+        {type === "youtube" ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 border border-red-100 dark:border-red-900/30">
+            <AiOutlineYoutube size={16} />
+            <span>YouTube</span>
+          </span>
+        ) : type === "tweet" ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400 border border-sky-100 dark:border-sky-900/30">
+            <CiTwitter size={16} />
+            <span>Twitter</span>
+          </span>
+        ) : type === "article" ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30">
+            <PiArticleNyTimesDuotone size={16} />
+            <span>Article</span>
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-violet-50 text-violet-600 dark:bg-violet-950/40 dark:text-violet-400 border border-violet-100 dark:border-violet-900/30">
+            <GiNotebook size={15} />
+            <span>Thought</span>
+          </span>
+        )}
 
-        <span className="text-zinc-500 dark:text-[#a9a9a9] max-md:text-xs text-sm">{createdAt}</span>
+        <span className="text-zinc-400 dark:text-zinc-500 text-xs font-medium">{createdAt}</span>
       </div>
 
       {/* Title */}
-      <div className="text-zinc-900 dark:text-white font-semibold max-md:text-lg text-xl">
-        {/* {title?.length} */}
-        {title!.length > 30 ? title?.trim().substring(0, 30) + "..." : title}
-      </div>
+      <h4 className="text-zinc-900 dark:text-zinc-100 font-semibold text-base leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors mb-2.5">
+        {title && title.length > 34 ? title.trim().substring(0, 34) + "..." : title}
+      </h4>
+
       {type === "youtube" ? (
-        <div className="relative h-65 overflow-hidden rounded-lg">
+        <div className="relative h-56 overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800/50 mb-3">
           {!imgLoaded && (
-            <div className="absolute inset-0 bg-gray-200 dark:bg-gray-800 overflow-hidden">
-              <div
-                className="absolute inset-0 
-                bg-[linear-gradient(110deg,#e5e7eb,45%,#f3f4f6,55%,#e5e7eb)] dark:bg-[linear-gradient(110deg,#1f2937,45%,#374151,55%,#1f2937)] 
-               bg-size-[200%_100%]
-                animate-shimmer"
-              />
-            </div>
+            <div className="absolute inset-0 bg-zinc-200 dark:bg-zinc-800 animate-pulse" />
           )}
           <iframe
-            className="w-full h-full rounded-lg"
+            className="w-full h-full rounded-xl"
             frameBorder="0"
             sandbox="allow-scripts allow-same-origin allow-presentation"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -121,17 +124,15 @@ export const Card = ({
           />
         </div>
       ) : type == "tweet" ? (
-        <div className="h-65 relative overflow-hidden rounded-lg">
+        <div className="h-60 relative overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800/50 mb-3">
           {!tweetLoaded && (
-            <div className="absolute inset-0 bg-gray-200 dark:bg-gray-800 overflow-hidden">
-              <div className="absolute inset-0 bg-[linear-gradient(110deg,#e5e7eb,45%,#f3f4f6,55%,#e5e7eb)] dark:bg-[linear-gradient(110deg,#1f2937,45%,#374151,55%,#1f2937)] bg-size-[200%_100%] animate-shimmer" />
-            </div>
+            <div className="absolute inset-0 bg-zinc-200 dark:bg-zinc-800 animate-pulse" />
           )}
           <div
             ref={tweetRef}
-            className={`h-65 overflow-hidden flex justify-center items-start ${
+            className={`h-60 overflow-hidden flex justify-center items-start ${
               tweetLoaded ? "opacity-100" : "opacity-0"
-            }`}
+            } transition-opacity duration-200`}
           >
             <div className="w-65">
               <div className="scale-50 origin-top-left w-130">
@@ -144,45 +145,50 @@ export const Card = ({
         </div>
       ) : (
         imageUrl && (
-          <div className="relative h-65 overflow-hidden rounded-lg">
+          <div className="relative h-56 overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800/50 mb-3">
             {!imgLoaded && (
-              <div className="absolute inset-0 bg-gray-200 dark:bg-gray-800 overflow-hidden">
-                <div
-                  className="absolute inset-0 
-                bg-[linear-gradient(110deg,#e5e7eb,45%,#f3f4f6,55%,#e5e7eb)] dark:bg-[linear-gradient(110deg,#1f2937,45%,#374151,55%,#1f2937)] 
-                bg-bg-size-[200%_100%]
-                animate-shimmer"
-                />
-              </div>
+              <div className="absolute inset-0 bg-zinc-200 dark:bg-zinc-800 animate-pulse" />
             )}
             <img
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-expect-error
               src={imageUrl}
-              className={`h-full w-full object-cover ${
+              className={`h-full w-full object-cover rounded-xl ${
                 imgLoaded ? "opacity-100" : "opacity-0"
-              }`}
+              } transition-opacity duration-200`}
               onLoad={() => setImgLoaded(true)}
             />
           </div>
         )
       )}
-      <div />
+
       {/* Description */}
-      <div className="text-zinc-600 dark:text-[#a9a9a9] max-md:text-xs text-sm">{description}</div>
-      <div className="flex justify-between items-center">
-        {author && <span className="text-[#F59E0B] max-md:text-sm text-base">{author}</span>}
-        {type === "article" && (
-          <a
-            href={contentUrl}
-            target="_blank"
-            className="text-blue-500 flex ml-auto items-center max-md:text-sm text-base"
-          >
-            Take Me
-            <RiArrowRightUpFill size={16} color="text-blue-500" />
-          </a>
-        )}
-      </div>
-    </span>
+      <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed mb-3">
+        {description}
+      </p>
+
+      {/* Footer */}
+      {(author || type === "article") && (
+        <div className="flex justify-between items-center pt-2 border-t border-zinc-100 dark:border-zinc-800/60 mt-auto">
+          {author && (
+            <span className="text-xs font-medium text-amber-600 dark:text-amber-400 truncate">
+              {author}
+            </span>
+          )}
+          {type === "article" && (
+            <a
+              href={contentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex ml-auto items-center gap-0.5 transition-colors"
+            >
+              Read Article
+              <RiArrowRightUpFill size={15} />
+            </a>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
+
