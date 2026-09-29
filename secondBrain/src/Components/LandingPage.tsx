@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { FaGoogle } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { HiArrowRight, HiSparkles } from "react-icons/hi2";
+import { MdOutlineAttachEmail } from "react-icons/md";
+import { Link, useNavigate } from "react-router-dom";
 import GoogleSignIn from "./GoogleSignIn";
 import Navbar from "./Navbar/Navbar";
+
 const PAIRS = [
   ["Save everything,", "Find anything"],
   ["Your content,", "Your AI assistant"],
@@ -14,6 +17,7 @@ const PAIRS = [
   ["Collect knowledge,", "Chat with it"],
   ["Your second brain,", "Powered by AI"],
 ];
+
 const AIAnswers = [
   [
     "What is CereBro?",
@@ -24,6 +28,7 @@ const AIAnswers = [
     "It helps you save everything in one place and find anything you need, making your life more efficient and organized✨.",
   ],
 ];
+
 export default function LandingPage() {
   const [aiLine0, setAiLine0] = useState(""); // Q1
   const [aiLine1, setAiLine1] = useState(""); // A1
@@ -37,6 +42,8 @@ export default function LandingPage() {
   const [showCursor, setShowCursor] = useState(true);
   const [showsecondQ, setShowsecondQ] = useState(false);
   const [showFirstQ, setShowFirstQ] = useState(false);
+  const [errorGoogle, setErrorGoogle] = useState("");
+  const nav = useNavigate();
 
   // Typewriter effect for landing page headline
   useEffect(() => {
@@ -136,8 +143,7 @@ export default function LandingPage() {
       cancelled = true;
     };
   }, []);
-  const [errorGoogle, setErrorGoogle] = useState("");
-  const nav = useNavigate();
+
   // Blinking cursor
   useEffect(() => {
     const cursor = setInterval(() => {
@@ -145,162 +151,188 @@ export default function LandingPage() {
     }, 500);
     return () => clearInterval(cursor);
   }, []);
+
   const handleGoogleSuccess = (user: Record<string, unknown>) => {
     console.log("Signed in successfully:", user);
-    // Redirect to dashboard or home
     nav("/dashboard/all-content");
   };
 
   const handleGoogleError = (error: string) => {
     setErrorGoogle(error);
   };
+
   const handleCustomButtonClick = () => {
     const googleButton =
       googleButtonRef.current?.querySelector('div[role="button"]');
-    console.log(googleButton);
     if (googleButton) {
       (googleButton as HTMLElement).click();
     }
   };
+
   const navWithEmail = () => {
     nav("/login", { state: { landEmail } });
   };
+
   return (
-    <>
+    <div className="min-h-screen bg-canvas-grid text-zinc-900 dark:text-zinc-100 flex flex-col transition-colors duration-200 relative overflow-x-hidden">
+      {/* Subtle ambient lighting behind hero */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-indigo-500/10 via-purple-500/10 to-transparent blur-3xl pointer-events-none -z-10 rounded-full" />
+
       <Navbar />
-      <div className="hero-section flex h-[calc(100vh-7vh)] max-md:h-auto max-md:flex-col max-md:px-4 max-md:py-8 px-18 bg-slate-50 dark:bg-black">
-        <div className="leftSignInPart h-full w-1/2 max-md:w-full max-md:h-auto flex justify-center items-center">
-          <div className="flex w-96.25 max-md:w-full flex-col items-center justify-center">
-            <div className="text-center">
-              <h1 className="text-4xl h-20 text-primary font-bold">
-                {/* Line 1 */}
-                <span>{line1}</span>
-                {/* Cursor only on line 1 if line 2 is empty */}
-                {line2 === "" && (
-                  <span className={showCursor ? "opacity-100" : "opacity-0"}>
-                    |
-                  </span>
-                )}
-                <br />
-                {/* Line 2 */}
-                <span>{line2}</span>
-                {/* Cursor on line 2 when it's typing */}
-                {line2 !== "" && (
-                  <span className={showCursor ? "opacity-100" : "opacity-0"}>
-                    |
-                  </span>
-                )}
-              </h1>
-              <h2 className="text-zinc-600 dark:text-[#faf9f5] text-xl mt-4">
-                Your future self will thank you for this
-              </h2>
+
+      <main className="hero-section flex-1 flex flex-col md:flex-row items-center justify-center px-4 sm:px-8 lg:px-16 py-8 sm:py-12 gap-10 lg:gap-14 max-w-7xl mx-auto w-full">
+        {/* ── Left Hero & Auth Section ── */}
+        <div className="leftSignInPart w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left max-w-lg">
+
+          {/* Dynamic Typwriting Headline */}
+          <h1 className="text-3xl sm:text-4xl lg:text-4xl font-extrabold tracking-tight min-h-[5.5rem] flex flex-col justify-center leading-tight">
+            <span className="text-zinc-900 dark:text-white drop-shadow-xs">{line1 || "\u00A0"}</span>
+            <span className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 dark:from-indigo-400 dark:via-purple-300 dark:to-indigo-300 bg-clip-text text-transparent">
+              {line2 || "\u00A0"}
+              <span className={`inline-block ml-1 font-normal text-indigo-500 ${showCursor ? "opacity-100" : "opacity-0"}`}>
+                |
+              </span>
+            </span>
+          </h1>
+
+          <p className="text-zinc-600 dark:text-zinc-400 text-sm sm:text-base mt-3 max-w-md leading-relaxed">
+            Your personal digital vault for YouTube videos, tweets, articles, and thoughts. Never lose an idea again.
+          </p>
+
+          {errorGoogle && <div className="error-message w-full mt-4">{errorGoogle}</div>}
+
+          {/* ── Modern Auth Card ── */}
+          <div className="mt-4 w-4/5 bg-white/80 dark:bg-[#12141e]/80 backdrop-blur-xl border border-zinc-200/90 dark:border-zinc-800/90 rounded-3xl p-6 sm:p-7 shadow-xl shadow-indigo-500/5 dark:shadow-2xl dark:shadow-black/60 transition-all duration-300 hover:border-indigo-500/40 group">
+
+            {/* Google Sign In */}
+            <button
+              onClick={handleCustomButtonClick}
+              className="w-full cursor-pointer text-sm sm:text-base font-semibold rounded-xl justify-center bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white flex py-3 px-4 items-center gap-3 transition-all duration-200 shadow-md shadow-indigo-600/25 hover:shadow-lg hover:shadow-indigo-600/35 hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <FaGoogle size={18} /> Continue with Google
+            </button>
+            <div ref={googleButtonRef} style={{ display: "none" }}>
+              <GoogleSignIn
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+              />
             </div>
-            {errorGoogle && <div className="error-message">{errorGoogle}</div>}
-            <div className="not-odd mt-4 px-4 py-8 border w-full flex flex-col rounded-4xl justify-center items-center border-zinc-700 dummyButton">
-              <button
-                onClick={handleCustomButtonClick}
-                className="cursor-pointer text-lg rounded-lg justify-center w-80 bg-primary text-center text-white flex py-2 px-3 items-center gap-2 hover:bg-opacity-90 transition-colors"
-              >
-                <FaGoogle size={24} /> Login with Google
-              </button>
-              <div ref={googleButtonRef} style={{ display: "none" }}>
-                <GoogleSignIn
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                />
-              </div>
-              <h4 className="text-zinc-500 dark:text-zinc-400 text-center my-4">OR</h4>
-              <div>
+
+            {/* Divider */}
+            <div className="relative flex items-center justify-center my-4 w-full">
+              <div className="w-full border-t border-zinc-200 dark:border-zinc-800" />
+              <span className="absolute px-3 bg-white/95 dark:bg-[#12141e] text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                or with email
+              </span>
+            </div>
+
+            {/* Email Quick-Start Form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                navWithEmail();
+              }}
+              className="w-full flex flex-col gap-3"
+            >
+              <div className="relative w-full">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
+                  <MdOutlineAttachEmail size={18} />
+                </div>
                 <input
-                  type="text"
+                  type="email"
+                  value={landEmail}
                   onChange={(e) => setLandEmail(e.target.value)}
-                  className="bg-white dark:bg-zinc-900 mb-4 border border-zinc-300 dark:border-zinc-500 placeholder-zinc-400 dark:placeholder-gray-300 text-zinc-900 dark:text-zinc-100 text-lg px-4 py-3 w-80 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
                   placeholder="Enter your email"
+                  className="w-full pl-10 pr-4 py-2.5 bg-zinc-50/90 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-700/80 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
                 />
-                <button
-                  className="bg-zinc-900 dark:bg-[#faf9f5] w-80 text-center justify-center cursor-pointer flex py-2 px-3 gap-1 text-lg items-center rounded-lg text-white dark:text-zinc-900 hover:opacity-90 transition-opacity"
-                  onClick={() => navWithEmail()}
-                >
-                  Continue with Email
-                </button>
               </div>
-            </div>
+              <button
+                type="submit"
+                className="w-full cursor-pointer flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 font-semibold text-sm transition-all shadow-sm hover:shadow hover:-translate-y-0.5 active:translate-y-0"
+              >
+                Continue with Email
+                <HiArrowRight size={16} />
+              </button>
+            </form>
+
+            {/* Benefits Row */}
+            {/* <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+              <span className="flex items-center gap-1">✦ Free forever</span>
+            </div> */}
+          </div>
+
+          {/* Already have an account */}
+          <div className="mt-4 text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
+            Already have an account?{" "}
+            <Link to="/login" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+              Log in
+            </Link>
           </div>
         </div>
-        <div className="rightVideoSection pr-2 ml-20 py-18 h-full px-16 w-1/2 max-md:w-full max-md:ml-0 max-md:px-0 max-md:py-8 max-md:h-[500px]">
-          <div 
-          className="relative w-full h-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-600 border p-8 px-10 max-md:p-4 flex flex-col rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer group shadow-xl">
-            <span className="text-zinc-900 dark:text-white text-center text-md py-2 px-3  mx-auto mt-2 rounded-2xl  border border-zinc-300 dark:border-zinc-500">
-              Chat with your Knowledge
-            </span>
-            <div className="mt-12">
+
+        {/* ── Right Preview / Chat Demo Section ── */}
+        <div className="rightVideoSection w-full md:w-1/2 flex justify-center">
+          <div className="relative w-full max-w-lg bg-white/80 dark:bg-[#12141e]/80 backdrop-blur-xl border border-zinc-200/90 dark:border-zinc-800/90 p-6 sm:p-8 flex flex-col rounded-3xl shadow-xl shadow-indigo-500/5 dark:shadow-2xl dark:shadow-black/60 transition-all duration-300 min-h-[380px] sm:min-h-[420px]">
+
+            {/* Header pill */}
+            <div className="inline-flex items-center gap-2 text-zinc-800 dark:text-zinc-200 text-xs font-semibold py-1.5 px-3.5 mx-auto rounded-full bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/80 shadow-xs">
+              Chat with your Saved Knowledge
+            </div>
+
+            {/* Interactive Chat Stream */}
+            <div className="mt-6 flex flex-col gap-4 flex-1">
               {showFirstQ && (
-                <>
-                  <div
-                    className={`ml-auto rounded-xl max-w-lg p-3 w-fit mb-4 text-white bg-primary 
-                    transition-all duration-700 ease-out 
-                    ${
-                      showFirstQ
-                        ? "opacity-100 translate-y-0 scale-100"
-                        : "opacity-0 translate-y-6 scale-90"
-                    }`}
-                  >
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="ml-auto rounded-2xl rounded-tr-xs max-w-xs sm:max-w-sm p-3 px-4 w-fit mb-2 text-white bg-indigo-600 text-sm font-medium shadow-sm">
                     {aiLine0}
                   </div>
-                  {!aiLine1 && showFirstQ && (
-                    <div className="text-gray-500 text-sm animate-pulse">
-                      Thinking...
+                  {!aiLine1 && (
+                    <div className="text-zinc-400 text-xs flex items-center gap-1.5 py-1">
+                      <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping inline-block" />
+                      Searching your library...
                     </div>
                   )}
                   {aiLine1 && (
-                    <div className="text-gray-500 text-sm">
-                      Searched 3 sources &gt;
+                    <div className="text-indigo-500 dark:text-indigo-400 text-xs font-medium mb-1">
+                      ✓ Searched 3 sources
                     </div>
                   )}
-                  <div className="text-zinc-700 dark:text-zinc-300 min-h-16">
+                  <div className="text-zinc-800 dark:text-zinc-200 text-sm leading-relaxed bg-zinc-50 dark:bg-zinc-900/60 p-3.5 rounded-2xl rounded-tl-xs border border-zinc-200/60 dark:border-zinc-800/60">
                     {aiLine1}
                     {!showsecondQ && (
-                      <span
-                        className={showCursor ? "opacity-100" : "opacity-0"}
-                      >
+                      <span className={`inline-block ml-0.5 text-indigo-500 font-bold ${showCursor ? "opacity-100" : "opacity-0"}`}>
                         |
                       </span>
                     )}
                   </div>
-                </>
+                </div>
               )}
+
               {showsecondQ && (
-                <>
-                  {showsecondQ && (
-                    <div
-                      className={`ml-auto rounded-xl max-w-lg p-3 mt-4 mb-4 w-fit text-white bg-primary 
-                      transition-all duration-700 ease-out 
-                      ${
-                        showFirstQ
-                          ? "opacity-100 translate-y-0 scale-100"
-                          : "opacity-0 translate-y-6 scale-90"
-                      }`}
-                    >
-                      {aiLine2}
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 mt-2">
+                  <div className="ml-auto rounded-2xl rounded-tr-xs max-w-xs sm:max-w-sm p-3 px-4 w-fit mb-2 text-white bg-indigo-600 text-sm font-medium shadow-sm">
+                    {aiLine2}
+                  </div>
+                  {!aiLine3 && (
+                    <div className="text-zinc-400 text-xs flex items-center gap-1.5 py-1">
+                      <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping inline-block" />
+                      Synthesizing answers...
                     </div>
                   )}
-                  {!aiLine3 && showsecondQ && (
-                    <div className="text-gray-500 text-sm animate-pulse">
-                      Thinking...
-                    </div>
-                  )}{" "}
                   {aiLine3 && (
-                    <div className="text-gray-500 text-sm">
-                      Searched 3 sources &gt;
+                    <div className="text-indigo-500 dark:text-indigo-400 text-xs font-medium mb-1">
+                      ✓ Searched 3 sources
                     </div>
                   )}
-                  <div className="text-zinc-700 dark:text-zinc-300 min-h-16">{aiLine3}</div>
-                </>
+                  <div className="text-zinc-800 dark:text-zinc-200 text-sm leading-relaxed bg-zinc-50 dark:bg-zinc-900/60 p-3.5 rounded-2xl rounded-tl-xs border border-zinc-200/60 dark:border-zinc-800/60">
+                    {aiLine3}
+                  </div>
+                </div>
               )}
             </div>
           </div>
         </div>
-      </div>
-    </>
+      </main>
+    </div>
   );
 }
