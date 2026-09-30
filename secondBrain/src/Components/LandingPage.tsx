@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FaGoogle } from "react-icons/fa";
-import { HiArrowRight, HiSparkles } from "react-icons/hi2";
+import { HiArrowRight } from "react-icons/hi2";
 import { MdOutlineAttachEmail } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
 import GoogleSignIn from "./GoogleSignIn";
@@ -183,27 +183,32 @@ export default function LandingPage() {
       <main className="hero-section flex-1 flex flex-col md:flex-row items-center justify-center px-4 sm:px-8 lg:px-16 py-8 sm:py-12 gap-10 lg:gap-14 max-w-7xl mx-auto w-full">
         {/* ── Left Hero & Auth Section ── */}
         <div className="leftSignInPart w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left max-w-lg">
-
           {/* Dynamic Typwriting Headline */}
           <h1 className="text-3xl sm:text-4xl lg:text-4xl font-extrabold tracking-tight min-h-[5.5rem] flex flex-col justify-center leading-tight">
-            <span className="text-zinc-900 dark:text-white drop-shadow-xs">{line1 || "\u00A0"}</span>
+            <span className="text-zinc-900 dark:text-white drop-shadow-xs">
+              {line1 || "\u00A0"}
+            </span>
             <span className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 dark:from-indigo-400 dark:via-purple-300 dark:to-indigo-300 bg-clip-text text-transparent">
               {line2 || "\u00A0"}
-              <span className={`inline-block ml-1 font-normal text-indigo-500 ${showCursor ? "opacity-100" : "opacity-0"}`}>
+              <span
+                className={`inline-block ml-1 font-normal text-indigo-500 ${showCursor ? "opacity-100" : "opacity-0"}`}
+              >
                 |
               </span>
             </span>
           </h1>
 
           <p className="text-zinc-600 dark:text-zinc-400 text-sm sm:text-base mt-3 max-w-md leading-relaxed">
-            Your personal digital vault for YouTube videos, tweets, articles, and thoughts. Never lose an idea again.
+            Your personal digital vault for YouTube videos, tweets, articles,
+            and thoughts. Never lose an idea again.
           </p>
 
-          {errorGoogle && <div className="error-message w-full mt-4">{errorGoogle}</div>}
+          {errorGoogle && (
+            <div className="error-message w-full mt-4">{errorGoogle}</div>
+          )}
 
           {/* ── Modern Auth Card ── */}
           <div className="mt-4 w-4/5 bg-white/80 dark:bg-[#12141e]/80 backdrop-blur-xl border border-zinc-200/90 dark:border-zinc-800/90 rounded-3xl p-6 sm:p-7 shadow-xl shadow-indigo-500/5 dark:shadow-2xl dark:shadow-black/60 transition-all duration-300 hover:border-indigo-500/40 group">
-
             {/* Google Sign In */}
             <button
               onClick={handleCustomButtonClick}
@@ -264,7 +269,10 @@ export default function LandingPage() {
           {/* Already have an account */}
           <div className="mt-4 text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
             Already have an account?{" "}
-            <Link to="/login" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+            <Link
+              to="/login"
+              className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+            >
               Log in
             </Link>
           </div>
@@ -273,7 +281,6 @@ export default function LandingPage() {
         {/* ── Right Preview / Chat Demo Section ── */}
         <div className="rightVideoSection w-full md:w-1/2 flex justify-center">
           <div className="relative w-full max-w-lg bg-white/80 dark:bg-[#12141e]/80 backdrop-blur-xl border border-zinc-200/90 dark:border-zinc-800/90 p-6 sm:p-8 flex flex-col rounded-3xl shadow-xl shadow-indigo-500/5 dark:shadow-2xl dark:shadow-black/60 transition-all duration-300 min-h-[380px] sm:min-h-[420px]">
-
             {/* Header pill */}
             <div className="inline-flex items-center gap-2 text-zinc-800 dark:text-zinc-200 text-xs font-semibold py-1.5 px-3.5 mx-auto rounded-full bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/80 shadow-xs">
               Chat with your Saved Knowledge
@@ -300,7 +307,9 @@ export default function LandingPage() {
                   <div className="text-zinc-800 dark:text-zinc-200 text-sm leading-relaxed bg-zinc-50 dark:bg-zinc-900/60 p-3.5 rounded-2xl rounded-tl-xs border border-zinc-200/60 dark:border-zinc-800/60">
                     {aiLine1}
                     {!showsecondQ && (
-                      <span className={`inline-block ml-0.5 text-indigo-500 font-bold ${showCursor ? "opacity-100" : "opacity-0"}`}>
+                      <span
+                        className={`inline-block ml-0.5 text-indigo-500 font-bold ${showCursor ? "opacity-100" : "opacity-0"}`}
+                      >
                         |
                       </span>
                     )}
